@@ -48,10 +48,11 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { login } from '../api/auth'
 
 const route = useRoute()
+const router = useRouter()
 
 const form = reactive({
   username: route.query.username ? String(route.query.username) : '',
@@ -82,6 +83,7 @@ async function handleLogin() {
       'gcsc_user',
       JSON.stringify({ username: data.username, displayName: data.displayName })
     )
+    router.push('/home')
   } catch (error) {
     feedback.text = parseError(error)
     feedback.type = 'error'
