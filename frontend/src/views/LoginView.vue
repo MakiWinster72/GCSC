@@ -81,7 +81,14 @@ async function handleLogin() {
 
     localStorage.setItem(
       'gcsc_user',
-      JSON.stringify({ username: data.username, displayName: data.displayName })
+      JSON.stringify({
+        username: data.username,
+        displayName: data.displayName,
+        role: data.role,
+        studentNo: data.studentNo,
+        className: data.className,
+        college: data.college
+      })
     )
     localStorage.setItem('gcsc_token', data.token || '')
     router.push('/home')

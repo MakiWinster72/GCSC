@@ -5,6 +5,7 @@ import com.gcsc.studentcenter.dto.LoginRequest;
 import com.gcsc.studentcenter.dto.RegisterRequest;
 import com.gcsc.studentcenter.dto.UserProfileResponse;
 import com.gcsc.studentcenter.entity.AppUser;
+import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,14 +46,33 @@ public class AuthService {
         }
 
         AppUser user = new AppUser();
+        UserRole role = parseRole(request.getRole());
         user.setDisplayName(displayName);
         user.setUsername(username);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setRole(role);
+        user.setStudentNo(normalizeOptional(request.getStudentNo()));
+        user.setClassName(normalizeOptional(request.getClassName()));
+        user.setCollege(normalizeOptional(request.getCollege()));
         user.setCreatedAt(LocalDateTime.now());
         AppUser savedUser = appUserRepository.save(user);
-        String token = jwtService.generateToken(savedUser.getUsername(), savedUser.getDisplayName());
+        String token = jwtService.generateToken(
+            savedUser.getUsername(),
+            savedUser.getDisplayName(),
+            savedUser.getRole().name()
+        );
 
-        return new AuthResponse(true, "注册成功", savedUser.getUsername(), savedUser.getDisplayName(), token);
+        return new AuthResponse(
+            true,
+            "注册成功",
+            savedUser.getUsername(),
+            savedUser.getDisplayName(),
+            savedUser.getRole().name(),
+            savedUser.getStudentNo(),
+            savedUser.getClassName(),
+            savedUser.getCollege(),
+            token
+        );
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -70,14 +90,60 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("用户名或密码错误");
         }
-        String token = jwtService.generateToken(user.getUsername(), user.getDisplayName());
-
-        return new AuthResponse(true, "登录成功", user.getUsername(), user.getDisplayName(), token);
+        UserRole role = roleOrDefault(user);
+        String token = jwtService.generateToken(user.getUsername(), user.getDisplayName(), role.name());
+        return new AuthResponse(
+            true,
+            "登录成功",
+            user.getUsername(),
+            user.getDisplayName(),
+            role.name(),
+            user.getStudentNo(),
+            user.getClassName(),
+            user.getCollege(),
+            token
+        );
     }
 
     public UserProfileResponse getProfile(String username) {
         AppUser user = appUserRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        return new UserProfileResponse(user.getUsername(), user.getDisplayName());
+        UserRole role = roleOrDefault(user);
+        return new UserProfileResponse(
+            user.getUsername(),
+            user.getDisplayName(),
+            role.name(),
+            user.getStudentNo(),
+            user.getClassName(),
+            user.getCollege()
+        );
+    }
+
+    private UserRole parseRole(String rawRole) {
+        if (rawRole == null || rawRole.trim().isEmpty()) {
+            return UserRole.STUDENT;
+        }
+        try {
+            return UserRole.valueOf(rawRole.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("角色只支持 STUDENT/TEACHER/ADMIN");
+        }
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private UserRole roleOrDefault(AppUser user) {
+        if (user.getRole() != null) {
+            return user.getRole();
+        }
+        user.setRole(UserRole.STUDENT);
+        appUserRepository.save(user);
+        return UserRole.STUDENT;
     }
 }
