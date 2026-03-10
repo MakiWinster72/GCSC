@@ -52,34 +52,6 @@
           </div>
           <div class="post-content" v-html="renderMarkdown(post.content)"></div>
           <div
-            v-if="
-              post.media &&
-              post.media.some(
-                (m) => m.mediaType === 'IMAGE' || m.mediaType === 'VIDEO',
-              )
-            "
-            class="post-media"
-          >
-            <div
-              v-for="item in post.media.filter(
-                (m) => m.mediaType === 'IMAGE' || m.mediaType === 'VIDEO',
-              )"
-              :key="item.id || item.url"
-              class="media-item"
-            >
-              <img
-                v-if="item.mediaType === 'IMAGE'"
-                :src="resolveMediaUrl(item.url)"
-                :alt="item.originalName || 'image'"
-              />
-              <video
-                v-else-if="item.mediaType === 'VIDEO'"
-                controls
-                :src="resolveMediaUrl(item.url)"
-              ></video>
-            </div>
-          </div>
-          <div
             v-if="post.media && post.media.some((m) => m.mediaType === 'FILE')"
             class="post-attachments"
           >
@@ -1000,6 +972,12 @@ async function onMediaChange(event) {
     return;
   }
 
+  const input = composerInput.value;
+  const hasInput = Boolean(input);
+  let insertPos = hasInput
+    ? input.selectionStart || 0
+    : (composer.content || "").length;
+
   for (const file of files) {
     uploadingCount.value += 1;
     try {
@@ -1009,6 +987,28 @@ async function onMediaChange(event) {
         mediaType: data.mediaType,
         originalName: data.originalName,
       });
+
+      const name = data.originalName || "媒体";
+      const url = data.url;
+      const markdown =
+        data.mediaType === "IMAGE" ? `![${name}](${url})` : `[${name}](${url})`;
+      const content = composer.content || "";
+      const needsNewline = insertPos > 0 && content[insertPos - 1] !== "\n";
+      const prefix = needsNewline ? "\n" : "";
+      const insertText = `${prefix}${markdown}\n`;
+      composer.content = replaceRange(content, insertPos, insertPos, insertText);
+
+      if (hasInput) {
+        const nameStart =
+          insertPos + prefix.length + (data.mediaType === "IMAGE" ? 2 : 1);
+        const nameEnd = nameStart + name.length;
+        nextTick(() => {
+          input.setSelectionRange(nameStart, nameEnd);
+          input.focus();
+        });
+      }
+
+      insertPos += insertText.length;
     } catch (err) {
       composerError.value = err?.response?.data?.message || "媒体上传失败";
     } finally {
@@ -1100,11 +1100,43 @@ function renderMarkdown(text) {
   if (!text) {
     return "";
   }
-  const lines = text.split("\n");
+  const lines = text.replace(/\r\n?/g, "\n").split("\n");
   const out = [];
 
+  function normalizeUrl(raw) {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("/")) {
+      return `${API_BASE}${trimmed}`;
+    }
+    return trimmed;
+  }
+
   function inline(s) {
-    let v = escapeHtml(s);
+    const parts = [];
+    const pattern = /!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)/g;
+    let lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(s)) !== null) {
+      const before = s.slice(lastIndex, match.index);
+      parts.push(escapeHtml(before));
+      if (match[1] !== undefined) {
+        const alt = escapeHtml(match[1]);
+        const src = normalizeUrl(match[2].trim());
+        parts.push(`<img class="md-image" alt="${alt}" src="${src}">`);
+      } else {
+        const text = escapeHtml(match[3]);
+        const href = normalizeUrl(match[4].trim());
+        parts.push(
+          `<a class="md-link" href="${href}" target="_blank" rel="noreferrer">${text}</a>`,
+        );
+      }
+      lastIndex = match.index + match[0].length;
+    }
+    parts.push(escapeHtml(s.slice(lastIndex)));
+    let v = parts.join("");
     v = v.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     v = v.replace(/\*(.+?)\*/g, "<em>$1</em>");
     return v;
@@ -1129,6 +1161,15 @@ function renderMarkdown(text) {
 
     if (line.trim() === "") {
       out.push("<br>");
+      i += 1;
+      continue;
+    }
+
+    const imageOnly = line.match(/^\s*!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+    if (imageOnly) {
+      const alt = escapeHtml(imageOnly[1] || "");
+      const src = normalizeUrl(imageOnly[2].trim());
+      out.push(`<img class="md-image" alt="${alt}" src="${src}">`);
       i += 1;
       continue;
     }
@@ -1235,7 +1276,24 @@ function renderMarkdown(text) {
     );
   }
 
-  return out.join("");
+  let html = out.join("");
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+    const src = normalizeUrl(url.trim());
+    return `<img class="md-image" alt="${escapeHtml(alt)}" src="${src}">`;
+  });
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+    const href = normalizeUrl(url.trim());
+    return `<a class="md-link" href="${href}" target="_blank" rel="noreferrer">${escapeHtml(text)}</a>`;
+  });
+  return html
+    .replace(
+      /src="(\/uploads\/[^"]+)"/g,
+      (_, url) => `src="${normalizeUrl(url)}"`,
+    )
+    .replace(
+      /href="(\/uploads\/[^"]+)"/g,
+      (_, url) => `href="${normalizeUrl(url)}"`,
+    );
 }
 
 function resolveMediaUrl(url) {

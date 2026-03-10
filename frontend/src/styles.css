@@ -1147,6 +1147,18 @@ body {
   border-right: 0;
 }
 
+.md-image {
+  max-width: 100%;
+  border-radius: 10px;
+  display: block;
+  margin: 8px 0;
+}
+
+.md-link {
+  color: #0f555d;
+  text-decoration: underline;
+}
+
 @media (max-width: 1080px) {
   .dashboard-layout {
     grid-template-columns: 260px minmax(0, 1fr);
