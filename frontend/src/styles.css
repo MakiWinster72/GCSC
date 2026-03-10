@@ -1227,6 +1227,15 @@ body {
   max-width: 50%;
 }
 
+.md-video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  display: block;
+  margin: 8px 0;
+  background: rgba(0, 0, 0, 0.06);
+}
+
 .md-link {
   color: #0f555d;
   text-decoration: underline;

@@ -1014,7 +1014,11 @@ async function onMediaChange(event) {
       const name = data.originalName || "媒体";
       const url = data.url;
       const markdown =
-        data.mediaType === "IMAGE" ? `![${name}](${url})` : `[${name}](${url})`;
+        data.mediaType === "IMAGE"
+          ? `![${name}](${url})`
+          : data.mediaType === "VIDEO"
+            ? `<video class="md-video" controls src="${url}"></video>`
+            : `[${name}](${url})`;
       const content = composer.content || "";
       const needsNewline = insertPos > 0 && content[insertPos - 1] !== "\n";
       const prefix = needsNewline ? "\n" : "";
@@ -1165,7 +1169,14 @@ function renderMarkdown(text) {
   if (!text) {
     return "";
   }
-  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  const rawBlocks = [];
+  const rawToken = (index) => `__RAW_${index}__`;
+  const withRaw = text.replace(/<video[\s\S]*?<\/video>/gi, (match) => {
+    const token = rawToken(rawBlocks.length);
+    rawBlocks.push(match);
+    return token;
+  });
+  const lines = withRaw.replace(/\r\n?/g, "\n").split("\n");
   const out = [];
 
   function normalizeUrl(raw) {
@@ -1349,6 +1360,9 @@ function renderMarkdown(text) {
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
     const href = normalizeUrl(url.trim());
     return `<a class="md-link" href="${href}" target="_blank" rel="noreferrer">${escapeHtml(text)}</a>`;
+  });
+  rawBlocks.forEach((raw, index) => {
+    html = html.replace(rawToken(index), raw);
   });
   return html
     .replace(
