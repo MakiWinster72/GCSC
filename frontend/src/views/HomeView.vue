@@ -1016,6 +1016,26 @@ function indentSelection(add) {
 }
 
 function handleComposerKeydown(event) {
+  if (event.ctrlKey || event.metaKey) {
+    const key = event.key.toLowerCase();
+    if (key === "b") {
+      event.preventDefault();
+      wrapInline("**", "粗体");
+      return;
+    }
+    if (key === "i") {
+      event.preventDefault();
+      wrapInline("*", "斜体");
+      return;
+    }
+  }
+
+  if (event.key === "Tab") {
+    event.preventDefault();
+    indentSelection(!event.shiftKey);
+    return;
+  }
+
   if (event.key !== "Enter") {
     return;
   }
