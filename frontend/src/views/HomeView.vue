@@ -105,9 +105,7 @@
         <div v-if="loadingPosts" class="empty-tip">加载中...</div>
       </section>
 
-      <div class="footer-capsule">
-        <button class="footer-action" type="button">{{ footerActionText }}</button>
-      </div>
+      <button class="footer-action" type="button">{{ footerActionText }}</button>
     </main>
   </div>
 </template>
