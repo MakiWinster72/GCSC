@@ -7,6 +7,7 @@ import com.gcsc.studentcenter.dto.PostResponse;
 import com.gcsc.studentcenter.entity.AppUser;
 import com.gcsc.studentcenter.entity.Post;
 import com.gcsc.studentcenter.entity.PostMedia;
+import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
 import com.gcsc.studentcenter.repository.PostRepository;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,17 @@ public class PostService {
             .collect(Collectors.toList());
     }
 
+    public void deletePost(String username, Long postId) {
+        AppUser operator = appUserRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalArgumentException("动态不存在"));
+        if (!canDelete(post, operator)) {
+            throw new IllegalArgumentException("无权限删除该动态");
+        }
+        postRepository.delete(post);
+    }
+
     private boolean filterByType(Post post, String username, String type) {
         String normalized = type == null ? "" : type.trim().toLowerCase();
         switch (normalized) {
@@ -89,6 +101,14 @@ public class PostService {
 
     private boolean isAuthor(Post post, String username) {
         return post.getAuthor() != null && Objects.equals(post.getAuthor().getUsername(), username);
+    }
+
+    private boolean canDelete(Post post, AppUser operator) {
+        if (post.getAuthor() != null && Objects.equals(post.getAuthor().getId(), operator.getId())) {
+            return true;
+        }
+        UserRole role = operator.getRole();
+        return role == UserRole.TEACHER || role == UserRole.ADMIN;
     }
 
     private PostResponse toResponse(Post post) {

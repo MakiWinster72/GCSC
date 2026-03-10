@@ -31,4 +31,11 @@ public class PostController {
         String username = authentication.getName();
         return ResponseEntity.ok(postService.listPosts(username, type));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(Authentication authentication, @PathVariable("id") Long id) {
+        String username = authentication.getName();
+        postService.deletePost(username, id);
+        return ResponseEntity.ok().build();
+    }
 }

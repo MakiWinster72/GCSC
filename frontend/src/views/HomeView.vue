@@ -85,7 +85,7 @@
                 v-if="canDeletePost(post)"
                 class="post-action danger"
                 type="button"
-                @click="showToast('删除功能待接入')"
+                @click="openDeleteDialog(post)"
               >
                 删除
               </button>
@@ -536,6 +536,33 @@
           </div>
         </div>
       </section>
+
+      <transition name="dialog-fade">
+        <div
+          v-if="deleteDialogOpen"
+          class="dialog-backdrop"
+          @click="closeDeleteDialog"
+        ></div>
+      </transition>
+      <transition name="dialog-pop">
+        <section v-if="deleteDialogOpen" class="dialog-card" @click.stop>
+          <header class="dialog-header">确认删除</header>
+          <div class="dialog-body">删除后无法恢复，确定要删除这条动态吗？</div>
+          <div class="dialog-actions">
+            <button class="ghost-button" type="button" @click="closeDeleteDialog">
+              取消
+            </button>
+            <button
+              class="action-button"
+              type="button"
+              :disabled="deleteBusy"
+              @click="confirmDelete"
+            >
+              {{ deleteBusy ? "删除中..." : "确定删除" }}
+            </button>
+          </div>
+        </section>
+      </transition>
     </main>
   </div>
 </template>
@@ -552,7 +579,7 @@ import {
 } from "vue";
 import { useRouter } from "vue-router";
 import { getMe } from "../api/auth";
-import { createPost, getPosts, uploadMedia } from "../api/posts";
+import { createPost, deletePost, getPosts, uploadMedia } from "../api/posts";
 
 const router = useRouter();
 const API_BASE = "http://localhost:8080";
@@ -603,6 +630,9 @@ const mediaDialogOpen = ref(false);
 const toastMessage = ref("");
 let toastTimer = null;
 const headingDropdown = ref(null);
+const deleteDialogOpen = ref(false);
+const deleteBusy = ref(false);
+const deleteTarget = ref(null);
 
 const composer = reactive({
   content: "",
@@ -1298,6 +1328,45 @@ function canDeletePost(post) {
     return true;
   }
   return profile.role === "TEACHER" || profile.role === "ADMIN";
+}
+
+function openDeleteDialog(post) {
+  if (!post || !post.id) {
+    return;
+  }
+  deleteTarget.value = post;
+  deleteDialogOpen.value = true;
+}
+
+function closeDeleteDialog() {
+  if (deleteBusy.value) {
+    return;
+  }
+  deleteDialogOpen.value = false;
+  deleteTarget.value = null;
+}
+
+async function confirmDelete() {
+  const post = deleteTarget.value;
+  if (!post || !post.id) {
+    closeDeleteDialog();
+    return;
+  }
+  deleteBusy.value = true;
+  try {
+    await deletePost(post.id);
+    posts.value = posts.value.filter((item) => item.id !== post.id);
+    showToast("已删除");
+  } catch (err) {
+    if (err?.response?.status === 401) {
+      showToast("登录已过期，请重新登录");
+      return;
+    }
+    showToast(err?.response?.data?.message || "删除失败");
+  } finally {
+    deleteBusy.value = false;
+    closeDeleteDialog();
+  }
 }
 
 function logout() {

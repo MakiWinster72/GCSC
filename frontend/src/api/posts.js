@@ -8,6 +8,12 @@ export function createPost(data) {
   return request.post('/api/posts', data)
 }
 
+export function deletePost(id) {
+  const token = localStorage.getItem('gcsc_token')
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
+  return request.delete(`/api/posts/${id}`, { headers })
+}
+
 export function uploadMedia(file) {
   const form = new FormData()
   form.append('file', file)

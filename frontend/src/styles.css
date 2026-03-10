@@ -1098,6 +1098,93 @@ body {
   overflow: hidden;
 }
 
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(6px);
+  z-index: 75;
+}
+
+.dialog-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    150deg,
+    rgba(205, 255, 249, 0.96),
+    rgba(197, 217, 226, 0.86)
+  );
+  box-shadow: 0 24px 60px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  padding: 16px;
+  z-index: 80;
+  display: grid;
+  gap: 12px;
+}
+
+.dialog-header {
+  font-weight: 700;
+  color: #123f45;
+}
+
+.dialog-body {
+  color: #2a4b52;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dialog-actions .ghost-button,
+.dialog-actions .action-button {
+  width: 100%;
+  height: 40px;
+  margin-top: 0;
+}
+
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition: opacity 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.dialog-fade-enter-to,
+.dialog-fade-leave-from {
+  opacity: 1;
+  backdrop-filter: blur(6px);
+}
+
+.dialog-pop-enter-active,
+.dialog-pop-leave-active {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+}
+
+.dialog-pop-enter-from,
+.dialog-pop-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -48%) scale(0.96);
+}
+
+.dialog-pop-enter-to,
+.dialog-pop-leave-from {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
 .media-dialog-header {
   display: flex;
   align-items: center;
