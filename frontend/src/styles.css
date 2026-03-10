@@ -571,7 +571,7 @@ body {
 
 .feed-waterfall {
   column-gap: 12px;
-  column-count: 3;
+  column-count: 1;
 }
 
 .post-card {
@@ -586,12 +586,6 @@ body {
   );
   box-shadow: 0 12px 28px rgba(3, 107, 114, 0.14);
   padding: 12px;
-}
-
-.post-top {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
 .tag {
@@ -615,6 +609,41 @@ body {
 .tag.private {
   background: rgba(130, 95, 220, 0.16);
   color: #4d3695;
+}
+
+.post-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.post-author {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.post-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 107, 114, 0.16);
+  color: #0f555d;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.post-author-info {
+  display: grid;
+  gap: 4px;
+}
+
+.post-author-name {
+  color: #173d44;
+  font-weight: 600;
 }
 
 .post-content {
@@ -641,11 +670,45 @@ body {
   background: rgba(0, 0, 0, 0.06);
 }
 
-.post-meta {
+.post-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: #698087;
   font-size: 12px;
+}
+
+.post-time {
+  color: #5a747b;
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.post-action {
+  border: 0;
+  background: transparent;
+  color: #0f555d;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.post-action:hover {
+  background: rgba(3, 107, 114, 0.12);
+}
+
+.post-action.danger {
+  color: #b03c2f;
+}
+
+.post-action.danger:hover {
+  background: rgba(176, 60, 47, 0.12);
 }
 
 .panel-card {
@@ -1154,6 +1217,16 @@ body {
   margin: 8px 0;
 }
 
+.md-image.full {
+  width: 100%;
+  max-width: 100%;
+}
+
+.md-image.half {
+  width: 100%;
+  max-width: 50%;
+}
+
 .md-link {
   color: #0f555d;
   text-decoration: underline;
@@ -1165,7 +1238,7 @@ body {
   }
 
   .feed-waterfall {
-    column-count: 2;
+    column-count: 1;
   }
 }
 

@@ -44,11 +44,15 @@
 
       <section class="feed-waterfall">
         <article v-for="post in visiblePosts" :key="post.id" class="post-card">
-          <div class="post-top">
-            <span class="tag role">{{ roleText(post.authorRole) }}</span>
-            <span v-if="post.goodNews" class="tag good">喜报🎉</span>
-            <span v-if="post.achievement" class="tag achie">个人成就</span>
-            <span v-if="post.privatePost" class="tag private">记录</span>
+          <div class="post-header">
+            <div class="post-author">
+              <div class="post-avatar">{{ postAvatarText(post) }}</div>
+              <div class="post-author-info">
+                <div class="post-author-name">
+                  {{ post.authorName || post.authorUsername || "同学" }}
+                </div>
+              </div>
+            </div>
           </div>
           <div class="post-content" v-html="renderMarkdown(post.content)"></div>
           <div
@@ -66,9 +70,26 @@
               {{ item.originalName || "附件" }}
             </a>
           </div>
-          <div class="post-meta">
-            <span>{{ post.authorName }}</span>
-            <span>{{ formatTime(post.createdAt) }}</span>
+          <div class="post-footer">
+            <span class="post-time">{{ formatTime(post.createdAt) }}</span>
+            <div class="post-actions">
+              <button
+                v-if="canEditPost(post)"
+                class="post-action"
+                type="button"
+                @click="showToast('编辑功能待接入')"
+              >
+                编辑
+              </button>
+              <button
+                v-if="canDeletePost(post)"
+                class="post-action danger"
+                type="button"
+                @click="showToast('删除功能待接入')"
+              >
+                删除
+              </button>
+            </div>
           </div>
         </article>
 
@@ -651,6 +672,7 @@ async function fetchPosts() {
   try {
     const { data } = await getPosts(activeMenu.value);
     posts.value = Array.isArray(data) ? data : [];
+    applyPostImageLayout();
   } catch {
     posts.value = [];
   } finally {
@@ -752,6 +774,7 @@ async function publishPost() {
   try {
     const { data } = await createPost(payload);
     posts.value = [data, ...posts.value];
+    applyPostImageLayout();
     resetComposerState();
     closePublisher();
   } catch (err) {
@@ -1077,8 +1100,50 @@ function formatTime(timestamp) {
   });
 }
 
-function roleText(role) {
-  return roleLabelMap[role] || "学生";
+function applyPostImageLayout() {
+  nextTick(() => {
+    const images = document.querySelectorAll(".post-content .md-image");
+    images.forEach((img) => {
+      if (img.dataset.aspectReady) {
+        return;
+      }
+      const apply = () => {
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        if (!width || !height) {
+          return;
+        }
+        const ratio = width / height;
+        img.classList.toggle("full", ratio >= 1.4);
+        img.classList.toggle("half", ratio < 1.4);
+        img.dataset.aspectReady = "1";
+      };
+      if (img.complete) {
+        apply();
+      } else {
+        img.addEventListener("load", apply, { once: true });
+      }
+    });
+  });
+}
+
+function postAvatarText(post) {
+  const name = post?.authorName || post?.authorUsername || "同学";
+  return name.slice(0, 1).toUpperCase();
+}
+
+function canEditPost(post) {
+  if (!post || !profile.username) {
+    return false;
+  }
+  return post.authorUsername === profile.username;
+}
+
+function canDeletePost(post) {
+  if (canEditPost(post)) {
+    return true;
+  }
+  return profile.role === "TEACHER" || profile.role === "ADMIN";
 }
 
 function logout() {
