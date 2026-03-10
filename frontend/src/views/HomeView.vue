@@ -128,18 +128,80 @@
           </button>
         </header>
 
-        <div class="editor-toolbar">
-          <div class="toolbar-item-wrap">
-          <div
-            class="toolbar-dropdown"
-            ref="headingDropdown"
-            :class="{ open: headingMenuOpen }"
-          >
+        <div class="publisher-body">
+          <div class="publisher-section-title">内容</div>
+          <div class="publisher-section-divider"></div>
+          <div class="editor-toolbar">
+            <div class="toolbar-item-wrap">
+              <div
+                class="toolbar-dropdown"
+                ref="headingDropdown"
+                :class="{ open: headingMenuOpen }"
+              >
+                <button
+                  class="toolbar-button"
+                  type="button"
+                  title="标题"
+                  @click.stop="toggleHeadingMenu"
+                >
+                  <span class="icon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M6 5v14M18 5v14" />
+                      <path d="M6 12h12" />
+                    </svg>
+                  </span>
+                </button>
+                <div
+                  class="toolbar-menu"
+                  :class="{ open: headingMenuOpen }"
+                  :aria-hidden="!headingMenuOpen"
+                  @click.stop
+                >
+                  <button
+                    type="button"
+                    class="toolbar-menu-item"
+                    @click="applyHeading(2)"
+                  >
+                    二级标题
+                  </button>
+                  <button
+                    type="button"
+                    class="toolbar-menu-item"
+                    @click="applyHeading(3)"
+                  >
+                    三级标题
+                  </button>
+                  <button
+                    type="button"
+                    class="toolbar-menu-item"
+                    @click="applyHeading(4)"
+                  >
+                    四级标题
+                  </button>
+                  <button
+                    type="button"
+                    class="toolbar-menu-item"
+                    @click="applyHeading(5)"
+                  >
+                    五级标题
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar-item-wrap">
               <button
                 class="toolbar-button"
                 type="button"
-                title="标题"
-                @click.stop="toggleHeadingMenu"
+                title="加粗"
+                @click="wrapInline('**', '粗体')"
               >
                 <span class="icon" aria-hidden="true">
                   <svg
@@ -150,314 +212,251 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   >
-                    <path d="M6 5v14M18 5v14" />
-                    <path d="M6 12h12" />
+                    <path d="M7 5h6a3.5 3.5 0 0 1 0 7H7V5z" />
+                    <path d="M7 12h7a3.5 3.5 0 0 1 0 7H7v-7z" />
                   </svg>
                 </span>
               </button>
-              <div
-                class="toolbar-menu"
-                :class="{ open: headingMenuOpen }"
-                :aria-hidden="!headingMenuOpen"
-                @click.stop
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="斜体"
+                @click="wrapInline('*', '斜体')"
               >
-                <button
-                  type="button"
-                  class="toolbar-menu-item"
-                  @click="applyHeading(2)"
-                >
-                  二级标题
-                </button>
-                <button
-                  type="button"
-                  class="toolbar-menu-item"
-                  @click="applyHeading(3)"
-                >
-                  三级标题
-                </button>
-                <button
-                  type="button"
-                  class="toolbar-menu-item"
-                  @click="applyHeading(4)"
-                >
-                  四级标题
-                </button>
-                <button
-                  type="button"
-                  class="toolbar-menu-item"
-                  @click="applyHeading(5)"
-                >
-                  五级标题
-                </button>
-              </div>
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M19 5h-8" />
+                    <path d="M13 19H5" />
+                    <path d="M14 5 10 19" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="引用"
+                @click="applyQuote"
+              >
+                <span class="icon quote-icon" aria-hidden="true">&gt;</span>
+              </button>
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="表格"
+                @click="insertTable"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 17h16" />
+                    <path d="M8 5v14" />
+                    <path d="M16 5v14" />
+                    <rect x="4" y="5" width="16" height="14" rx="2" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="图片/视频"
+                @click="openMediaDialog"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="4" y="6" width="16" height="12" rx="2" />
+                    <path d="M8 14l2-2 3 3 3-3 2 2" />
+                    <circle cx="9" cy="10" r="1" />
+                  </svg>
+                </span>
+              </button>
+              <input
+                ref="mediaInput"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                hidden
+                @change="onMediaChange"
+              />
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="文件"
+                @click="triggerFileUpload"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 7h6" />
+                    <path d="M8 11h8" />
+                    <path d="M8 15h6" />
+                    <path
+                      d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9l-5-6z"
+                    />
+                    <path d="M14 3v6h6" />
+                  </svg>
+                </span>
+              </button>
+              <input
+                ref="fileInput"
+                type="file"
+                accept=".doc,.ppt,.xls,.docx,.pptx,.xlsx,.pdf,.zip,.rar,.7z,.tar"
+                multiple
+                hidden
+                @change="onMediaChange"
+              />
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="有序列表"
+                @click="applyList('ordered')"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 6h12" />
+                    <path d="M8 12h12" />
+                    <path d="M8 18h12" />
+                    <path d="M4 6h1" />
+                    <path d="M4 12h1" />
+                    <path d="M4 18h1" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="无序列表"
+                @click="applyList('unordered')"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 6h12" />
+                    <path d="M8 12h12" />
+                    <path d="M8 18h12" />
+                    <circle cx="5" cy="6" r="1" />
+                    <circle cx="5" cy="12" r="1" />
+                    <circle cx="5" cy="18" r="1" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="缩进"
+                @click="indentSelection(true)"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 6h16" />
+                    <path d="M4 12h10" />
+                    <path d="M4 18h16" />
+                    <path d="M14 9l3 3-3 3" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+
+            <div class="toolbar-item-wrap">
+              <button
+                class="toolbar-button"
+                type="button"
+                title="减少缩进"
+                @click="indentSelection(false)"
+              >
+                <span class="icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 6h16" />
+                    <path d="M4 12h10" />
+                    <path d="M4 18h16" />
+                    <path d="M10 9l-3 3 3 3" />
+                  </svg>
+                </span>
+              </button>
             </div>
           </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="加粗"
-              @click="wrapInline('**', '粗体')"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M7 5h6a3.5 3.5 0 0 1 0 7H7V5z" />
-                  <path d="M7 12h7a3.5 3.5 0 0 1 0 7H7v-7z" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="斜体"
-              @click="wrapInline('*', '斜体')"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M19 5h-8" />
-                  <path d="M13 19H5" />
-                  <path d="M14 5 10 19" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="引用"
-              @click="applyQuote"
-            >
-              <span class="icon quote-icon" aria-hidden="true">&gt;</span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="表格"
-              @click="insertTable"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M4 7h16" />
-                  <path d="M4 12h16" />
-                  <path d="M4 17h16" />
-                  <path d="M8 5v14" />
-                  <path d="M16 5v14" />
-                  <rect x="4" y="5" width="16" height="14" rx="2" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-divider"></div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="图片/视频"
-              @click="openMediaDialog"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="4" y="6" width="16" height="12" rx="2" />
-                  <path d="M8 14l2-2 3 3 3-3 2 2" />
-                  <circle cx="9" cy="10" r="1" />
-                </svg>
-              </span>
-            </button>
-            <input
-              ref="mediaInput"
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              hidden
-              @change="onMediaChange"
-            />
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="文件"
-              @click="triggerFileUpload"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M8 7h6" />
-                  <path d="M8 11h8" />
-                  <path d="M8 15h6" />
-                  <path
-                    d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9l-5-6z"
-                  />
-                  <path d="M14 3v6h6" />
-                </svg>
-              </span>
-            </button>
-            <input
-              ref="fileInput"
-              type="file"
-              accept=".doc,.ppt,.xls,.docx,.pptx,.xlsx,.pdf,.zip,.rar,.7z,.tar"
-              multiple
-              hidden
-              @change="onMediaChange"
-            />
-          </div>
-
-          <div class="toolbar-divider"></div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="有序列表"
-              @click="applyList('ordered')"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M8 6h12" />
-                  <path d="M8 12h12" />
-                  <path d="M8 18h12" />
-                  <path d="M4 6h1" />
-                  <path d="M4 12h1" />
-                  <path d="M4 18h1" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="无序列表"
-              @click="applyList('unordered')"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M8 6h12" />
-                  <path d="M8 12h12" />
-                  <path d="M8 18h12" />
-                  <circle cx="5" cy="6" r="1" />
-                  <circle cx="5" cy="12" r="1" />
-                  <circle cx="5" cy="18" r="1" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="缩进"
-              @click="indentSelection(true)"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M4 6h16" />
-                  <path d="M4 12h10" />
-                  <path d="M4 18h16" />
-                  <path d="M14 9l3 3-3 3" />
-                </svg>
-              </span>
-            </button>
-          </div>
-
-          <div class="toolbar-item-wrap">
-            <button
-              class="toolbar-button"
-              type="button"
-              title="减少缩进"
-              @click="indentSelection(false)"
-            >
-              <span class="icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M4 6h16" />
-                  <path d="M4 12h10" />
-                  <path d="M4 18h16" />
-                  <path d="M10 9l-3 3 3 3" />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div class="publisher-body">
-          <div class="publisher-section-title">内容</div>
-          <div class="publisher-section-divider"></div>
           <textarea
             ref="composerInput"
             v-model="composer.content"
