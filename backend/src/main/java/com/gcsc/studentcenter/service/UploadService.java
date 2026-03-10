@@ -10,12 +10,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class UploadService {
 
     private final Path uploadRoot;
+
+    private static final Set<String> ALLOWED_FILE_EXT = Set.of(
+        ".doc", ".ppt", ".xls", ".docx", ".pptx", ".xlsx", ".pdf",
+        ".zip", ".rar", ".7z", ".tar"
+    );
 
     public UploadService(@Value("${app.upload-dir:./uploads}") String uploadDir) {
         this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
@@ -29,7 +36,12 @@ public class UploadService {
         String contentType = file.getContentType();
         String mediaType = resolveMediaType(contentType);
         if (mediaType == null) {
-            throw new IllegalArgumentException("仅支持图片或视频");
+            String ext = extractExtension(file.getOriginalFilename());
+            if (!ext.isEmpty() && ALLOWED_FILE_EXT.contains(ext.toLowerCase(Locale.ROOT))) {
+                mediaType = "FILE";
+            } else {
+                throw new IllegalArgumentException("仅支持图片/视频/常见附件");
+            }
         }
 
         LocalDate now = LocalDate.now();

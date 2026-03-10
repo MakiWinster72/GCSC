@@ -126,6 +126,9 @@ public class PostService {
         if (upper.equals("VIDEO")) {
             return "VIDEO";
         }
+        if (upper.equals("FILE")) {
+            return "FILE";
+        }
         return "IMAGE";
     }
 }
