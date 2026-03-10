@@ -291,6 +291,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: sticky;
+  top: 24px;
+  align-self: start;
 }
 
 .profile-card,
