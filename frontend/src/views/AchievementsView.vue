@@ -40,8 +40,9 @@
       </header>
 
       <div v-if="!achievements.length" class="empty-tip">
-        还没有成就，点击右上角添加。
+        还没有成就，点击右下角添加。
       </div>
+      <div v-if="errorMessage" class="form-tip">{{ errorMessage }}</div>
 
       <section class="achievement-list">
         <article v-for="item in achievements" :key="item.id" class="achievement-card">
@@ -162,8 +163,10 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { createAchievement, getAchievements } from "../api/achievements";
+import { uploadMedia } from "../api/posts";
 
 const router = useRouter();
 const profile = reactive(loadUser());
@@ -171,8 +174,10 @@ const activeMenu = ref("achievements");
 const editorOpen = ref(false);
 const imageInput = ref(null);
 const imagePreview = ref("");
+const errorMessage = ref("");
 
 const achievements = ref([]);
+const API_BASE = "http://localhost:8080";
 
 const form = reactive({
   name: "",
@@ -181,7 +186,7 @@ const form = reactive({
   awardDate: "",
   description: "",
   thoughts: "",
-  image: "",
+  imageUrl: "",
 });
 
 const menuItems = computed(() => [
@@ -267,42 +272,81 @@ function resetForm() {
   form.awardDate = "";
   form.description = "";
   form.thoughts = "";
-  form.image = "";
+  form.imageUrl = "";
   imagePreview.value = "";
 }
 
-function saveAchievement() {
+async function saveAchievement() {
   const payload = {
-    id: Date.now(),
     name: form.name.trim(),
-    startDate: form.startDate,
-    endDate: form.endDate,
-    awardDate: form.awardDate,
+    startDate: form.startDate || null,
+    endDate: form.endDate || null,
+    awardDate: form.awardDate || null,
     description: form.description.trim(),
     thoughts: form.thoughts.trim(),
-    image: form.image,
+    imageUrl: form.imageUrl || null,
   };
-  achievements.value = [payload, ...achievements.value];
-  resetForm();
-  closeEditor();
+  try {
+    const { data } = await createAchievement(payload);
+    achievements.value = [normalizeAchievement(data), ...achievements.value];
+    resetForm();
+    closeEditor();
+    errorMessage.value = "";
+  } catch (err) {
+    errorMessage.value = err?.response?.data?.message || "保存失败，请重新登录";
+  }
 }
 
 function triggerImage() {
   imageInput.value && imageInput.value.click();
 }
 
-function onImageChange(event) {
+async function onImageChange(event) {
   const [file] = Array.from(event.target.files || []);
   event.target.value = "";
   if (!file) {
     return;
   }
-  const reader = new FileReader();
-  reader.onload = () => {
-    const src = String(reader.result || "");
-    imagePreview.value = src;
-    form.image = src;
-  };
-  reader.readAsDataURL(file);
+  const { data } = await uploadMedia(file);
+  form.imageUrl = data.url;
+  imagePreview.value = resolveMediaUrl(data.url);
 }
+
+function resolveMediaUrl(url) {
+  if (!url) {
+    return "";
+  }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `${API_BASE}${url}`;
+}
+
+function normalizeAchievement(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    startDate: item.startDate,
+    endDate: item.endDate,
+    awardDate: item.awardDate,
+    description: item.description,
+    thoughts: item.thoughts,
+    image: resolveMediaUrl(item.imageUrl),
+  };
+}
+
+async function fetchAchievements() {
+  try {
+    const { data } = await getAchievements();
+    achievements.value = Array.isArray(data) ? data.map(normalizeAchievement) : [];
+    errorMessage.value = "";
+  } catch (err) {
+    achievements.value = [];
+    errorMessage.value = err?.response?.data?.message || "无法获取成就列表";
+  }
+}
+
+onMounted(() => {
+  fetchAchievements();
+});
 </script>
