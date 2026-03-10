@@ -116,7 +116,7 @@
       </transition>
       <section
         class="publisher-sheet"
-        :class="{ open: publisherOpen }"
+        :class="{ open: publisherOpen, expanded: hasPreview }"
         :aria-hidden="!publisherOpen"
       >
         <header class="publisher-header">
@@ -507,35 +507,53 @@
         <p v-if="composerError" class="form-tip">{{ composerError }}</p>
       </section>
 
-      <div
-        v-show="mediaDialogOpen"
-        class="media-dialog-backdrop"
-        @click="closeMediaDialog"
-      ></div>
-      <section v-show="mediaDialogOpen" class="media-dialog" @click.stop>
-        <header class="media-dialog-header">
-          <div class="media-dialog-title">上传图片/视频</div>
-          <button
-            class="media-dialog-close"
-            type="button"
-            @click="closeMediaDialog"
-          >
-            关闭
-          </button>
-        </header>
-        <div class="media-dialog-body">
-          <button
-            class="action-button"
-            type="button"
-            @click="triggerMediaUpload"
-          >
-            选择文件
-          </button>
-          <div class="media-dialog-hint">
-            支持多选，图片/视频会上传到服务器。
+      <transition name="dialog-fade">
+        <div
+          v-if="mediaDialogOpen"
+          class="media-dialog-backdrop"
+          @click="closeMediaDialog"
+        ></div>
+      </transition>
+      <transition name="dialog-pop">
+        <section v-if="mediaDialogOpen" class="media-dialog" @click.stop>
+          <header class="media-dialog-header">
+            <div class="media-dialog-title">上传图片/视频</div>
+            <button
+              class="media-dialog-close"
+              type="button"
+              @click="closeMediaDialog"
+            >
+              关闭
+            </button>
+          </header>
+          <div class="media-dialog-body">
+            <button
+              class="action-button"
+              type="button"
+              @click="triggerMediaUpload"
+            >
+              选择文件
+            </button>
+            <div class="media-dialog-hint">
+              支持多选，图片/视频会上传到服务器。
+            </div>
+            <div v-if="uploadQueue.length" class="upload-queue">
+              <div v-for="item in uploadQueue" :key="item.id" class="upload-row">
+                <div class="upload-row-header">
+                  <span class="upload-name">{{ item.name }}</span>
+                  <span class="upload-percent">{{ item.progress }}%</span>
+                </div>
+                <div class="upload-bar">
+                  <div
+                    class="upload-bar-fill"
+                    :style="{ width: `${item.progress}%` }"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </transition>
 
       <transition name="dialog-fade">
         <div
@@ -633,6 +651,7 @@ const headingDropdown = ref(null);
 const deleteDialogOpen = ref(false);
 const deleteBusy = ref(false);
 const deleteTarget = ref(null);
+const uploadQueue = ref([]);
 
 const composer = reactive({
   content: "",
@@ -769,11 +788,15 @@ function showToast(message) {
 }
 
 function isMenuEnabled(key) {
-  return key === "campus" || key === "good-news" || key === "records";
+  return key === "campus" || key === "good-news" || key === "records" || key === "achievements";
 }
 
 function handleMenuClick(key) {
   if (!isMenuEnabled(key)) {
+    return;
+  }
+  if (key === "achievements") {
+    router.push("/achievements");
     return;
   }
   activeMenu.value = key;
@@ -1182,6 +1205,31 @@ async function onMediaChange(event) {
     : (composer.content || "").length;
 
   for (const file of files) {
+    const queueItem = {
+      id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      name: file.name,
+      progress: 0,
+    };
+    uploadQueue.value = [...uploadQueue.value, queueItem];
+    const progressTimer = setInterval(() => {
+      uploadQueue.value = uploadQueue.value.map((item) => {
+        if (item.id !== queueItem.id) {
+          return item;
+        }
+        const next = Math.min(item.progress + 6, 90);
+        return { ...item, progress: next };
+      });
+    }, 200);
+    const finalizeProgress = () => {
+      clearInterval(progressTimer);
+      uploadQueue.value = uploadQueue.value.map((item) =>
+        item.id === queueItem.id ? { ...item, progress: 100 } : item,
+      );
+      setTimeout(() => {
+        uploadQueue.value = uploadQueue.value.filter((item) => item.id !== queueItem.id);
+      }, 600);
+    };
+
     uploadingCount.value += 1;
     try {
       const { data } = await uploadMedia(file);
@@ -1216,8 +1264,11 @@ async function onMediaChange(event) {
       }
 
       insertPos += insertText.length;
+      finalizeProgress();
     } catch (err) {
       composerError.value = err?.response?.data?.message || "媒体上传失败";
+      clearInterval(progressTimer);
+      uploadQueue.value = uploadQueue.value.filter((item) => item.id !== queueItem.id);
     } finally {
       uploadingCount.value -= 1;
     }

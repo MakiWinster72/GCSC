@@ -413,6 +413,18 @@ body {
   color: #083d45;
 }
 
+.header-action {
+  border: 1px solid rgba(3, 107, 114, 0.45);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 0 14px;
+  height: 36px;
+  cursor: pointer;
+  color: #0f555d;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
 .composer-shell {
   margin-bottom: 14px;
 }
@@ -720,6 +732,222 @@ body {
   line-height: 1.8;
 }
 
+.achievement-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 40;
+}
+
+.achievement-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  width: min(980px, calc(100vw - 32px));
+  transform: translate(-50%, 120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    140deg,
+    rgba(205, 255, 249, 0.92),
+    rgba(197, 217, 226, 0.78)
+  );
+  box-shadow: 0 28px 70px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.75s ease,
+    filter 0.75s ease;
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  scrollbar-width: none;
+  padding: 12px 14px 16px;
+}
+
+.achievement-sheet.open {
+  transform: translate(-50%, 0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+  pointer-events: auto;
+}
+
+.achievement-sheet::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.achievement-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  border: 1px dashed rgba(3, 107, 114, 0.35);
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  color: #3b5962;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.achievement-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.achievement-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.field-row {
+  display: grid;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 12px;
+  color: #57737c;
+  font-weight: 600;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-input {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+}
+
+.date-input.single {
+  max-width: 220px;
+}
+
+.date-label {
+  font-size: 11px;
+  color: #5b7680;
+}
+
+.date-input-field {
+  border: 1px solid rgba(3, 107, 114, 0.18);
+  background: rgba(255, 255, 255, 0.68);
+  border-radius: 12px;
+  height: 42px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #103f46;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.date-input-field:focus {
+  border-color: rgba(3, 107, 114, 0.55);
+  background: rgba(205, 255, 249, 0.85);
+  box-shadow: 0 10px 20px rgba(3, 107, 114, 0.12);
+}
+
+.achievement-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.achievement-actions .ghost-button,
+.achievement-actions .action-button {
+  width: 100%;
+  height: 40px;
+}
+
+.achievement-list {
+  display: grid;
+  gap: 14px;
+}
+
+.achievement-card {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px;
+  box-shadow: 0 12px 28px rgba(3, 107, 114, 0.12);
+}
+
+.achievement-card-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.achievement-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+}
+
+.achievement-card-placeholder {
+  color: #6a8088;
+  font-size: 13px;
+}
+
+.achievement-card-body {
+  display: grid;
+  gap: 8px;
+  color: #21424a;
+}
+
+.achievement-card-title {
+  margin: 0;
+  font-size: 18px;
+  color: #0d3f45;
+}
+
+.achievement-card-dates {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: #546f78;
+}
+
+.achievement-card-text {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
 .simple-list {
   display: grid;
   gap: 10px;
@@ -833,8 +1061,9 @@ body {
   transition:
     transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.75s ease,
-    filter 0.75s ease;
-  max-height: 84vh;
+    filter 0.75s ease,
+    height 0.6s ease;
+  height: 56vh;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -847,6 +1076,10 @@ body {
   opacity: 1;
   filter: blur(0px);
   pointer-events: auto;
+}
+
+.publisher-sheet.expanded {
+  height: 78vh;
 }
 
 .publisher-sheet::-webkit-scrollbar {
@@ -1217,6 +1450,48 @@ body {
   gap: 10px;
 }
 
+.upload-queue {
+  display: grid;
+  gap: 10px;
+}
+
+.upload-row {
+  display: grid;
+  gap: 6px;
+}
+
+.upload-row-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #375a62;
+}
+
+.upload-name {
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-percent {
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(3, 107, 114, 0.12);
+  overflow: hidden;
+}
+
+.upload-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #11a1ab, #0f6e76);
+  transition: width 0.2s linear;
+}
+
 .media-dialog-hint {
   font-size: 12px;
   color: #5b6f78;
@@ -1379,5 +1654,26 @@ body {
   .toast {
     right: 50%;
     transform: translateX(50%);
+  }
+
+  .achievement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievement-card {
+    grid-template-columns: 1fr;
+  }
+
+  .achievement-sheet {
+    width: min(960px, calc(100vw - 20px));
+    bottom: 10px;
+  }
+
+  .date-range {
+    flex-direction: column;
+  }
+
+  .date-input.single {
+    max-width: none;
   }
 }
