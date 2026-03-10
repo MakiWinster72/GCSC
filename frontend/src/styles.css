@@ -1189,11 +1189,12 @@ body {
 
 .post-content .md-paragraph {
   margin: 0 0 8px;
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
 
 .post-content li {
   margin: 4px 0;
+  white-space: pre-wrap;
 }
 
 .md-table {

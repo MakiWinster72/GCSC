@@ -1337,6 +1337,13 @@ function renderMarkdown(text) {
     return trimmed.split("|").map((c) => c.trim());
   }
 
+  function indentToNbsp(indent) {
+    if (!indent) {
+      return "";
+    }
+    return "\u00A0".repeat(indent.length);
+  }
+
   function isTableSep(row) {
     const t = row.trim().replace(/^\|/, "").replace(/\|$/, "");
     if (!t.includes("-")) {
@@ -1397,7 +1404,10 @@ function renderMarkdown(text) {
     if (/^\s*-\s+/.test(line)) {
       const items = [];
       while (i < lines.length && /^\s*-\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*-\s+/, ""));
+        const match = lines[i].match(/^(\s*)-\s+(.*)$/);
+        const indent = match ? match[1] : "";
+        const content = match ? match[2] : lines[i].replace(/^\s*-\s+/, "");
+        items.push(indentToNbsp(indent) + content);
         i += 1;
       }
       out.push(
@@ -1409,7 +1419,10 @@ function renderMarkdown(text) {
     if (/^\s*\d+\.\s+/.test(line)) {
       const items = [];
       while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*\d+\.\s+/, ""));
+        const match = lines[i].match(/^(\s*)\d+\.\s+(.*)$/);
+        const indent = match ? match[1] : "";
+        const content = match ? match[2] : lines[i].replace(/^\s*\d+\.\s+/, "");
+        items.push(indentToNbsp(indent) + content);
         i += 1;
       }
       out.push(
