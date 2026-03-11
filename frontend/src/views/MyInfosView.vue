@@ -39,42 +39,228 @@
         <h1 class="feed-title">我的信息</h1>
       </header>
 
-      <section class="info-card">
-        <div class="info-header">
+      <section class="info-shell">
+        <div class="info-hero">
           <button class="avatar-square" type="button">
             点击设置头像
           </button>
-          <div class="info-grid">
-            <div v-for="item in primaryInfos" :key="item.key" class="info-row">
-              <span class="info-label">{{ item.label }}</span>
-              <span class="info-value">{{ info[item.key] || "未填写" }}</span>
+          <div class="info-hero-text">
+            <div class="info-hero-title">基础信息</div>
+            <div class="info-hero-subtitle">请确保信息完整准确</div>
+          </div>
+          <div class="info-actions">
+            <button class="ghost-button" type="button" @click="enterEdit">
+              编辑
+            </button>
+            <button class="action-button" type="button" @click="confirmEdit">
+              确认
+            </button>
+            <button class="ghost-button" type="button">
+              请求变更
+            </button>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-section-title">个人信息</div>
+          <div class="info-form-grid">
+            <label class="field-card">
+              <span class="info-label">名字</span>
+              <input
+                v-model="info.name"
+                class="info-input"
+                type="text"
+                placeholder="请输入名字"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">学号</span>
+              <input
+                v-model="info.studentNo"
+                class="info-input"
+                type="text"
+                placeholder="请输入学号"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card field-full">
+              <span class="info-label">班别</span>
+              <div class="class-inline">
+                <select v-model="info.classYear" class="info-input" :disabled="!isEditing">
+                  <option disabled value="">选择年份</option>
+                  <option v-for="year in classYearOptions" :key="year" :value="year">
+                    {{ year }}
+                  </option>
+                </select>
+                <span class="class-text">级</span>
+                <input
+                  v-model="info.classMajor"
+                  class="info-input"
+                  type="text"
+                  placeholder="专业"
+                  :disabled="!isEditing"
+                />
+                <input
+                  v-model="info.classNo"
+                  class="info-input class-num"
+                  type="text"
+                  placeholder="数字"
+                  :disabled="!isEditing"
+                />
+                <span class="class-text">班</span>
+              </div>
+            </label>
+            <label class="field-card">
+              <span class="info-label">学院</span>
+              <input
+                v-model="info.college"
+                class="info-input"
+                type="text"
+                placeholder="请输入学院"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-section-title">联系方式</div>
+          <div class="info-form-grid">
+            <label class="field-card">
+              <span class="info-label">电话号码</span>
+              <input
+                v-model="info.phone"
+                class="info-input"
+                type="tel"
+                placeholder="请输入电话号码"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card field-full">
+              <span class="info-label">住址</span>
+              <input
+                v-model="info.address"
+                class="info-input"
+                type="text"
+                placeholder="请输入住址"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">身份证号</span>
+              <input
+                v-model="info.idNo"
+                class="info-input"
+                type="text"
+                placeholder="请输入身份证号"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">籍贯</span>
+              <input
+                v-model="info.nativePlace"
+                class="info-input"
+                type="text"
+                placeholder="例：广东广州"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-section-title">团组织与入党信息</div>
+          <div class="info-form-grid">
+            <label class="field-card">
+              <span class="info-label">团号</span>
+              <input
+                v-model="info.leagueNo"
+                class="info-input"
+                type="text"
+                placeholder="请输入团号"
+                :disabled="!isEditing"
+              />
+            </label>
+            <div class="field-card field-full">
+              <span class="info-label">是否申请入党</span>
+              <div class="info-inline">
+                <label class="info-choice">
+                  <input
+                    v-model="info.partyApplied"
+                    type="radio"
+                    :value="true"
+                    :disabled="!isEditing"
+                  />
+                  是
+                </label>
+                <label class="info-choice">
+                  <input
+                    v-model="info.partyApplied"
+                    type="radio"
+                    :value="false"
+                    :disabled="!isEditing"
+                  />
+                  否
+                </label>
+              </div>
             </div>
+            <label class="field-card">
+              <span class="info-label">入党通知书申请日期</span>
+              <input
+                v-model="info.applicationDate"
+                class="info-input"
+                type="date"
+                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">成为入党积极分子日期</span>
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.activistDate"
+                  class="info-input"
+                  type="date"
+                  :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.notDeveloped"
+                    type="checkbox"
+                    :disabled="!isEditing"
+                  />
+                  暂未发展
+                </label>
+              </div>
+            </label>
           </div>
         </div>
 
-        <div class="info-grid info-grid-secondary">
-          <div v-for="item in secondaryInfos" :key="item.key" class="info-row">
-            <span class="info-label">{{ item.label }}</span>
-            <span class="info-value">{{ info[item.key] || "未填写" }}</span>
+        <div class="info-card">
+          <div class="info-section-title">其他</div>
+          <div class="info-form-grid">
+            <label class="field-card">
+              <span class="info-label">紧急联系人电话</span>
+              <input
+                v-model="info.emergencyPhone"
+                class="info-input"
+                type="tel"
+                placeholder="请输入紧急联系人电话"
+                :disabled="!isEditing"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">紧急联系人的关系</span>
+              <input
+                v-model="info.emergencyRelation"
+                class="info-input"
+                type="text"
+                placeholder="如父母、亲属"
+                :disabled="!isEditing"
+              />
+            </label>
           </div>
-        </div>
-
-        <div class="info-divider"></div>
-
-        <div class="info-grid info-grid-tertiary">
-          <div v-for="item in tertiaryInfos" :key="item.key" class="info-row">
-            <span class="info-label">{{ item.label }}</span>
-            <span class="info-value">{{ info[item.key] || "未填写" }}</span>
-          </div>
-        </div>
-
-        <div class="info-actions">
-          <button class="action-button" type="button">
-            确认（初次填写）
-          </button>
-          <button class="ghost-button" type="button">
-            请求变更
-          </button>
         </div>
       </section>
     </main>
@@ -90,42 +276,30 @@ const router = useRouter();
 
 const profile = reactive(loadUser());
 const activeMenu = ref("my-info");
+const isEditing = ref(false);
 
 const info = reactive({
-  name: "",
-  studentNo: "",
-  className: "",
-  college: "",
+  name: profile.displayName || profile.username || "",
+  studentNo: profile.studentNo || "",
+  classYear: "",
+  classMajor: "",
+  classNo: "",
+  className: profile.className || "",
+  college: profile.college || "",
   phone: "",
   address: "",
   idNo: "",
   nativePlace: "",
   leagueNo: "",
-  partyApplied: "",
+  partyApplied: false,
+  notDeveloped: false,
   applicationDate: "",
   activistDate: "",
+  emergencyPhone: "",
+  emergencyRelation: "",
 });
 
-const primaryInfos = [
-  { key: "name", label: "名字" },
-  { key: "studentNo", label: "学号" },
-  { key: "className", label: "班别" },
-  { key: "college", label: "学院" },
-];
-
-const secondaryInfos = [
-  { key: "phone", label: "电话号码" },
-  { key: "address", label: "住址" },
-  { key: "idNo", label: "身份证号" },
-  { key: "nativePlace", label: "籍贯" },
-];
-
-const tertiaryInfos = [
-  { key: "leagueNo", label: "团号" },
-  { key: "partyApplied", label: "是否申请入党" },
-  { key: "applicationDate", label: "入党通知书申请日期" },
-  { key: "activistDate", label: "成为入党积极分子日期" },
-];
+const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
 
 const menuItems = computed(() => MENU_ITEMS);
 
@@ -164,6 +338,14 @@ function handleMenuClick(key) {
     return;
   }
   router.push("/home");
+}
+
+function enterEdit() {
+  isEditing.value = true;
+}
+
+function confirmEdit() {
+  isEditing.value = false;
 }
 
 function loadUser() {
