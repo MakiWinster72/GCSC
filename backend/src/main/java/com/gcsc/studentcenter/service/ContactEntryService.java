@@ -4,13 +4,11 @@ import com.gcsc.studentcenter.dto.ContactCreateRequest;
 import com.gcsc.studentcenter.dto.ContactResponse;
 import com.gcsc.studentcenter.dto.ContactUpdateRequest;
 import com.gcsc.studentcenter.entity.ContactEntry;
-import com.gcsc.studentcenter.entity.ContactEntryType;
 import com.gcsc.studentcenter.repository.ContactEntryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,15 +53,10 @@ public class ContactEntryService {
     }
 
     private void applyCreate(ContactEntry entry, ContactCreateRequest request) {
-        ContactEntryType type = parseEntryType(request.getEntryType());
         String name = normalize(request.getName());
-        if (type == null) {
-            throw new IllegalArgumentException("类型不能为空");
-        }
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("名称不能为空");
         }
-        entry.setEntryType(type);
         entry.setName(name);
         entry.setOffice(normalize(request.getOffice()));
         entry.setDuty(normalize(request.getDuty()));
@@ -74,10 +67,6 @@ public class ContactEntryService {
     }
 
     private void applyUpdate(ContactEntry entry, ContactUpdateRequest request) {
-        ContactEntryType type = parseEntryType(request.getEntryType());
-        if (type != null) {
-            entry.setEntryType(type);
-        }
         if (request.getName() != null) {
             String name = normalize(request.getName());
             if (name == null || name.isEmpty()) {
@@ -113,22 +102,9 @@ public class ContactEntryService {
         return trimmed.isEmpty() ? "" : trimmed;
     }
 
-    private ContactEntryType parseEntryType(String raw) {
-        if (raw == null) {
-            return null;
-        }
-        String upper = raw.trim().toUpperCase(Locale.ROOT);
-        try {
-            return ContactEntryType.valueOf(upper);
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
     private ContactResponse toResponse(ContactEntry entry) {
         return new ContactResponse(
             entry.getId(),
-            entry.getEntryType() == null ? null : entry.getEntryType().name(),
             entry.getName(),
             entry.getOffice(),
             entry.getDuty(),

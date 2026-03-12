@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public class ContactResponse {
     private Long id;
-    private String entryType;
     private String name;
     private String office;
     private String duty;
@@ -17,7 +16,6 @@ public class ContactResponse {
 
     public ContactResponse(
         Long id,
-        String entryType,
         String name,
         String office,
         String duty,
@@ -29,7 +27,6 @@ public class ContactResponse {
         LocalDateTime updatedAt
     ) {
         this.id = id;
-        this.entryType = entryType;
         this.name = name;
         this.office = office;
         this.duty = duty;
@@ -43,10 +40,6 @@ public class ContactResponse {
 
     public Long getId() {
         return id;
-    }
-
-    public String getEntryType() {
-        return entryType;
     }
 
     public String getName() {

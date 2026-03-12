@@ -1,7 +1,6 @@
 package com.gcsc.studentcenter.dto;
 
 public class ContactUpdateRequest {
-    private String entryType;
     private String name;
     private String office;
     private String duty;
@@ -9,14 +8,6 @@ public class ContactUpdateRequest {
     private String photoUrl;
     private Integer sortOrder;
     private Boolean active;
-
-    public String getEntryType() {
-        return entryType;
-    }
-
-    public void setEntryType(String entryType) {
-        this.entryType = entryType;
-    }
 
     public String getName() {
         return name;

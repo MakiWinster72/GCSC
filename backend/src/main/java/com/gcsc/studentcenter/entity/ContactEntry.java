@@ -12,10 +12,6 @@ public class ContactEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "entry_type", nullable = false, length = 16)
-    private ContactEntryType entryType;
-
     @Column(name = "name", nullable = false, length = 64)
     private String name;
 
@@ -45,14 +41,6 @@ public class ContactEntry {
 
     public Long getId() {
         return id;
-    }
-
-    public ContactEntryType getEntryType() {
-        return entryType;
-    }
-
-    public void setEntryType(ContactEntryType entryType) {
-        this.entryType = entryType;
     }
 
     public String getName() {
