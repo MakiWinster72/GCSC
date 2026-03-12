@@ -49,7 +49,27 @@
         </button>
       </header>
 
-      <section class="feed-waterfall">
+      <section v-if="isContactsMode" class="contacts-grid">
+        <article
+          v-for="contact in contacts"
+          :key="contact.id"
+          class="contact-card"
+        >
+          <div
+            class="contact-photo"
+            :class="{ placeholder: !contact.photoUrl }"
+            :style="contactPhotoStyle(contact)"
+          ></div>
+          <div class="contact-info">
+            <div class="contact-line contact-name">{{ contact.name }}</div>
+            <div class="contact-line">{{ contact.office }}</div>
+            <div class="contact-line">{{ contact.role }}</div>
+            <div class="contact-line">{{ contact.phone }}</div>
+          </div>
+        </article>
+      </section>
+
+      <section v-else class="feed-waterfall">
         <article v-for="post in visiblePosts" :key="post.id" class="post-card">
           <div class="post-header">
             <div class="post-author">
@@ -116,19 +136,25 @@
         <div v-if="loadingPosts" class="empty-tip">加载中...</div>
       </section>
 
-      <button class="footer-action" type="button" @click="openPublisher">
+      <button
+        v-if="canOpenPublisher"
+        class="footer-action"
+        type="button"
+        @click="openPublisher"
+      >
         {{ footerActionText }}
       </button>
       <div v-if="toastMessage" class="toast">{{ toastMessage }}</div>
 
       <transition name="publisher-backdrop">
         <div
-          v-if="publisherOpen"
+          v-if="publisherOpen && canOpenPublisher"
           class="publisher-backdrop"
           @click="closePublisher"
         ></div>
       </transition>
       <section
+        v-if="canOpenPublisher"
         class="publisher-sheet"
         :class="{ open: publisherOpen, expanded: hasPreview }"
         :aria-hidden="!publisherOpen"
@@ -641,6 +667,56 @@ const activeMenu = ref("campus");
 const profile = reactive(loadUser());
 const posts = ref([]);
 const loadingPosts = ref(false);
+const contacts = [
+  {
+    id: 1,
+    name: "王老师",
+    office: "厚德楼802",
+    role: "辅导员",
+    phone: "18273648264",
+    photoUrl: "",
+  },
+  {
+    id: 2,
+    name: "李老师",
+    office: "明德楼504",
+    role: "学业导师",
+    phone: "13755219801",
+    photoUrl: "",
+  },
+  {
+    id: 3,
+    name: "陈老师",
+    office: "崇德楼213",
+    role: "就业指导",
+    phone: "18660318577",
+    photoUrl: "",
+  },
+  {
+    id: 4,
+    name: "教务处",
+    office: "行政楼201",
+    role: "课程/考试咨询",
+    phone: "021-6000-1001",
+    photoUrl: "",
+  },
+  {
+    id: 5,
+    name: "学生工作部",
+    office: "行政楼305",
+    role: "奖助学金",
+    phone: "021-6000-1002",
+    photoUrl: "",
+  },
+  {
+    id: 6,
+    name: "辅导员值班室",
+    office: "厚德楼一层",
+    role: "紧急值守",
+    phone: "021-6000-1003",
+    photoUrl: "",
+  },
+];
 
 const composerBusy = ref(false);
 const composerError = ref("");
@@ -679,6 +755,7 @@ const canPost = computed(() => Boolean(profile.username));
 const isFeedMenu = computed(() =>
   ["campus", "good-news", "records"].includes(activeMenu.value),
 );
+const isContactsMode = computed(() => activeMenu.value === "contacts");
 const showComposer = computed(() =>
   ["campus", "good-news", "records"].includes(activeMenu.value),
 );
@@ -707,6 +784,10 @@ function syncMenuFromRoute() {
   }
   if (route.path === "/memory") {
     activeMenu.value = "records";
+    return;
+  }
+  if (route.path === "/contacts") {
+    activeMenu.value = "contacts";
     return;
   }
   activeMenu.value = "campus";
@@ -834,7 +915,20 @@ function handleMenuClick(key) {
     router.push("/memory");
     return;
   }
+  if (key === "contacts") {
+    router.push("/contacts");
+    return;
+  }
   router.push("/home");
+}
+
+function contactPhotoStyle(contact) {
+  if (!contact.photoUrl) {
+    return null;
+  }
+  return {
+    backgroundImage: `url(${contact.photoUrl})`,
+  };
 }
 
 function resetComposerState() {

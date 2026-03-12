@@ -734,6 +734,55 @@ body {
   line-height: 1.8;
 }
 
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.contact-card {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #f4fffd;
+  box-shadow: 0 12px 26px rgba(3, 107, 114, 0.12);
+  padding: 12px;
+}
+
+.contact-photo {
+  width: 96px;
+  height: 128px;
+  border-radius: 12px;
+  background: rgba(3, 107, 114, 0.16);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(3, 107, 114, 0.16);
+}
+
+.contact-photo.placeholder {
+  background: linear-gradient(135deg, rgba(3, 107, 114, 0.2), rgba(165, 255, 214, 0.6));
+}
+
+.contact-info {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  color: #1f4f57;
+  font-size: 14px;
+}
+
+.contact-line {
+  color: #1b4a52;
+}
+
+.contact-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
 .achievement-backdrop {
   position: fixed;
   inset: 0;
@@ -1960,6 +2009,10 @@ body {
 
   .feed-waterfall {
     column-count: 1;
+  }
+
+  .contacts-grid {
+    grid-template-columns: 1fr;
   }
 }
 
