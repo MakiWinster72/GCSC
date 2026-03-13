@@ -71,6 +71,8 @@ public class StudentProfileService {
         profile.setDormCampus(normalize(request.getDormCampus()));
         profile.setDormBuilding(normalize(request.getDormBuilding()));
         profile.setDormRoom(normalize(request.getDormRoom()));
+        profile.setOffCampusLiving(request.getOffCampusLiving());
+        profile.setOffCampusAddress(normalize(request.getOffCampusAddress()));
         profile.setClassTeacher(normalize(request.getClassTeacher()));
         profile.setCounselor(normalize(request.getCounselor()));
         profile.setPhone(normalize(request.getPhone()));
@@ -80,14 +82,21 @@ public class StudentProfileService {
         profile.setLeagueNo(normalize(request.getLeagueNo()));
         profile.setLeagueApplicationDate(request.getLeagueApplicationDate());
         profile.setLeagueJoinDate(request.getLeagueJoinDate());
+        profile.setLeagueJoined(request.getLeagueJoined());
+        profile.setLeagueDeveloping(request.getLeagueDeveloping());
         profile.setPartyApplied(request.getPartyApplied());
         profile.setNotDeveloped(request.getNotDeveloped());
         profile.setApplicationDate(request.getApplicationDate());
         profile.setActivistDate(request.getActivistDate());
+        profile.setActivistDeveloping(request.getActivistDeveloping());
         profile.setPartyTrainingDate(request.getPartyTrainingDate());
+        profile.setPartyTrainingPending(request.getPartyTrainingPending());
         profile.setDevelopmentTargetDate(request.getDevelopmentTargetDate());
+        profile.setDevelopmentTargetDeveloping(request.getDevelopmentTargetDeveloping());
         profile.setProbationaryMemberDate(request.getProbationaryMemberDate());
+        profile.setProbationaryDeveloping(request.getProbationaryDeveloping());
         profile.setFullMemberDate(request.getFullMemberDate());
+        profile.setFullMemberDeveloping(request.getFullMemberDeveloping());
         profile.setEmergencyPhone(normalize(request.getEmergencyPhone()));
         profile.setEmergencyRelation(normalize(request.getEmergencyRelation()));
         profile.setHkMoTw(request.getHkMoTw());
@@ -176,19 +185,28 @@ public class StudentProfileService {
             profile != null ? profile.getDormCampus() : null,
             profile != null ? profile.getDormBuilding() : null,
             profile != null ? profile.getDormRoom() : null,
+            profile != null ? profile.getOffCampusLiving() : null,
+            profile != null ? profile.getOffCampusAddress() : null,
             profile != null ? profile.getClassTeacher() : null,
             profile != null ? profile.getCounselor() : null,
             profile != null ? profile.getLeagueNo() : null,
             profile != null ? profile.getLeagueApplicationDate() : null,
             profile != null ? profile.getLeagueJoinDate() : null,
+            profile != null ? profile.getLeagueJoined() : null,
+            profile != null ? profile.getLeagueDeveloping() : null,
             profile != null ? profile.getPartyApplied() : null,
             profile != null ? profile.getNotDeveloped() : null,
             profile != null ? profile.getApplicationDate() : null,
             profile != null ? profile.getActivistDate() : null,
+            profile != null ? profile.getActivistDeveloping() : null,
             profile != null ? profile.getPartyTrainingDate() : null,
+            profile != null ? profile.getPartyTrainingPending() : null,
             profile != null ? profile.getDevelopmentTargetDate() : null,
+            profile != null ? profile.getDevelopmentTargetDeveloping() : null,
             profile != null ? profile.getProbationaryMemberDate() : null,
+            profile != null ? profile.getProbationaryDeveloping() : null,
             profile != null ? profile.getFullMemberDate() : null,
+            profile != null ? profile.getFullMemberDeveloping() : null,
             profile != null ? profile.getEmergencyPhone() : null,
             profile != null ? profile.getEmergencyRelation() : null,
             profile != null ? profile.getHkMoTw() : null,

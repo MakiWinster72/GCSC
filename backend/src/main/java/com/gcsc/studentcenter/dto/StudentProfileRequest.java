@@ -18,6 +18,8 @@ public class StudentProfileRequest {
     private String dormCampus;
     private String dormBuilding;
     private String dormRoom;
+    private Boolean offCampusLiving;
+    private String offCampusAddress;
     private String classTeacher;
     private String counselor;
     private String phone;
@@ -27,14 +29,21 @@ public class StudentProfileRequest {
     private String leagueNo;
     private LocalDate leagueApplicationDate;
     private LocalDate leagueJoinDate;
+    private Boolean leagueJoined;
+    private Boolean leagueDeveloping;
     private Boolean partyApplied;
     private Boolean notDeveloped;
     private LocalDate applicationDate;
     private LocalDate activistDate;
+    private Boolean activistDeveloping;
     private LocalDate partyTrainingDate;
+    private Boolean partyTrainingPending;
     private LocalDate developmentTargetDate;
+    private Boolean developmentTargetDeveloping;
     private LocalDate probationaryMemberDate;
+    private Boolean probationaryDeveloping;
     private LocalDate fullMemberDate;
+    private Boolean fullMemberDeveloping;
     private String emergencyPhone;
     private String emergencyRelation;
     private Boolean hkMoTw;
@@ -168,6 +177,22 @@ public class StudentProfileRequest {
         this.dormRoom = dormRoom;
     }
 
+    public Boolean getOffCampusLiving() {
+        return offCampusLiving;
+    }
+
+    public void setOffCampusLiving(Boolean offCampusLiving) {
+        this.offCampusLiving = offCampusLiving;
+    }
+
+    public String getOffCampusAddress() {
+        return offCampusAddress;
+    }
+
+    public void setOffCampusAddress(String offCampusAddress) {
+        this.offCampusAddress = offCampusAddress;
+    }
+
     public String getClassTeacher() {
         return classTeacher;
     }
@@ -240,6 +265,22 @@ public class StudentProfileRequest {
         this.leagueJoinDate = leagueJoinDate;
     }
 
+    public Boolean getLeagueJoined() {
+        return leagueJoined;
+    }
+
+    public void setLeagueJoined(Boolean leagueJoined) {
+        this.leagueJoined = leagueJoined;
+    }
+
+    public Boolean getLeagueDeveloping() {
+        return leagueDeveloping;
+    }
+
+    public void setLeagueDeveloping(Boolean leagueDeveloping) {
+        this.leagueDeveloping = leagueDeveloping;
+    }
+
     public Boolean getPartyApplied() {
         return partyApplied;
     }
@@ -272,12 +313,28 @@ public class StudentProfileRequest {
         this.activistDate = activistDate;
     }
 
+    public Boolean getActivistDeveloping() {
+        return activistDeveloping;
+    }
+
+    public void setActivistDeveloping(Boolean activistDeveloping) {
+        this.activistDeveloping = activistDeveloping;
+    }
+
     public LocalDate getPartyTrainingDate() {
         return partyTrainingDate;
     }
 
     public void setPartyTrainingDate(LocalDate partyTrainingDate) {
         this.partyTrainingDate = partyTrainingDate;
+    }
+
+    public Boolean getPartyTrainingPending() {
+        return partyTrainingPending;
+    }
+
+    public void setPartyTrainingPending(Boolean partyTrainingPending) {
+        this.partyTrainingPending = partyTrainingPending;
     }
 
     public LocalDate getDevelopmentTargetDate() {
@@ -288,12 +345,28 @@ public class StudentProfileRequest {
         this.developmentTargetDate = developmentTargetDate;
     }
 
+    public Boolean getDevelopmentTargetDeveloping() {
+        return developmentTargetDeveloping;
+    }
+
+    public void setDevelopmentTargetDeveloping(Boolean developmentTargetDeveloping) {
+        this.developmentTargetDeveloping = developmentTargetDeveloping;
+    }
+
     public LocalDate getProbationaryMemberDate() {
         return probationaryMemberDate;
     }
 
     public void setProbationaryMemberDate(LocalDate probationaryMemberDate) {
         this.probationaryMemberDate = probationaryMemberDate;
+    }
+
+    public Boolean getProbationaryDeveloping() {
+        return probationaryDeveloping;
+    }
+
+    public void setProbationaryDeveloping(Boolean probationaryDeveloping) {
+        this.probationaryDeveloping = probationaryDeveloping;
     }
 
     public LocalDate getFullMemberDate() {
@@ -304,6 +377,13 @@ public class StudentProfileRequest {
         this.fullMemberDate = fullMemberDate;
     }
 
+    public Boolean getFullMemberDeveloping() {
+        return fullMemberDeveloping;
+    }
+
+    public void setFullMemberDeveloping(Boolean fullMemberDeveloping) {
+        this.fullMemberDeveloping = fullMemberDeveloping;
+    }
     public String getEmergencyPhone() {
         return emergencyPhone;
     }

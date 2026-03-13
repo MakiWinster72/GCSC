@@ -25,19 +25,28 @@ public class StudentProfileResponse {
     private String dormCampus;
     private String dormBuilding;
     private String dormRoom;
+    private Boolean offCampusLiving;
+    private String offCampusAddress;
     private String classTeacher;
     private String counselor;
     private String leagueNo;
     private LocalDate leagueApplicationDate;
     private LocalDate leagueJoinDate;
+    private Boolean leagueJoined;
+    private Boolean leagueDeveloping;
     private Boolean partyApplied;
     private Boolean notDeveloped;
     private LocalDate applicationDate;
     private LocalDate activistDate;
+    private Boolean activistDeveloping;
     private LocalDate partyTrainingDate;
+    private Boolean partyTrainingPending;
     private LocalDate developmentTargetDate;
+    private Boolean developmentTargetDeveloping;
     private LocalDate probationaryMemberDate;
+    private Boolean probationaryDeveloping;
     private LocalDate fullMemberDate;
+    private Boolean fullMemberDeveloping;
     private String emergencyPhone;
     private String emergencyRelation;
     private Boolean hkMoTw;
@@ -74,19 +83,28 @@ public class StudentProfileResponse {
         String dormCampus,
         String dormBuilding,
         String dormRoom,
+        Boolean offCampusLiving,
+        String offCampusAddress,
         String classTeacher,
         String counselor,
         String leagueNo,
         LocalDate leagueApplicationDate,
         LocalDate leagueJoinDate,
+        Boolean leagueJoined,
+        Boolean leagueDeveloping,
         Boolean partyApplied,
         Boolean notDeveloped,
         LocalDate applicationDate,
         LocalDate activistDate,
+        Boolean activistDeveloping,
         LocalDate partyTrainingDate,
+        Boolean partyTrainingPending,
         LocalDate developmentTargetDate,
+        Boolean developmentTargetDeveloping,
         LocalDate probationaryMemberDate,
+        Boolean probationaryDeveloping,
         LocalDate fullMemberDate,
+        Boolean fullMemberDeveloping,
         String emergencyPhone,
         String emergencyRelation,
         Boolean hkMoTw,
@@ -122,19 +140,28 @@ public class StudentProfileResponse {
         this.dormCampus = dormCampus;
         this.dormBuilding = dormBuilding;
         this.dormRoom = dormRoom;
+        this.offCampusLiving = offCampusLiving;
+        this.offCampusAddress = offCampusAddress;
         this.classTeacher = classTeacher;
         this.counselor = counselor;
         this.leagueNo = leagueNo;
         this.leagueApplicationDate = leagueApplicationDate;
         this.leagueJoinDate = leagueJoinDate;
+        this.leagueJoined = leagueJoined;
+        this.leagueDeveloping = leagueDeveloping;
         this.partyApplied = partyApplied;
         this.notDeveloped = notDeveloped;
         this.applicationDate = applicationDate;
         this.activistDate = activistDate;
+        this.activistDeveloping = activistDeveloping;
         this.partyTrainingDate = partyTrainingDate;
+        this.partyTrainingPending = partyTrainingPending;
         this.developmentTargetDate = developmentTargetDate;
+        this.developmentTargetDeveloping = developmentTargetDeveloping;
         this.probationaryMemberDate = probationaryMemberDate;
+        this.probationaryDeveloping = probationaryDeveloping;
         this.fullMemberDate = fullMemberDate;
+        this.fullMemberDeveloping = fullMemberDeveloping;
         this.emergencyPhone = emergencyPhone;
         this.emergencyRelation = emergencyRelation;
         this.hkMoTw = hkMoTw;
@@ -237,6 +264,14 @@ public class StudentProfileResponse {
         return dormRoom;
     }
 
+    public Boolean getOffCampusLiving() {
+        return offCampusLiving;
+    }
+
+    public String getOffCampusAddress() {
+        return offCampusAddress;
+    }
+
     public String getClassTeacher() {
         return classTeacher;
     }
@@ -257,6 +292,14 @@ public class StudentProfileResponse {
         return leagueJoinDate;
     }
 
+    public Boolean getLeagueJoined() {
+        return leagueJoined;
+    }
+
+    public Boolean getLeagueDeveloping() {
+        return leagueDeveloping;
+    }
+
     public Boolean getPartyApplied() {
         return partyApplied;
     }
@@ -273,20 +316,40 @@ public class StudentProfileResponse {
         return activistDate;
     }
 
+    public Boolean getActivistDeveloping() {
+        return activistDeveloping;
+    }
+
     public LocalDate getPartyTrainingDate() {
         return partyTrainingDate;
+    }
+
+    public Boolean getPartyTrainingPending() {
+        return partyTrainingPending;
     }
 
     public LocalDate getDevelopmentTargetDate() {
         return developmentTargetDate;
     }
 
+    public Boolean getDevelopmentTargetDeveloping() {
+        return developmentTargetDeveloping;
+    }
+
     public LocalDate getProbationaryMemberDate() {
         return probationaryMemberDate;
     }
 
+    public Boolean getProbationaryDeveloping() {
+        return probationaryDeveloping;
+    }
+
     public LocalDate getFullMemberDate() {
         return fullMemberDate;
+    }
+
+    public Boolean getFullMemberDeveloping() {
+        return fullMemberDeveloping;
     }
 
     public String getEmergencyPhone() {

@@ -158,18 +158,39 @@
                 v-model="info.enrollmentDate"
                 class="info-input"
                 type="date"
+                lang="zh-CN"
+                inputmode="none"
+                @click.stop="openDatePicker"
+                @mousedown.prevent
+                @keydown.prevent
                 :disabled="!isEditing"
               />
             </label>
             <label class="field-card">
               <span class="info-label">学生类别</span>
-              <input
-                v-model="info.studentCategory"
-                class="info-input"
-                type="text"
-                placeholder="如：本科/研究生"
-                :disabled="!isEditing"
-              />
+              <div class="student-select">
+                <button
+                  class="info-input student-select-trigger"
+                  type="button"
+                  :disabled="!isEditing"
+                  @click.stop="toggleStudentCategoryMenu"
+                >
+                  {{ studentCategoryLabel }}
+                </button>
+                <transition name="student-dropdown">
+                  <div v-if="studentCategoryMenuOpen" class="student-select-menu">
+                    <button
+                      v-for="item in studentCategoryOptions"
+                      :key="item"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectStudentCategory(item)"
+                    >
+                      {{ item }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">班主任</span>
@@ -209,13 +230,29 @@
             </label>
             <label class="field-card">
               <span class="info-label">政治面貌</span>
-              <input
-                v-model="info.politicalStatus"
-                class="info-input"
-                type="text"
-                placeholder="如：共青团员"
-                :disabled="!isEditing"
-              />
+              <div class="student-select">
+                <button
+                  class="info-input student-select-trigger"
+                  type="button"
+                  :disabled="!isEditing"
+                  @click.stop="togglePoliticalStatusMenu"
+                >
+                  {{ politicalStatusLabel }}
+                </button>
+                <transition name="student-dropdown">
+                  <div v-if="politicalStatusMenuOpen" class="student-select-menu">
+                    <button
+                      v-for="item in politicalStatusOptions"
+                      :key="item"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectPoliticalStatus(item)"
+                    >
+                      {{ item }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">手机号码</span>
@@ -224,6 +261,9 @@
                 class="info-input"
                 type="tel"
                 placeholder="请输入手机号"
+                maxlength="11"
+                inputmode="numeric"
+                @input="handleDigitsInput('phone', 11, $event)"
                 :disabled="!isEditing"
               />
             </label>
@@ -234,6 +274,9 @@
                 class="info-input"
                 type="text"
                 placeholder="请输入身份证件号"
+                maxlength="18"
+                inputmode="text"
+                @input="handleIdNoInput"
                 :disabled="!isEditing"
               />
             </label>
@@ -263,34 +306,83 @@
         <div class="info-card">
           <div class="info-section-title">住宿信息</div>
           <div class="info-form-grid">
-            <label class="field-card">
-              <span class="info-label">住宿校区</span>
+            <div class="field-card field-full">
+              <span class="info-label">是否在外居住</span>
+              <div class="info-inline">
+                <label class="info-choice">
+                  <input
+                    v-model="info.offCampusLiving"
+                    type="radio"
+                    :value="true"
+                    :disabled="!isEditing"
+                  />
+                  是
+                </label>
+                <label class="info-choice">
+                  <input
+                    v-model="info.offCampusLiving"
+                    type="radio"
+                    :value="false"
+                    :disabled="!isEditing"
+                  />
+                  否
+                </label>
+              </div>
+            </div>
+            <label class="field-card field-full" v-if="info.offCampusLiving">
+              <span class="info-label">外居住详细地址</span>
               <input
-                v-model="info.dormCampus"
+                v-model="info.offCampusAddress"
                 class="info-input"
                 type="text"
-                placeholder="如：主校区"
+                placeholder="请输入详细地址"
                 :disabled="!isEditing"
               />
             </label>
-            <label class="field-card">
+            <label class="field-card" v-if="!info.offCampusLiving">
+              <span class="info-label">住宿校区</span>
+              <div class="student-select">
+                <button
+                  class="info-input student-select-trigger"
+                  type="button"
+                  :disabled="!isEditing || info.offCampusLiving"
+                  @click.stop="toggleDormCampusMenu"
+                >
+                  {{ dormCampusLabel }}
+                </button>
+                <transition name="student-dropdown">
+                  <div v-if="dormCampusMenuOpen" class="student-select-menu">
+                    <button
+                      v-for="item in dormCampusOptions"
+                      :key="item"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectDormCampus(item)"
+                    >
+                      {{ item }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
+            </label>
+            <label class="field-card" v-if="!info.offCampusLiving">
               <span class="info-label">住宿楼栋</span>
               <input
                 v-model="info.dormBuilding"
                 class="info-input"
                 type="text"
                 placeholder="如：1号楼"
-                :disabled="!isEditing"
+                :disabled="dormBuildingDisabled"
               />
             </label>
-            <label class="field-card">
+            <label class="field-card" v-if="!info.offCampusLiving">
               <span class="info-label">住宿房间</span>
               <input
                 v-model="info.dormRoom"
                 class="info-input"
                 type="text"
                 placeholder="如：508"
-                :disabled="!isEditing"
+                :disabled="dormRoomDisabled"
               />
             </label>
           </div>
@@ -299,6 +391,67 @@
         <div class="info-card">
           <div class="info-section-title">团组织与入党信息</div>
           <div class="info-form-grid three">
+            <div class="field-card field-full">
+              <span class="info-label">是否入团</span>
+              <div class="info-inline">
+                <label class="info-choice">
+                  <input
+                    v-model="info.leagueJoined"
+                    type="radio"
+                    :value="true"
+                    :disabled="!isEditing"
+                  />
+                  是
+                </label>
+                <label class="info-choice">
+                  <input
+                    v-model="info.leagueJoined"
+                    type="radio"
+                    :value="false"
+                    :disabled="!isEditing"
+                  />
+                  否
+                </label>
+              </div>
+            </div>
+            <label class="field-card">
+              <span class="info-label">提交入团申请书时间</span>
+              <input
+                v-model="info.leagueApplicationDate"
+                class="info-input"
+                type="date"
+                lang="zh-CN"
+                inputmode="none"
+                @click.stop="openDatePicker"
+                @mousedown.prevent
+                @keydown.prevent
+                :disabled="leagueApplicationDisabled"
+              />
+            </label>
+            <label class="field-card">
+              <span class="info-label">入团时间</span>
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.leagueJoinDate"
+                  class="info-input"
+                  type="date"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="leagueJoinDisabled"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.leagueDeveloping"
+                    type="checkbox"
+                    :disabled="leagueApplicationDisabled"
+                  />
+                  正在发展
+                </label>
+              </div>
+            </label>
             <label class="field-card">
               <span class="info-label">团号</span>
               <input
@@ -306,25 +459,7 @@
                 class="info-input"
                 type="text"
                 placeholder="请输入团号"
-                :disabled="!isEditing"
-              />
-            </label>
-            <label class="field-card">
-              <span class="info-label">提交入团申请书时间</span>
-              <input
-                v-model="info.leagueApplicationDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing"
-              />
-            </label>
-            <label class="field-card">
-              <span class="info-label">入团时间</span>
-              <input
-                v-model="info.leagueJoinDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing"
+                :disabled="leagueNoDisabled"
               />
             </label>
             <div class="field-card field-full">
@@ -335,7 +470,7 @@
                     v-model="info.partyApplied"
                     type="radio"
                     :value="true"
-                    :disabled="!isEditing"
+                    :disabled="partyAppliedDisabled"
                   />
                   是
                 </label>
@@ -344,7 +479,7 @@
                     v-model="info.partyApplied"
                     type="radio"
                     :value="false"
-                    :disabled="!isEditing"
+                    :disabled="partyAppliedDisabled"
                   />
                   否
                 </label>
@@ -356,7 +491,12 @@
                 v-model="info.applicationDate"
                 class="info-input"
                 type="date"
-                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
+                lang="zh-CN"
+                inputmode="none"
+                @pointerdown.stop.prevent
+                @click.stop="openDatePicker"
+                @keydown.prevent
+                :disabled="applicationDateDisabled"
               />
             </label>
             <label class="field-card">
@@ -366,62 +506,128 @@
                   v-model="info.activistDate"
                   class="info-input"
                   type="date"
-                  :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="activistDateDisabled"
                 />
                 <label class="info-choice info-choice-muted">
                   <input
-                    v-model="info.notDeveloped"
+                    v-model="info.activistDeveloping"
                     type="checkbox"
-                    :disabled="!isEditing"
+                    :disabled="applicationDateDisabled"
                   />
-                  暂未发展
+                  正在发展
                 </label>
               </div>
             </label>
             <label class="field-card">
               <span class="info-label">上党课时间</span>
-              <input
-                v-model="info.partyTrainingDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
-              />
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.partyTrainingDate"
+                  class="info-input"
+                  type="date"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="partyTrainingDisabled"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.partyTrainingPending"
+                    type="checkbox"
+                    :disabled="activistDateDisabled"
+                  />
+                  暂未报名
+                </label>
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">确定发展对象时间</span>
-              <input
-                v-model="info.developmentTargetDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
-              />
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.developmentTargetDate"
+                  class="info-input"
+                  type="date"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="developmentTargetDisabled"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.developmentTargetDeveloping"
+                    type="checkbox"
+                    :disabled="partyTrainingDisabled"
+                  />
+                  正在发展
+                </label>
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">接受为预备党员时间</span>
-              <input
-                v-model="info.probationaryMemberDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
-              />
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.probationaryMemberDate"
+                  class="info-input"
+                  type="date"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="probationaryDisabled"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.probationaryDeveloping"
+                    type="checkbox"
+                    :disabled="developmentTargetDisabled"
+                  />
+                  正在发展
+                </label>
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">转为正式党员时间</span>
-              <input
-                v-model="info.fullMemberDate"
-                class="info-input"
-                type="date"
-                :disabled="!isEditing || !info.partyApplied || info.notDeveloped"
-              />
+              <div class="info-inline info-inline-date">
+                <input
+                  v-model="info.fullMemberDate"
+                  class="info-input"
+                  type="date"
+                  lang="zh-CN"
+                  inputmode="none"
+                  @click.stop="openDatePicker"
+                  @mousedown.prevent
+                  @keydown.prevent
+                  :disabled="fullMemberDisabled"
+                />
+                <label class="info-choice info-choice-muted">
+                  <input
+                    v-model="info.fullMemberDeveloping"
+                    type="checkbox"
+                    :disabled="probationaryDisabled"
+                  />
+                  正在发展
+                </label>
+              </div>
             </label>
           </div>
         </div>
 
         <div class="info-card">
           <div class="info-section-title">家庭信息</div>
-          <div class="info-form-grid three">
+          <div class="info-form-grid family-grid">
+            <div class="family-section-title">父亲</div>
             <label class="field-card">
-              <span class="info-label">父亲姓名</span>
+              <span class="info-label">姓名</span>
               <input
                 v-model="info.fatherName"
                 class="info-input"
@@ -431,17 +637,20 @@
               />
             </label>
             <label class="field-card">
-              <span class="info-label">父亲手机号码</span>
+              <span class="info-label">手机号码</span>
               <input
                 v-model="info.fatherPhone"
                 class="info-input"
                 type="tel"
                 placeholder="请输入父亲手机号码"
+                maxlength="11"
+                inputmode="numeric"
+                @input="handleDigitsInput('fatherPhone', 11, $event)"
                 :disabled="!isEditing"
               />
             </label>
             <label class="field-card">
-              <span class="info-label">父亲工作单位</span>
+              <span class="info-label">工作单位</span>
               <input
                 v-model="info.fatherWorkUnit"
                 class="info-input"
@@ -451,7 +660,7 @@
               />
             </label>
             <label class="field-card">
-              <span class="info-label">父亲职务</span>
+              <span class="info-label">职务</span>
               <input
                 v-model="info.fatherTitle"
                 class="info-input"
@@ -460,8 +669,9 @@
                 :disabled="!isEditing"
               />
             </label>
+            <div class="family-section-title">母亲</div>
             <label class="field-card">
-              <span class="info-label">母亲姓名</span>
+              <span class="info-label">姓名</span>
               <input
                 v-model="info.motherName"
                 class="info-input"
@@ -471,17 +681,20 @@
               />
             </label>
             <label class="field-card">
-              <span class="info-label">母亲手机号码</span>
+              <span class="info-label">手机号码</span>
               <input
                 v-model="info.motherPhone"
                 class="info-input"
                 type="tel"
                 placeholder="请输入母亲手机号码"
+                maxlength="11"
+                inputmode="numeric"
+                @input="handleDigitsInput('motherPhone', 11, $event)"
                 :disabled="!isEditing"
               />
             </label>
             <label class="field-card">
-              <span class="info-label">母亲工作单位</span>
+              <span class="info-label">工作单位</span>
               <input
                 v-model="info.motherWorkUnit"
                 class="info-input"
@@ -491,7 +704,7 @@
               />
             </label>
             <label class="field-card">
-              <span class="info-label">母亲职务</span>
+              <span class="info-label">职务</span>
               <input
                 v-model="info.motherTitle"
                 class="info-input"
@@ -513,6 +726,9 @@
                 class="info-input"
                 type="tel"
                 placeholder="请输入紧急联系人电话"
+                maxlength="11"
+                inputmode="numeric"
+                @input="handleDigitsInput('emergencyPhone', 11, $event)"
                 :disabled="!isEditing"
               />
             </label>
@@ -556,7 +772,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref, onMounted } from "vue";
+import { reactive, computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter } from "vue-router";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfile, saveStudentProfile } from "../api/profile";
@@ -570,6 +786,9 @@ const activeMenu = ref("my-info");
 const isEditing = ref(false);
 const avatarInput = ref(null);
 const sidebarOpen = ref(false);
+const studentCategoryMenuOpen = ref(false);
+const politicalStatusMenuOpen = ref(false);
+const dormCampusMenuOpen = ref(false);
 
 const info = reactive({
   name: profile.displayName || profile.username || "",
@@ -587,6 +806,8 @@ const info = reactive({
   dormCampus: "",
   dormBuilding: "",
   dormRoom: "",
+  offCampusLiving: false,
+  offCampusAddress: "",
   classTeacher: "",
   counselor: "",
   phone: "",
@@ -596,14 +817,21 @@ const info = reactive({
   leagueNo: "",
   leagueApplicationDate: "",
   leagueJoinDate: "",
+  leagueJoined: false,
+  leagueDeveloping: false,
   partyApplied: false,
   notDeveloped: false,
   applicationDate: "",
   activistDate: "",
+  activistDeveloping: false,
   partyTrainingDate: "",
+  partyTrainingPending: false,
   developmentTargetDate: "",
+  developmentTargetDeveloping: false,
   probationaryMemberDate: "",
+  probationaryDeveloping: false,
   fullMemberDate: "",
+  fullMemberDeveloping: false,
   emergencyPhone: "",
   emergencyRelation: "",
   fatherName: "",
@@ -617,6 +845,9 @@ const info = reactive({
 });
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
+const studentCategoryOptions = ["本科", "研究生"];
+const politicalStatusOptions = ["无", "共青团员", "入党积极分子", "预备党员", "中共党员"];
+const dormCampusOptions = ["佛山校区", "广州校区"];
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 
@@ -634,6 +865,99 @@ const roleLabel = computed(() => {
   }
   return "学生";
 });
+
+const studentCategoryLabel = computed(
+  () => info.studentCategory || "选择学生类别",
+);
+const politicalStatusLabel = computed(
+  () => info.politicalStatus || "选择政治面貌",
+);
+const dormCampusLabel = computed(
+  () => info.dormCampus || "选择住宿校区",
+);
+
+const dormBuildingDisabled = computed(
+  () => !isEditing.value || info.offCampusLiving || !info.dormCampus,
+);
+const dormRoomDisabled = computed(
+  () => dormBuildingDisabled.value || !info.dormBuilding,
+);
+
+const leagueApplicationDisabled = computed(
+  () => !isEditing.value || !info.leagueJoined,
+);
+const leagueJoinDisabled = computed(
+  () =>
+    leagueApplicationDisabled.value ||
+    !info.leagueApplicationDate ||
+    info.leagueDeveloping,
+);
+const leagueNoDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.leagueJoinDate ||
+    info.leagueDeveloping ||
+    !info.leagueJoined,
+);
+const partyAppliedDisabled = computed(
+  () => !isEditing.value || !info.leagueJoinDate || info.leagueDeveloping,
+);
+const applicationDateDisabled = computed(
+  () =>
+    !isEditing.value ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
+const activistDateDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.applicationDate ||
+    info.activistDeveloping ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
+const partyTrainingDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.activistDate ||
+    info.activistDeveloping ||
+    info.partyTrainingPending ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
+const developmentTargetDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.partyTrainingDate ||
+    info.partyTrainingPending ||
+    info.developmentTargetDeveloping ||
+    info.activistDeveloping ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
+const probationaryDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.developmentTargetDate ||
+    info.developmentTargetDeveloping ||
+    info.probationaryDeveloping ||
+    info.partyTrainingPending ||
+    info.activistDeveloping ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
+const fullMemberDisabled = computed(
+  () =>
+    !isEditing.value ||
+    !info.probationaryMemberDate ||
+    info.probationaryDeveloping ||
+    info.fullMemberDeveloping ||
+    info.developmentTargetDeveloping ||
+    info.partyTrainingPending ||
+    info.activistDeveloping ||
+    partyAppliedDisabled.value ||
+    !info.partyApplied,
+);
 
 function handleMenuClick(key) {
   if (!isMenuEnabled(key)) {
@@ -670,6 +994,88 @@ function resolveMediaUrl(url) {
     return url;
   }
   return `${API_BASE}${url}`;
+}
+
+function toggleStudentCategoryMenu() {
+  if (!isEditing.value) {
+    return;
+  }
+  studentCategoryMenuOpen.value = !studentCategoryMenuOpen.value;
+  politicalStatusMenuOpen.value = false;
+  dormCampusMenuOpen.value = false;
+}
+
+function togglePoliticalStatusMenu() {
+  if (!isEditing.value) {
+    return;
+  }
+  politicalStatusMenuOpen.value = !politicalStatusMenuOpen.value;
+  studentCategoryMenuOpen.value = false;
+  dormCampusMenuOpen.value = false;
+}
+
+function toggleDormCampusMenu() {
+  if (!isEditing.value || info.offCampusLiving) {
+    return;
+  }
+  dormCampusMenuOpen.value = !dormCampusMenuOpen.value;
+  studentCategoryMenuOpen.value = false;
+  politicalStatusMenuOpen.value = false;
+}
+
+function selectStudentCategory(value) {
+  info.studentCategory = value;
+  studentCategoryMenuOpen.value = false;
+}
+
+function selectPoliticalStatus(value) {
+  info.politicalStatus = value;
+  politicalStatusMenuOpen.value = false;
+}
+
+function selectDormCampus(value) {
+  info.dormCampus = value;
+  if (!value) {
+    info.dormBuilding = "";
+    info.dormRoom = "";
+  }
+  dormCampusMenuOpen.value = false;
+}
+
+function handleDocumentClick(event) {
+  if (event.target.closest(".student-select")) {
+    return;
+  }
+  studentCategoryMenuOpen.value = false;
+  politicalStatusMenuOpen.value = false;
+  dormCampusMenuOpen.value = false;
+}
+
+function openDatePicker(event) {
+  if (!isEditing.value) {
+    return;
+  }
+  const target = event?.target;
+  if (target && typeof target.showPicker === "function") {
+    requestAnimationFrame(() => target.showPicker());
+  }
+}
+
+function handleDigitsInput(field, maxLength, event) {
+  const raw = event.target.value || "";
+  const next = raw.replace(/\D/g, "").slice(0, maxLength);
+  info[field] = next;
+}
+
+function handleIdNoInput(event) {
+  const raw = (event.target.value || "").toUpperCase();
+  const cleaned = raw.replace(/[^0-9X]/g, "");
+  const digits = cleaned.replace(/X/g, "").slice(0, 18);
+  if (raw.endsWith("X")) {
+    info.idNo = `${digits.slice(0, 17)}X`.slice(0, 18);
+    return;
+  }
+  info.idNo = digits;
 }
 
 function triggerAvatarUpload() {
@@ -726,6 +1132,8 @@ async function confirmEdit() {
     dormCampus: info.dormCampus,
     dormBuilding: info.dormBuilding,
     dormRoom: info.dormRoom,
+    offCampusLiving: info.offCampusLiving,
+    offCampusAddress: info.offCampusAddress,
     classTeacher: info.classTeacher,
     counselor: info.counselor,
     phone: info.phone,
@@ -735,14 +1143,21 @@ async function confirmEdit() {
     leagueNo: info.leagueNo,
     leagueApplicationDate: info.leagueApplicationDate || null,
     leagueJoinDate: info.leagueJoinDate || null,
+    leagueJoined: info.leagueJoined,
+    leagueDeveloping: info.leagueDeveloping,
     partyApplied: info.partyApplied,
     notDeveloped: info.notDeveloped,
     applicationDate: info.applicationDate || null,
     activistDate: info.activistDate || null,
+    activistDeveloping: info.activistDeveloping,
     partyTrainingDate: info.partyTrainingDate || null,
+    partyTrainingPending: info.partyTrainingPending,
     developmentTargetDate: info.developmentTargetDate || null,
+    developmentTargetDeveloping: info.developmentTargetDeveloping,
     probationaryMemberDate: info.probationaryMemberDate || null,
+    probationaryDeveloping: info.probationaryDeveloping,
     fullMemberDate: info.fullMemberDate || null,
+    fullMemberDeveloping: info.fullMemberDeveloping,
     emergencyPhone: info.emergencyPhone,
     emergencyRelation: info.emergencyRelation,
     fatherName: info.fatherName,
@@ -754,6 +1169,43 @@ async function confirmEdit() {
     motherWorkUnit: info.motherWorkUnit,
     motherTitle: info.motherTitle,
   };
+  if (info.offCampusLiving) {
+    payload.dormCampus = null;
+    payload.dormBuilding = null;
+    payload.dormRoom = null;
+  } else {
+    payload.offCampusAddress = null;
+  }
+  if (leagueApplicationDisabled.value) {
+    payload.leagueApplicationDate = null;
+  }
+  if (leagueJoinDisabled.value) {
+    payload.leagueJoinDate = null;
+  }
+  if (leagueNoDisabled.value) {
+    payload.leagueNo = null;
+  }
+  if (partyAppliedDisabled.value) {
+    payload.partyApplied = false;
+  }
+  if (applicationDateDisabled.value) {
+    payload.applicationDate = null;
+  }
+  if (activistDateDisabled.value) {
+    payload.activistDate = null;
+  }
+  if (partyTrainingDisabled.value) {
+    payload.partyTrainingDate = null;
+  }
+  if (developmentTargetDisabled.value) {
+    payload.developmentTargetDate = null;
+  }
+  if (probationaryDisabled.value) {
+    payload.probationaryMemberDate = null;
+  }
+  if (fullMemberDisabled.value) {
+    payload.fullMemberDate = null;
+  }
   try {
     const { data } = await saveStudentProfile(payload);
     applyProfileResponse(data);
@@ -793,6 +1245,8 @@ function applyProfileResponse(data) {
   info.dormCampus = data.dormCampus || "";
   info.dormBuilding = data.dormBuilding || "";
   info.dormRoom = data.dormRoom || "";
+  info.offCampusLiving = Boolean(data.offCampusLiving);
+  info.offCampusAddress = data.offCampusAddress || "";
   info.classTeacher = data.classTeacher || "";
   info.counselor = data.counselor || "";
   info.phone = data.phone || "";
@@ -802,14 +1256,21 @@ function applyProfileResponse(data) {
   info.leagueNo = data.leagueNo || "";
   info.leagueApplicationDate = data.leagueApplicationDate || "";
   info.leagueJoinDate = data.leagueJoinDate || "";
+  info.leagueJoined = Boolean(data.leagueJoined);
+  info.leagueDeveloping = Boolean(data.leagueDeveloping);
   info.partyApplied = Boolean(data.partyApplied);
   info.notDeveloped = Boolean(data.notDeveloped);
   info.applicationDate = data.applicationDate || "";
   info.activistDate = data.activistDate || "";
+  info.activistDeveloping = Boolean(data.activistDeveloping);
   info.partyTrainingDate = data.partyTrainingDate || "";
+  info.partyTrainingPending = Boolean(data.partyTrainingPending);
   info.developmentTargetDate = data.developmentTargetDate || "";
+  info.developmentTargetDeveloping = Boolean(data.developmentTargetDeveloping);
   info.probationaryMemberDate = data.probationaryMemberDate || "";
+  info.probationaryDeveloping = Boolean(data.probationaryDeveloping);
   info.fullMemberDate = data.fullMemberDate || "";
+  info.fullMemberDeveloping = Boolean(data.fullMemberDeveloping);
   info.emergencyPhone = data.emergencyPhone || "";
   info.emergencyRelation = data.emergencyRelation || "";
   info.fatherName = data.fatherName || "";
@@ -845,6 +1306,7 @@ function saveUser(data) {
 }
 
 onMounted(async () => {
+  document.addEventListener("click", handleDocumentClick);
   try {
     const { data } = await getStudentProfile();
     applyProfileResponse(data);
@@ -852,6 +1314,116 @@ onMounted(async () => {
     console.error(err);
   }
 });
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleDocumentClick);
+});
+
+watch(
+  () => info.offCampusLiving,
+  (next) => {
+    if (next) {
+      info.dormCampus = "";
+      info.dormBuilding = "";
+      info.dormRoom = "";
+    } else {
+      info.offCampusAddress = "";
+    }
+  },
+);
+
+watch(
+  () => info.leagueDeveloping,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.leagueJoinDate = "";
+    info.leagueNo = "";
+    info.partyApplied = false;
+    info.applicationDate = "";
+    info.activistDate = "";
+    info.partyTrainingDate = "";
+    info.developmentTargetDate = "";
+    info.probationaryMemberDate = "";
+    info.fullMemberDate = "";
+    info.activistDeveloping = false;
+    info.partyTrainingPending = false;
+    info.developmentTargetDeveloping = false;
+    info.probationaryDeveloping = false;
+    info.fullMemberDeveloping = false;
+  },
+);
+
+watch(
+  () => info.activistDeveloping,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.activistDate = "";
+    info.partyTrainingDate = "";
+    info.developmentTargetDate = "";
+    info.probationaryMemberDate = "";
+    info.fullMemberDate = "";
+    info.partyTrainingPending = false;
+    info.developmentTargetDeveloping = false;
+    info.probationaryDeveloping = false;
+    info.fullMemberDeveloping = false;
+  },
+);
+
+watch(
+  () => info.partyTrainingPending,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.partyTrainingDate = "";
+    info.developmentTargetDate = "";
+    info.probationaryMemberDate = "";
+    info.fullMemberDate = "";
+    info.developmentTargetDeveloping = false;
+    info.probationaryDeveloping = false;
+    info.fullMemberDeveloping = false;
+  },
+);
+
+watch(
+  () => info.developmentTargetDeveloping,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.developmentTargetDate = "";
+    info.probationaryMemberDate = "";
+    info.fullMemberDate = "";
+    info.probationaryDeveloping = false;
+    info.fullMemberDeveloping = false;
+  },
+);
+
+watch(
+  () => info.probationaryDeveloping,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.probationaryMemberDate = "";
+    info.fullMemberDate = "";
+    info.fullMemberDeveloping = false;
+  },
+);
+
+watch(
+  () => info.fullMemberDeveloping,
+  (next) => {
+    if (!next) {
+      return;
+    }
+    info.fullMemberDate = "";
+  },
+);
 
 function loadUser() {
   try {

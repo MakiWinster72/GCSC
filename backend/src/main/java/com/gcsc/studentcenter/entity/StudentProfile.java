@@ -65,6 +65,12 @@ public class StudentProfile {
     @Column(name = "dorm_room", length = 64)
     private String dormRoom;
 
+    @Column(name = "off_campus_living")
+    private Boolean offCampusLiving;
+
+    @Column(name = "off_campus_address", length = 255)
+    private String offCampusAddress;
+
     @Column(name = "class_teacher", length = 64)
     private String classTeacher;
 
@@ -92,6 +98,12 @@ public class StudentProfile {
     @Column(name = "league_join_date")
     private LocalDate leagueJoinDate;
 
+    @Column(name = "league_joined")
+    private Boolean leagueJoined;
+
+    @Column(name = "league_developing")
+    private Boolean leagueDeveloping;
+
     @Column(name = "party_applied")
     private Boolean partyApplied;
 
@@ -104,18 +116,32 @@ public class StudentProfile {
     @Column(name = "activist_date")
     private LocalDate activistDate;
 
+    @Column(name = "activist_developing")
+    private Boolean activistDeveloping;
+
     @Column(name = "party_training_date")
     private LocalDate partyTrainingDate;
+
+    @Column(name = "party_training_pending")
+    private Boolean partyTrainingPending;
 
     @Column(name = "development_target_date")
     private LocalDate developmentTargetDate;
 
+    @Column(name = "development_target_developing")
+    private Boolean developmentTargetDeveloping;
+
     @Column(name = "probationary_member_date")
     private LocalDate probationaryMemberDate;
+
+    @Column(name = "probationary_developing")
+    private Boolean probationaryDeveloping;
 
     @Column(name = "full_member_date")
     private LocalDate fullMemberDate;
 
+    @Column(name = "full_member_developing")
+    private Boolean fullMemberDeveloping;
     @Column(name = "emergency_phone", length = 32)
     private String emergencyPhone;
 
@@ -276,6 +302,22 @@ public class StudentProfile {
         this.dormRoom = dormRoom;
     }
 
+    public Boolean getOffCampusLiving() {
+        return offCampusLiving;
+    }
+
+    public void setOffCampusLiving(Boolean offCampusLiving) {
+        this.offCampusLiving = offCampusLiving;
+    }
+
+    public String getOffCampusAddress() {
+        return offCampusAddress;
+    }
+
+    public void setOffCampusAddress(String offCampusAddress) {
+        this.offCampusAddress = offCampusAddress;
+    }
+
     public String getClassTeacher() {
         return classTeacher;
     }
@@ -348,6 +390,22 @@ public class StudentProfile {
         this.leagueJoinDate = leagueJoinDate;
     }
 
+    public Boolean getLeagueJoined() {
+        return leagueJoined;
+    }
+
+    public void setLeagueJoined(Boolean leagueJoined) {
+        this.leagueJoined = leagueJoined;
+    }
+
+    public Boolean getLeagueDeveloping() {
+        return leagueDeveloping;
+    }
+
+    public void setLeagueDeveloping(Boolean leagueDeveloping) {
+        this.leagueDeveloping = leagueDeveloping;
+    }
+
     public Boolean getPartyApplied() {
         return partyApplied;
     }
@@ -380,12 +438,28 @@ public class StudentProfile {
         this.activistDate = activistDate;
     }
 
+    public Boolean getActivistDeveloping() {
+        return activistDeveloping;
+    }
+
+    public void setActivistDeveloping(Boolean activistDeveloping) {
+        this.activistDeveloping = activistDeveloping;
+    }
+
     public LocalDate getPartyTrainingDate() {
         return partyTrainingDate;
     }
 
     public void setPartyTrainingDate(LocalDate partyTrainingDate) {
         this.partyTrainingDate = partyTrainingDate;
+    }
+
+    public Boolean getPartyTrainingPending() {
+        return partyTrainingPending;
+    }
+
+    public void setPartyTrainingPending(Boolean partyTrainingPending) {
+        this.partyTrainingPending = partyTrainingPending;
     }
 
     public LocalDate getDevelopmentTargetDate() {
@@ -396,12 +470,28 @@ public class StudentProfile {
         this.developmentTargetDate = developmentTargetDate;
     }
 
+    public Boolean getDevelopmentTargetDeveloping() {
+        return developmentTargetDeveloping;
+    }
+
+    public void setDevelopmentTargetDeveloping(Boolean developmentTargetDeveloping) {
+        this.developmentTargetDeveloping = developmentTargetDeveloping;
+    }
+
     public LocalDate getProbationaryMemberDate() {
         return probationaryMemberDate;
     }
 
     public void setProbationaryMemberDate(LocalDate probationaryMemberDate) {
         this.probationaryMemberDate = probationaryMemberDate;
+    }
+
+    public Boolean getProbationaryDeveloping() {
+        return probationaryDeveloping;
+    }
+
+    public void setProbationaryDeveloping(Boolean probationaryDeveloping) {
+        this.probationaryDeveloping = probationaryDeveloping;
     }
 
     public LocalDate getFullMemberDate() {
@@ -412,6 +502,13 @@ public class StudentProfile {
         this.fullMemberDate = fullMemberDate;
     }
 
+    public Boolean getFullMemberDeveloping() {
+        return fullMemberDeveloping;
+    }
+
+    public void setFullMemberDeveloping(Boolean fullMemberDeveloping) {
+        this.fullMemberDeveloping = fullMemberDeveloping;
+    }
     public String getEmergencyPhone() {
         return emergencyPhone;
     }
