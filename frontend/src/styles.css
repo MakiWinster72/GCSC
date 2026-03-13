@@ -1327,11 +1327,28 @@ body {
   width: 100%;
   text-align: left;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .student-select-trigger:disabled {
   cursor: not-allowed;
   opacity: 0.65;
+}
+
+.select-placeholder {
+  color: #8aa2aa;
+}
+
+.select-caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid rgba(3, 107, 114, 0.6);
+  margin-left: auto;
 }
 
 .student-select-menu {
@@ -1476,7 +1493,7 @@ body {
 
 .info-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   width: 100%;
 }

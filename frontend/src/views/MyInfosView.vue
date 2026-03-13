@@ -86,9 +86,6 @@
             <button class="action-button" type="button" @click="confirmEdit">
               确认
             </button>
-            <button class="ghost-button" type="button">
-              请求变更
-            </button>
           </div>
         </div>
 
@@ -118,12 +115,37 @@
             <label class="field-card field-full">
               <span class="info-label">班别</span>
               <div class="class-inline">
-                <select v-model="info.classYear" class="info-input" :disabled="!isEditing">
-                  <option disabled value="">选择年份</option>
-                  <option v-for="year in classYearOptions" :key="year" :value="year">
-                    {{ year }}
-                  </option>
-                </select>
+                <div class="student-select">
+                  <button
+                    class="info-input student-select-trigger"
+                    type="button"
+                    :disabled="!isEditing"
+                    @click.stop="toggleYearMenu"
+                  >
+                    <span :class="{ 'select-placeholder': !info.classYear }">{{ yearLabel }}</span>
+                    <span class="select-caret" aria-hidden="true"></span>
+                  </button>
+                  <transition name="student-dropdown">
+                    <div v-if="yearMenuOpen" class="student-select-menu">
+                      <button
+                        class="student-select-option"
+                        type="button"
+                        @click="selectYear('')"
+                      >
+                        选择年级
+                      </button>
+                      <button
+                        v-for="year in classYearOptions"
+                        :key="year"
+                        class="student-select-option"
+                        type="button"
+                        @click="selectYear(String(year))"
+                      >
+                        {{ year }}
+                      </button>
+                    </div>
+                  </transition>
+                </div>
                 <span class="class-text">级</span>
                 <input
                   v-model="info.classMajor"
@@ -175,7 +197,10 @@
                   :disabled="!isEditing"
                   @click.stop="toggleStudentCategoryMenu"
                 >
-                  {{ studentCategoryLabel }}
+                  <span :class="{ 'select-placeholder': !info.studentCategory }">
+                    {{ studentCategoryLabel }}
+                  </span>
+                  <span class="select-caret" aria-hidden="true"></span>
                 </button>
                 <transition name="student-dropdown">
                   <div v-if="studentCategoryMenuOpen" class="student-select-menu">
@@ -237,7 +262,10 @@
                   :disabled="!isEditing"
                   @click.stop="togglePoliticalStatusMenu"
                 >
-                  {{ politicalStatusLabel }}
+                  <span :class="{ 'select-placeholder': !info.politicalStatus }">
+                    {{ politicalStatusLabel }}
+                  </span>
+                  <span class="select-caret" aria-hidden="true"></span>
                 </button>
                 <transition name="student-dropdown">
                   <div v-if="politicalStatusMenuOpen" class="student-select-menu">
@@ -348,7 +376,10 @@
                   :disabled="!isEditing || info.offCampusLiving"
                   @click.stop="toggleDormCampusMenu"
                 >
-                  {{ dormCampusLabel }}
+                  <span :class="{ 'select-placeholder': !info.dormCampus }">
+                    {{ dormCampusLabel }}
+                  </span>
+                  <span class="select-caret" aria-hidden="true"></span>
                 </button>
                 <transition name="student-dropdown">
                   <div v-if="dormCampusMenuOpen" class="student-select-menu">
@@ -786,6 +817,7 @@ const activeMenu = ref("my-info");
 const isEditing = ref(false);
 const avatarInput = ref(null);
 const sidebarOpen = ref(false);
+const yearMenuOpen = ref(false);
 const studentCategoryMenuOpen = ref(false);
 const politicalStatusMenuOpen = ref(false);
 const dormCampusMenuOpen = ref(false);
@@ -875,6 +907,7 @@ const politicalStatusLabel = computed(
 const dormCampusLabel = computed(
   () => info.dormCampus || "选择住宿校区",
 );
+const yearLabel = computed(() => (info.classYear ? `${info.classYear}级` : "选择年级"));
 
 const dormBuildingDisabled = computed(
   () => !isEditing.value || info.offCampusLiving || !info.dormCampus,
@@ -1005,6 +1038,16 @@ function toggleStudentCategoryMenu() {
   dormCampusMenuOpen.value = false;
 }
 
+function toggleYearMenu() {
+  if (!isEditing.value) {
+    return;
+  }
+  yearMenuOpen.value = !yearMenuOpen.value;
+  studentCategoryMenuOpen.value = false;
+  politicalStatusMenuOpen.value = false;
+  dormCampusMenuOpen.value = false;
+}
+
 function togglePoliticalStatusMenu() {
   if (!isEditing.value) {
     return;
@@ -1042,10 +1085,16 @@ function selectDormCampus(value) {
   dormCampusMenuOpen.value = false;
 }
 
+function selectYear(value) {
+  info.classYear = value ? Number(value) : "";
+  yearMenuOpen.value = false;
+}
+
 function handleDocumentClick(event) {
   if (event.target.closest(".student-select")) {
     return;
   }
+  yearMenuOpen.value = false;
   studentCategoryMenuOpen.value = false;
   politicalStatusMenuOpen.value = false;
   dormCampusMenuOpen.value = false;
