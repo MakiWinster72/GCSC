@@ -68,6 +68,8 @@ users
 | emergency_relation | varchar(32) | YES |  | NULL |  | 紧急联系人关系 |
 | full_name | varchar(64) | YES |  | NULL |  | 姓名 |
 | id_no | varchar(32) | YES |  | NULL |  | 身份证号 |
+| is_hk_mo_tw | bit(1) | YES |  | NULL |  | 港澳台 |
+| is_special | bit(1) | YES |  | NULL |  | 特殊学生 |
 | league_no | varchar(32) | YES |  | NULL |  | 团员编号 |
 | native_place | varchar(64) | YES |  | NULL |  | 籍贯 |
 | not_developed | bit(1) | YES |  | NULL |  | 是否未发展党员 |
