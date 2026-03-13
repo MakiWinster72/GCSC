@@ -538,6 +538,8 @@ function loadUser() {
 <style scoped>
 .student-filter-card {
   gap: 18px;
+  position: relative;
+  z-index: 40;
 }
 
 .student-right-stack {
@@ -628,6 +630,8 @@ function loadUser() {
 
 .student-results-card {
   gap: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .student-list {
