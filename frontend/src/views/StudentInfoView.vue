@@ -61,12 +61,16 @@
             <div class="student-filter-row student-filter-two">
               <div class="student-filter-field">
                 <span class="info-label">年级</span>
-                <div class="student-select" @click.stop="toggleYearMenu">
-                  <button class="info-input student-select-trigger" type="button">
+                <div class="student-select">
+                  <button
+                    class="info-input student-select-trigger"
+                    type="button"
+                    @click.stop="toggleYearMenu"
+                  >
                     {{ yearLabel }}
                   </button>
-                <transition name="student-dropdown">
-                  <div v-if="yearMenuOpen" class="student-select-menu">
+                  <transition name="student-dropdown">
+                    <div v-if="yearMenuOpen" class="student-select-menu">
                     <button
                       class="student-select-option"
                       type="button"
@@ -89,12 +93,16 @@
             </div>
             <div class="student-filter-field">
               <span class="info-label">学院</span>
-              <div class="student-select" @click.stop="toggleCollegeMenu">
-                <button class="info-input student-select-trigger" type="button">
-                  {{ collegeLabel }}
-                </button>
-                <transition name="student-dropdown">
-                  <div v-if="collegeMenuOpen" class="student-select-menu">
+                <div class="student-select">
+                  <button
+                    class="info-input student-select-trigger"
+                    type="button"
+                    @click.stop="toggleCollegeMenu"
+                  >
+                    {{ collegeLabel }}
+                  </button>
+                  <transition name="student-dropdown">
+                    <div v-if="collegeMenuOpen" class="student-select-menu">
                     <button
                       class="student-select-option"
                       type="button"
@@ -119,12 +127,16 @@
 
           <div class="student-filter-row">
             <span class="info-label">班级</span>
-            <div class="student-select" @click.stop="toggleMajorMenu">
-              <button class="info-input student-select-trigger" type="button">
-                {{ majorLabel }}
-              </button>
-              <transition name="student-dropdown">
-                <div v-if="majorMenuOpen" class="student-select-menu">
+              <div class="student-select">
+                <button
+                  class="info-input student-select-trigger"
+                  type="button"
+                  @click.stop="toggleMajorMenu"
+                >
+                  {{ majorLabel }}
+                </button>
+                <transition name="student-dropdown">
+                  <div v-if="majorMenuOpen" class="student-select-menu">
                   <button
                     class="student-select-option"
                     type="button"
