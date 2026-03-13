@@ -46,120 +46,156 @@
         <h1 class="feed-title">学生信息</h1>
       </header>
 
-      <section class="info-card student-filter-card">
-        <div class="student-filter-header">
-          <div class="info-section-title">搜索</div>
-          <input
-            v-model="filters.keyword"
-            class="info-input student-search"
-            type="text"
-            placeholder="搜索姓名 / 班别 / 学院 / 学号"
-          />
-        </div>
-        <div class="student-filter-grid">
-          <div class="student-filter-row student-filter-two">
-            <div class="student-filter-field">
-              <span class="info-label">年级</span>
-              <div class="student-select" @click.stop="toggleYearMenu">
+      <div class="student-right-stack">
+        <section class="info-card student-filter-card">
+          <div class="student-filter-header">
+            <div class="info-section-title">搜索</div>
+            <input
+              v-model="filters.keyword"
+              class="info-input student-search"
+              type="text"
+              placeholder="搜索姓名 / 班别 / 学院 / 学号"
+            />
+          </div>
+          <div class="student-filter-grid">
+            <div class="student-filter-row student-filter-two">
+              <div class="student-filter-field">
+                <span class="info-label">年级</span>
+                <div class="student-select" @click.stop="toggleYearMenu">
+                  <button class="info-input student-select-trigger" type="button">
+                    {{ yearLabel }}
+                  </button>
+                  <div v-if="yearMenuOpen" class="student-select-menu">
+                    <button
+                      class="student-select-option"
+                      type="button"
+                      @click="selectYear('')"
+                    >
+                      全部
+                    </button>
+                    <button
+                      v-for="year in classYearOptions"
+                      :key="year"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectYear(String(year))"
+                    >
+                      {{ year }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="student-filter-field">
+                <span class="info-label">学院</span>
+                <div class="student-select" @click.stop="toggleCollegeMenu">
+                  <button class="info-input student-select-trigger" type="button">
+                    {{ collegeLabel }}
+                  </button>
+                  <div v-if="collegeMenuOpen" class="student-select-menu">
+                    <button
+                      class="student-select-option"
+                      type="button"
+                      @click="selectCollege('')"
+                    >
+                      全部
+                    </button>
+                    <button
+                      v-for="college in collegeOptions"
+                      :key="college"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectCollege(college)"
+                    >
+                      {{ college }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="student-filter-row">
+              <span class="info-label">班级</span>
+              <div class="student-select" @click.stop="toggleMajorMenu">
                 <button class="info-input student-select-trigger" type="button">
-                  {{ yearLabel }}
+                  {{ majorLabel }}
                 </button>
-                <div v-if="yearMenuOpen" class="student-select-menu">
+                <div v-if="majorMenuOpen" class="student-select-menu">
                   <button
                     class="student-select-option"
                     type="button"
-                    @click="selectYear('')"
+                    @click="selectMajor('')"
                   >
                     全部
                   </button>
                   <button
-                    v-for="year in classYearOptions"
-                    :key="year"
+                    v-for="major in availableMajors"
+                    :key="major"
                     class="student-select-option"
                     type="button"
-                    @click="selectYear(String(year))"
+                    @click="selectMajor(major)"
                   >
-                    {{ year }}
+                    {{ major }}
                   </button>
                 </div>
               </div>
             </div>
-            <div class="student-filter-field">
-              <span class="info-label">学院</span>
-              <select v-model="filters.college" class="info-input">
-                <option value="">全部</option>
-                <option v-for="college in collegeOptions" :key="college" :value="college">
-                  {{ college }}
-                </option>
-              </select>
+
+            <div class="student-filter-row student-filter-inline">
+              <label class="info-choice">
+                <input v-model="filters.isHkMoTw" type="checkbox" />
+                港澳台
+              </label>
+              <label class="info-choice">
+                <input v-model="filters.isSpecial" type="checkbox" />
+                特殊学生
+              </label>
             </div>
           </div>
+        </section>
 
-          <div class="student-filter-row">
-            <span class="info-label">班级</span>
-            <select v-model="filters.major" class="info-input">
-              <option value="">全部</option>
-              <option v-for="major in availableMajors" :key="major" :value="major">
-                {{ major }}
-              </option>
-            </select>
-          </div>
-
-          <div class="student-filter-row student-filter-inline">
-            <label class="info-choice">
-              <input v-model="filters.isHkMoTw" type="checkbox" />
-              港澳台
-            </label>
-            <label class="info-choice">
-              <input v-model="filters.isSpecial" type="checkbox" />
-              特殊学生
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section v-if="hasActiveFilters" class="info-card student-results-card">
-        <div class="info-section-title">筛选结果</div>
-        <div v-if="pagedStudents.length" class="student-list">
-          <div v-for="item in pagedStudents" :key="item.id" class="student-row">
-            <input v-model="selectedIds" type="checkbox" :value="item.id" />
-            <div class="student-main">
-              <div class="student-name">{{ item.name }}</div>
-              <div class="student-meta">
-                {{ item.gradeYear }}级 {{ item.college }} {{ item.major }}{{ item.classNo }}班 ·
-                {{ item.studentNo }}
+        <section class="info-card student-results-card">
+          <div class="info-section-title">筛选结果</div>
+          <div v-if="pagedStudents.length" class="student-list">
+            <div v-for="item in pagedStudents" :key="item.id" class="student-row">
+              <input v-model="selectedIds" type="checkbox" :value="item.id" />
+              <div class="student-main">
+                <div class="student-name">{{ item.name }}</div>
+                <div class="student-meta">
+                  {{ item.gradeYear }}级 {{ item.college }} {{ item.major }}{{ item.classNo }}班 ·
+                  {{ item.studentNo }}
+                </div>
               </div>
+              <button class="ghost-button" type="button">详情</button>
             </div>
-            <button class="ghost-button" type="button">详情</button>
           </div>
-        </div>
-        <div v-else class="empty-tip">没有匹配的学生。</div>
+          <div v-else class="empty-tip">没有匹配的学生。</div>
 
-        <div class="student-pagination">
-          <div class="student-pages">
-            <button
-              v-for="page in totalPages"
-              :key="page"
-              class="page-button"
-              :class="{ active: page === currentPage }"
-              type="button"
-              @click="setPage(page)"
-            >
-              {{ page }}
-            </button>
-            <input
-              v-model.number="pageInput"
-              class="info-input page-input"
-              type="number"
-              :min="1"
-              :max="totalPages"
-              placeholder="页码"
-              @change="applyPageInput"
-            />
+          <div class="student-pagination">
+            <div class="student-pages">
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                class="page-button"
+                :class="{ active: page === currentPage }"
+                type="button"
+                @click="setPage(page)"
+              >
+                {{ page }}
+              </button>
+              <input
+                v-model.number="pageInput"
+                class="info-input page-input"
+                type="number"
+                :min="1"
+                :max="totalPages"
+                placeholder="页码"
+                @change="applyPageInput"
+              />
+            </div>
+            <button class="action-button" type="button">导出</button>
           </div>
-          <button class="action-button" type="button">导出</button>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   </div>
 </template>
@@ -179,6 +215,8 @@ const selectedIds = ref([]);
 const currentPage = ref(1);
 const pageInput = ref(null);
 const yearMenuOpen = ref(false);
+const collegeMenuOpen = ref(false);
+const majorMenuOpen = ref(false);
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
 const collegeOptions = [
@@ -285,6 +323,8 @@ const availableMajors = computed(() => {
 });
 
 const yearLabel = computed(() => filters.classYear || "全部");
+const collegeLabel = computed(() => filters.college || "全部");
+const majorLabel = computed(() => filters.major || "全部");
 
 const hasActiveFilters = computed(() => {
   return Boolean(
@@ -350,6 +390,10 @@ watch(filteredStudents, () => {
 
 function toggleYearMenu() {
   yearMenuOpen.value = !yearMenuOpen.value;
+  if (yearMenuOpen.value) {
+    collegeMenuOpen.value = false;
+    majorMenuOpen.value = false;
+  }
 }
 
 function selectYear(value) {
@@ -357,11 +401,42 @@ function selectYear(value) {
   yearMenuOpen.value = false;
 }
 
+function toggleCollegeMenu() {
+  collegeMenuOpen.value = !collegeMenuOpen.value;
+  if (collegeMenuOpen.value) {
+    yearMenuOpen.value = false;
+    majorMenuOpen.value = false;
+  }
+}
+
+function selectCollege(value) {
+  filters.college = value;
+  if (filters.college && !availableMajors.value.includes(filters.major)) {
+    filters.major = "";
+  }
+  collegeMenuOpen.value = false;
+}
+
+function toggleMajorMenu() {
+  majorMenuOpen.value = !majorMenuOpen.value;
+  if (majorMenuOpen.value) {
+    yearMenuOpen.value = false;
+    collegeMenuOpen.value = false;
+  }
+}
+
+function selectMajor(value) {
+  filters.major = value;
+  majorMenuOpen.value = false;
+}
+
 function handleDocumentClick(event) {
   if (event.target.closest(".student-select")) {
     return;
   }
   yearMenuOpen.value = false;
+  collegeMenuOpen.value = false;
+  majorMenuOpen.value = false;
 }
 
 onMounted(() => {
@@ -465,6 +540,11 @@ function loadUser() {
   gap: 18px;
 }
 
+.student-right-stack {
+  display: grid;
+  gap: 14px;
+}
+
 .student-filter-header {
   display: flex;
   align-items: center;
@@ -516,9 +596,10 @@ function loadUser() {
   overflow-y: auto;
   border-radius: 12px;
   border: 1px solid rgba(3, 107, 114, 0.2);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 18px 38px rgba(3, 107, 114, 0.12);
-  z-index: 5;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 18px 38px rgba(3, 107, 114, 0.16);
+  backdrop-filter: blur(12px);
+  z-index: 30;
   padding: 6px;
   display: grid;
   gap: 4px;
