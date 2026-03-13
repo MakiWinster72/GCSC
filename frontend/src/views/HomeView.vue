@@ -115,12 +115,21 @@
         </header>
         <div class="contacts-add-body">
           <div class="contacts-add-photo">
-            <div class="contacts-add-photo-frame">
-              <span>照片 3:4</span>
-            </div>
-            <button class="post-action" type="button" @click="showToast('上传功能待接入')">
-              上传照片
+            <button class="contacts-add-photo-frame" type="button" @click="triggerContactPhoto">
+              <img
+                v-if="contactForm.photoPreview"
+                :src="contactForm.photoPreview"
+                alt="联系人照片预览"
+              />
+              <span v-else>照片 3:4</span>
             </button>
+            <input
+              ref="contactPhotoInput"
+              class="contacts-photo-input"
+              type="file"
+              accept="image/*"
+              @change="onContactPhotoChange"
+            />
           </div>
           <div class="contacts-add-fields">
             <label class="form-row">
@@ -163,7 +172,7 @@
               <button class="ghost-button" type="button" @click="closeAddContact">
                 取消
               </button>
-              <button class="ghost-button" type="button" @click="showToast('保存功能待接入')">
+              <button class="ghost-button" type="button" @click="saveContact">
                 保存
               </button>
             </div>
@@ -741,6 +750,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getMe } from "../api/auth";
 import { MENU_ITEMS, isMenuEnabled } from "../constants/menu";
 import { createPost, deletePost, getPosts, uploadMedia } from "../api/posts";
+import { createContact, getContacts } from "../api/contacts";
 
 const router = useRouter();
 const route = useRoute();
@@ -769,56 +779,7 @@ const activeMenu = ref("campus");
 const profile = reactive(loadUser());
 const posts = ref([]);
 const loadingPosts = ref(false);
-const contacts = [
-  {
-    id: 1,
-    name: "王老师",
-    office: "厚德楼802",
-    role: "辅导员",
-    phone: "18273648264",
-    photoUrl: "",
-  },
-  {
-    id: 2,
-    name: "李老师",
-    office: "明德楼504",
-    role: "学业导师",
-    phone: "13755219801",
-    photoUrl: "",
-  },
-  {
-    id: 3,
-    name: "陈老师",
-    office: "崇德楼213",
-    role: "就业指导",
-    phone: "18660318577",
-    photoUrl: "",
-  },
-  {
-    id: 4,
-    name: "教务处",
-    office: "行政楼201",
-    role: "课程/考试咨询",
-    phone: "021-6000-1001",
-    photoUrl: "",
-  },
-  {
-    id: 5,
-    name: "学生工作部",
-    office: "行政楼305",
-    role: "奖助学金",
-    phone: "021-6000-1002",
-    photoUrl: "",
-  },
-  {
-    id: 6,
-    name: "辅导员值班室",
-    office: "厚德楼一层",
-    role: "紧急值守",
-    phone: "021-6000-1003",
-    photoUrl: "",
-  },
-];
+const contacts = ref([]);
 
 const composerBusy = ref(false);
 const composerError = ref("");
@@ -883,9 +844,9 @@ const visiblePosts = computed(() => posts.value);
 const visibleContacts = computed(() => {
   const keyword = contactSearchQuery.value.trim().toLowerCase();
   if (!keyword) {
-    return contacts;
+    return contacts.value;
   }
-  return contacts.filter((item) => {
+  return contacts.value.filter((item) => {
     const name = (item.name || "").toLowerCase();
     const office = (item.office || "").toLowerCase();
     const duty = (item.role || "").toLowerCase();
@@ -894,12 +855,15 @@ const visibleContacts = computed(() => {
 });
 const addContactOpen = ref(false);
 const addContactClosing = ref(false);
+const contactPhotoUploading = ref(false);
+const contactPhotoInput = ref(null);
 const contactForm = reactive({
   name: "",
   office: "",
   role: "",
   phone: "",
   photoUrl: "",
+  photoPreview: "",
 });
 
 function syncMenuFromRoute() {
@@ -930,6 +894,9 @@ watch(activeMenu, () => {
   if (isFeedMenu.value) {
     fetchPosts();
   }
+  if (isContactsMode.value) {
+    fetchContacts();
+  }
   publisherOpen.value = false;
   headingMenuOpen.value = false;
     resetComposerState();
@@ -947,6 +914,7 @@ onMounted(async () => {
     const { data } = await getMe();
     saveUser(data);
     await fetchPosts();
+    await fetchContacts();
   } catch {
     localStorage.removeItem("gcsc_token");
     localStorage.removeItem("gcsc_user");
@@ -969,6 +937,15 @@ async function fetchPosts() {
     posts.value = [];
   } finally {
     loadingPosts.value = false;
+  }
+}
+
+async function fetchContacts() {
+  try {
+    const { data } = await getContacts();
+    contacts.value = Array.isArray(data) ? data.map(normalizeContact) : [];
+  } catch {
+    contacts.value = [];
   }
 }
 
@@ -998,6 +975,7 @@ function openAddContact() {
     showToast("仅管理员可添加");
     return;
   }
+  resetContactForm();
   addContactOpen.value = true;
   addContactClosing.value = false;
 }
@@ -1011,6 +989,79 @@ function closeAddContact() {
   setTimeout(() => {
     addContactClosing.value = false;
   }, 260);
+}
+
+function triggerContactPhoto() {
+  if (contactPhotoUploading.value) {
+    return;
+  }
+  contactPhotoInput.value && contactPhotoInput.value.click();
+}
+
+async function onContactPhotoChange(event) {
+  const [file] = Array.from(event.target.files || []);
+  event.target.value = "";
+  if (!file) {
+    return;
+  }
+  contactPhotoUploading.value = true;
+  try {
+    const { data } = await uploadMedia(file);
+    contactForm.photoUrl = data.url || "";
+    contactForm.photoPreview = resolveMediaUrl(data.url);
+  } catch (err) {
+    showToast(err?.response?.data?.message || "上传失败");
+  } finally {
+    contactPhotoUploading.value = false;
+  }
+}
+
+function resetContactForm() {
+  contactForm.name = "";
+  contactForm.office = "";
+  contactForm.role = "";
+  contactForm.phone = "";
+  contactForm.photoUrl = "";
+  contactForm.photoPreview = "";
+}
+
+function normalizeContact(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    office: item.office,
+    role: item.duty,
+    phone: item.phone,
+    photoUrl: resolveMediaUrl(item.photoUrl),
+  };
+}
+
+async function saveContact() {
+  if (!contactForm.name.trim()) {
+    showToast("姓名不能为空");
+    return;
+  }
+  const payload = {
+    name: contactForm.name.trim(),
+    office: contactForm.office.trim() || null,
+    duty: contactForm.role.trim() || null,
+    phone: contactForm.phone.trim() || null,
+    photoUrl: contactForm.photoUrl || null,
+  };
+  try {
+    const { data } = await createContact(payload);
+    const normalized = normalizeContact(data);
+    contacts.value = [normalized, ...contacts.value];
+    closeAddContact();
+    resetContactForm();
+    showToast("已保存");
+  } catch (err) {
+    if (err?.response?.status === 403) {
+      showToast("无权限操作");
+      return;
+    }
+    showToast(err?.response?.data?.message || "保存失败");
+  }
 }
 
 function closePublisher() {
