@@ -2,11 +2,15 @@ package com.gcsc.studentcenter.service;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gcsc.studentcenter.dto.StudentProfileRequest;
 import com.gcsc.studentcenter.dto.StudentProfileResponse;
+import com.gcsc.studentcenter.dto.StudentSearchItemResponse;
+import com.gcsc.studentcenter.dto.StudentSearchResponse;
 import com.gcsc.studentcenter.entity.AppUser;
 import com.gcsc.studentcenter.entity.StudentProfile;
 import com.gcsc.studentcenter.repository.AppUserRepository;
@@ -32,6 +36,14 @@ public class StudentProfileService {
             .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         Optional<StudentProfile> profileOpt = studentProfileRepository.findByUserId(user.getId());
         return toResponse(user, profileOpt.orElse(null));
+    }
+
+    @Transactional(readOnly = true)
+    public StudentProfileResponse getProfileById(Long id) {
+        StudentProfile profile = studentProfileRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("学生档案不存在"));
+        AppUser user = profile.getUser();
+        return toResponse(user, profile);
     }
 
     @Transactional
@@ -63,12 +75,45 @@ public class StudentProfileService {
         profile.setActivistDate(request.getActivistDate());
         profile.setEmergencyPhone(normalize(request.getEmergencyPhone()));
         profile.setEmergencyRelation(normalize(request.getEmergencyRelation()));
+        profile.setHkMoTw(request.getHkMoTw());
+        profile.setSpecialStudent(request.getSpecialStudent());
 
         user.setAvatarUrl(normalize(request.getAvatarUrl()));
         syncUserSummary(user, profile);
 
         StudentProfile saved = studentProfileRepository.save(profile);
         return toResponse(user, saved);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentSearchResponse searchProfiles(
+        Integer classYear,
+        String college,
+        String major,
+        Boolean hkMoTw,
+        Boolean specialStudent,
+        String keyword,
+        int page,
+        int size
+    ) {
+        int pageIndex = Math.max(page - 1, 0);
+        int pageSize = Math.max(size, 1);
+        Page<StudentSearchItemResponse> result = studentProfileRepository.searchProfiles(
+            classYear,
+            normalize(college),
+            normalize(major),
+            hkMoTw,
+            specialStudent,
+            normalize(keyword),
+            PageRequest.of(pageIndex, pageSize)
+        );
+        return new StudentSearchResponse(
+            result.getContent(),
+            pageIndex + 1,
+            pageSize,
+            result.getTotalElements(),
+            result.getTotalPages()
+        );
     }
 
     private void syncUserSummary(AppUser user, StudentProfile profile) {
@@ -107,7 +152,9 @@ public class StudentProfileService {
             profile != null ? profile.getApplicationDate() : null,
             profile != null ? profile.getActivistDate() : null,
             profile != null ? profile.getEmergencyPhone() : null,
-            profile != null ? profile.getEmergencyRelation() : null
+            profile != null ? profile.getEmergencyRelation() : null,
+            profile != null ? profile.getHkMoTw() : null,
+            profile != null ? profile.getSpecialStudent() : null
         );
     }
 
