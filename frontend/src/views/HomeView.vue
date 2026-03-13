@@ -611,14 +611,14 @@ import {
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getMe } from "../api/auth";
-import { MENU_ITEMS, isMenuEnabled } from "../constants/menu";
+import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { createPost, deletePost, getPosts, uploadMedia } from "../api/posts";
 
 const router = useRouter();
 const route = useRoute();
 const API_BASE = "http://localhost:8080";
 
-const menuItems = computed(() => MENU_ITEMS);
+const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 
 const menuLabelMap = {
   campus: "校园生活",
@@ -824,6 +824,10 @@ function handleMenuClick(key) {
   }
   if (key === "my-info") {
     router.push("/myinfos");
+    return;
+  }
+  if (key === "student-info") {
+    router.push("/student-info");
     return;
   }
   if (key === "good-news") {

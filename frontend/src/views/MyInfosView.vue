@@ -294,7 +294,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { MENU_ITEMS, isMenuEnabled } from "../constants/menu";
+import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfile, saveStudentProfile } from "../api/profile";
 import { uploadMedia } from "../api/posts";
 
@@ -330,7 +330,7 @@ const info = reactive({
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
 
-const menuItems = computed(() => MENU_ITEMS);
+const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 
 const avatarText = computed(() => {
   const name = profile.displayName || profile.username || "同学";
@@ -356,6 +356,10 @@ function handleMenuClick(key) {
   }
   if (key === "achievements") {
     router.push("/achievements");
+    return;
+  }
+  if (key === "student-info") {
+    router.push("/student-info");
     return;
   }
   if (key === "good-news") {

@@ -15,8 +15,24 @@ const ENABLED_MENU_KEYS = new Set([
   "records",
   "achievements",
   "my-info",
+  "student-info",
 ]);
+
+const ROLE_MENU_VISIBILITY = {
+  "student-info": new Set(["TEACHER", "ADMIN"]),
+};
 
 export function isMenuEnabled(key) {
   return ENABLED_MENU_KEYS.has(key);
+}
+
+export function filterMenuItemsByRole(role) {
+  const normalizedRole = role || "STUDENT";
+  return MENU_ITEMS.filter((item) => {
+    const allowedRoles = ROLE_MENU_VISIBILITY[item.key];
+    if (!allowedRoles) {
+      return true;
+    }
+    return allowedRoles.has(normalizedRole);
+  });
 }

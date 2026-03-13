@@ -246,7 +246,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { MENU_ITEMS, isMenuEnabled } from "../constants/menu";
+import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import {
   createAchievement,
   deleteAchievement,
@@ -283,7 +283,7 @@ const form = reactive({
   imageUrl: "",
 });
 
-const menuItems = computed(() => MENU_ITEMS);
+const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 
 const roleLabelMap = {
   STUDENT: "学生",
@@ -331,6 +331,10 @@ function handleMenuClick(key) {
   }
   if (key === "my-info") {
     router.push("/myinfos");
+    return;
+  }
+  if (key === "student-info") {
+    router.push("/student-info");
     return;
   }
   if (key === "good-news") {
