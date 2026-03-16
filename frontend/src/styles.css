@@ -430,6 +430,24 @@ body {
   color: #57808a;
 }
 
+.profile-settings {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border: 1px solid rgba(3, 107, 114, 0.25);
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.profile-settings img {
+  width: 18px;
+  height: 18px;
+}
+
 .ghost-button {
   border: 1px solid rgba(3, 107, 114, 0.35);
   background: rgba(255, 255, 255, 0.45);

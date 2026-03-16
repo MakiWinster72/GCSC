@@ -24,6 +24,9 @@
             </p>
             <p class="profile-role">{{ roleLabel }}</p>
           </div>
+          <button class="profile-settings" type="button" aria-label="设置">
+            <img src="/assets/icons/settings.svg" alt="设置" />
+          </button>
         </div>
         <div class="profile-row">学号：{{ profile.studentNo || "未填写" }}</div>
         <div class="profile-row">班级：{{ profile.className || "未填写" }}</div>
