@@ -66,7 +66,7 @@
           <div class="settings-row">
             <div class="settings-text">
               <div class="settings-title">外观</div>
-              <div class="settings-subtitle">明暗模式</div>
+              <div class="settings-subtitle">TODO:明暗模式</div>
             </div>
             <label class="ios-switch" aria-label="切换明暗模式">
               <input type="checkbox" />
