@@ -130,13 +130,16 @@
                   </option>
                 </select>
                 <span class="class-text">级</span>
-                <input
+                <select
                   v-model="info.classMajor"
                   class="info-input"
-                  type="text"
-                  placeholder="专业"
-                  :disabled="!isEditing"
-                />
+                  :disabled="!isEditing || !classMajorOptions.length"
+                >
+                  <option disabled value="">选择专业</option>
+                  <option v-for="major in classMajorOptions" :key="major" :value="major">
+                    {{ major }}
+                  </option>
+                </select>
                 <input
                   v-model="info.classNo"
                   class="info-input class-num"
@@ -149,13 +152,12 @@
             </label>
             <label class="field-card">
               <span class="info-label">学院</span>
-              <input
-                v-model="info.college"
-                class="info-input"
-                type="text"
-                placeholder="请输入学院"
-                :disabled="!isEditing"
-              />
+              <select v-model="info.college" class="info-input" :disabled="!isEditing">
+                <option disabled value="">选择学院</option>
+                <option v-for="item in collegeOptions" :key="item" :value="item">
+                  {{ item }}
+                </option>
+              </select>
             </label>
             <label class="field-card">
               <span class="info-label">入学时间</span>
@@ -760,6 +762,15 @@ const info = reactive({
 });
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
+const collegeOptions = ["大数据与人工智能学院"];
+const majorOptionsByCollege = {
+  大数据与人工智能学院: [
+    "计算机科学与技术",
+    "计算机科学与技术（实验区）",
+    "软件工程",
+    "电子商务",
+  ],
+};
 const studentCategoryOptions = ["本科", "研究生"];
 const politicalStatusOptions = ["无", "共青团员", "入党积极分子", "预备党员", "中共党员"];
 const dormCampusOptions = ["佛山校区", "广州校区"];
@@ -779,6 +790,10 @@ const roleLabel = computed(() => {
     return "老师";
   }
   return "学生";
+});
+
+const classMajorOptions = computed(() => {
+  return majorOptionsByCollege[info.college] || [];
 });
 
 
@@ -1164,6 +1179,19 @@ watch(
       info.dormRoom = "";
     } else {
       info.offCampusAddress = "";
+    }
+  },
+);
+
+watch(
+  () => info.college,
+  (college) => {
+    if (!majorOptionsByCollege[college]) {
+      info.classMajor = "";
+      return;
+    }
+    if (!majorOptionsByCollege[college].includes(info.classMajor)) {
+      info.classMajor = "";
     }
   },
 );
