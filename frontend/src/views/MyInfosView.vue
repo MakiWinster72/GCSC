@@ -1235,6 +1235,14 @@ async function confirmEdit() {
     info.dormRoomNo,
     info.dormRoom,
   );
+  const educationExperiences = educationItems.map((item) => ({
+    startDate: item.startDate,
+    endDate: item.endDate,
+    schoolName: item.schoolName,
+    educationLevel: item.educationLevel,
+    witness: item.witness,
+    isCurrent: item.isCurrent,
+  }));
   const payload = {
     fullName: info.name,
     avatarUrl: info.avatarUrl,
@@ -1287,6 +1295,7 @@ async function confirmEdit() {
     motherPhone: info.motherPhone,
     motherWorkUnit: info.motherWorkUnit,
     motherTitle: info.motherTitle,
+    educationExperiences,
   };
   if (info.offCampusLiving) {
     payload.dormCampus = null;
@@ -1429,6 +1438,7 @@ function applyProfileResponse(data) {
   info.motherPhone = data.motherPhone || "";
   info.motherWorkUnit = data.motherWorkUnit || "";
   info.motherTitle = data.motherTitle || "";
+  applyEducationExperiences(data.educationExperiences);
 
   profile.displayName = data.displayName || profile.displayName;
   profile.username = data.username || profile.username;
@@ -1438,6 +1448,22 @@ function applyProfileResponse(data) {
   profile.college = FIXED_COLLEGE;
 
   saveUser(profile);
+}
+
+function applyEducationExperiences(rawItems) {
+  const nextItems = Array.isArray(rawItems) ? rawItems : [];
+  const normalized = nextItems.map((item) => ({
+    startDate: item?.startDate || "",
+    endDate: item?.isCurrent ? "" : item?.endDate || "",
+    schoolName: item?.schoolName || "",
+    educationLevel: item?.educationLevel || "",
+    witness: item?.witness || "",
+    isCurrent: Boolean(item?.isCurrent),
+  }));
+  while (normalized.length < 5) {
+    normalized.push(createEducationItem());
+  }
+  educationItems.splice(0, educationItems.length, ...normalized);
 }
 
 function saveUser(data) {
