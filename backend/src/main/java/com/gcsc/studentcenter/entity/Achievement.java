@@ -20,6 +20,9 @@ public class Achievement {
     @Column(name = "name", nullable = false, length = 120)
     private String name;
 
+    @Column(name = "category", length = 64)
+    private String category;
+
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -59,6 +62,14 @@ public class Achievement {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public LocalDate getStartDate() {

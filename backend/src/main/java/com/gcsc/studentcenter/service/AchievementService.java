@@ -36,6 +36,7 @@ public class AchievementService {
         Achievement achievement = new Achievement();
         achievement.setAuthor(author);
         achievement.setName(name);
+        achievement.setCategory(normalizeCategory(request.getCategory()));
         achievement.setStartDate(request.getStartDate());
         achievement.setEndDate(request.getEndDate());
         achievement.setAwardDate(request.getAwardDate());
@@ -77,6 +78,9 @@ public class AchievementService {
             }
             achievement.setName(name);
         }
+        if (request.getCategory() != null) {
+            achievement.setCategory(normalizeCategory(request.getCategory()));
+        }
         achievement.setStartDate(request.getStartDate());
         achievement.setEndDate(request.getEndDate());
         achievement.setAwardDate(request.getAwardDate());
@@ -100,6 +104,7 @@ public class AchievementService {
         return new AchievementResponse(
             achievement.getId(),
             achievement.getName(),
+            achievement.getCategory(),
             achievement.getStartDate(),
             achievement.getEndDate(),
             achievement.getAwardDate(),
@@ -108,5 +113,13 @@ public class AchievementService {
             achievement.getImageUrl(),
             achievement.getCreatedAt()
         );
+    }
+
+    private String normalizeCategory(String category) {
+        if (category == null) {
+            return null;
+        }
+        String trimmed = category.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

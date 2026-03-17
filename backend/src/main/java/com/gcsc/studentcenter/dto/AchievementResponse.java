@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 public class AchievementResponse {
     private Long id;
     private String name;
+    private String category;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate awardDate;
@@ -17,6 +18,7 @@ public class AchievementResponse {
     public AchievementResponse(
         Long id,
         String name,
+        String category,
         LocalDate startDate,
         LocalDate endDate,
         LocalDate awardDate,
@@ -27,6 +29,7 @@ public class AchievementResponse {
     ) {
         this.id = id;
         this.name = name;
+        this.category = category;
         this.startDate = startDate;
         this.endDate = endDate;
         this.awardDate = awardDate;
@@ -42,6 +45,10 @@ public class AchievementResponse {
 
     public String getName() {
         return name;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
     public LocalDate getStartDate() {

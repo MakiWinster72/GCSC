@@ -59,15 +59,18 @@
               <span class="menu-drawer-caret" aria-hidden="true"></span>
             </button>
             <div v-show="achievementsOpen" class="menu-drawer-panel">
-              <div
-                v-for="entry in achievementEntries"
-                :key="entry"
-                class="menu-drawer-item"
-              >
-                {{ entry }}
-              </div>
-            </div>
+            <button
+              v-for="entry in achievementEntries"
+              :key="entry.key"
+              class="menu-drawer-item"
+              :class="{ active: activeAchievement === entry.key }"
+              type="button"
+              @click="handleAchievementEntry(entry.key)"
+            >
+              {{ entry.label }}
+            </button>
           </div>
+        </div>
           <button
             v-else
             class="menu-item"
@@ -737,6 +740,7 @@ const router = useRouter();
 
 const profile = reactive(loadUser());
 const activeMenu = ref("my-info");
+const activeAchievement = ref("all");
 const isEditing = ref(false);
 const avatarInput = ref(null);
 const sidebarOpen = ref(false);
@@ -812,13 +816,14 @@ const dormCampusOptions = ["佛山校区", "广州校区"];
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 const achievementEntries = [
-  "学科竞赛、文体艺术",
-  "发表学术论文",
-  "发表期刊作品",
-  "专利(著作权)授权数(项)",
-  "职业资格证书",
-  "学生参与教师科研项目情况",
-  "创作、表演的代表性作品",
+  { key: "all", label: "全部" },
+  { key: "contest", label: "学科竞赛、文体艺术" },
+  { key: "paper", label: "发表学术论文" },
+  { key: "journal", label: "发表期刊作品" },
+  { key: "patent", label: "专利(著作权)授权数(项)" },
+  { key: "certificate", label: "职业资格证书" },
+  { key: "research", label: "学生参与教师科研项目情况" },
+  { key: "works", label: "创作、表演的代表性作品" },
 ];
 
 const avatarText = computed(() => {
@@ -950,7 +955,19 @@ function toggleAchievements() {
   achievementsOpen.value = !achievementsOpen.value;
   if (achievementsOpen.value) {
     activeMenu.value = "achievements";
+    handleAchievementEntry("all");
   }
+}
+
+function handleAchievementEntry(key) {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  const safeKey = achievementEntries.some((entry) => entry.key === key) ? key : "all";
+  activeAchievement.value = safeKey;
+  activeMenu.value = "achievements";
+  sidebarOpen.value = false;
+  router.push({ path: "/achievements", query: { category: safeKey } });
 }
 
 function openSidebar() {

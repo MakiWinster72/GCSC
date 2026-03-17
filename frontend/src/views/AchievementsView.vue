@@ -39,36 +39,76 @@
       </section>
 
       <section class="menu-card">
-        <button
-          v-for="item in menuItems"
-          :key="item.key"
-          class="menu-item"
-          :class="{
-            active: activeMenu === item.key,
-            disabled: !isMenuEnabled(item.key),
-          }"
-          type="button"
-          :disabled="!isMenuEnabled(item.key)"
-          @click="handleMenuClick(item.key)"
-        >
-          {{ item.label }}
-        </button>
+        <template v-for="item in menuItems" :key="item.key">
+          <div
+            v-if="item.key === 'achievements'"
+            class="menu-drawer"
+            :class="{ open: achievementsOpen }"
+          >
+            <button
+              class="menu-item menu-drawer-trigger"
+              :class="{
+                active: activeMenu === item.key,
+                disabled: !isMenuEnabled(item.key),
+              }"
+              type="button"
+              :disabled="!isMenuEnabled(item.key)"
+              @click="toggleAchievements"
+            >
+              <span>{{ item.label }}</span>
+              <span class="menu-drawer-caret" aria-hidden="true"></span>
+            </button>
+            <div v-show="achievementsOpen" class="menu-drawer-panel">
+              <button
+                v-for="entry in achievementEntries"
+                :key="entry.key"
+                class="menu-drawer-item"
+                :class="{ active: activeCategory === entry.key }"
+                type="button"
+                @click="handleAchievementEntry(entry.key)"
+              >
+                {{ entry.label }}
+              </button>
+            </div>
+          </div>
+          <button
+            v-else
+            class="menu-item"
+            :class="{
+              active: activeMenu === item.key,
+              disabled: !isMenuEnabled(item.key),
+            }"
+            type="button"
+            :disabled="!isMenuEnabled(item.key)"
+            @click="handleMenuClick(item.key)"
+          >
+            {{ item.label }}
+          </button>
+        </template>
       </section>
     </aside>
 
     <main class="dashboard-right">
       <header class="feed-header">
         <h1 class="feed-title">个人成就</h1>
+        <div class="achievement-category-pill">
+          {{ activeCategoryLabel }}
+        </div>
       </header>
 
-      <div v-if="!achievements.length" class="empty-tip">
-        还没有成就，点击右下角添加。
+      <section v-if="activeCategory === 'all'" class="info-card achievement-intro-card">
+        <div class="info-section-title">全部</div>
+        <p class="achievement-intro-text">这里存放了我所有的成就！</p>
+      </section>
+
+      <div v-if="!filteredAchievements.length" class="empty-tip">
+        {{ emptyMessage }}
       </div>
       <div v-if="errorMessage" class="form-tip">{{ errorMessage }}</div>
 
       <section class="achievement-list">
         <article
-          v-for="item in achievements"
+          v-for="item in filteredAchievements"
           :key="item.id"
           class="achievement-card"
           @click="openDetail(item)"
@@ -94,8 +134,13 @@
         </article>
       </section>
 
-      <button class="footer-action" type="button" @click="openEditor">
-        添加成就
+      <button
+        class="achievement-add"
+        type="button"
+        :aria-label="addButtonLabel"
+        @click="openEditorForCategory"
+      >
+        <span aria-hidden="true">+</span>
       </button>
       <div class="mobile-capsule">
         <div class="capsule-left">
@@ -122,9 +167,10 @@
             class="capsule-action capsule-primary"
             role="button"
             tabindex="0"
-            @click="openEditor"
+            :aria-label="addButtonLabel"
+            @click="openEditorForCategory"
           >
-            添加成就
+            +
           </div>
         </div>
       </div>
@@ -199,6 +245,25 @@
           </button>
 
           <div class="achievement-fields">
+            <div v-if="showCategorySelect" class="field-row">
+              <label class="field-label">成就分类</label>
+              <select v-model="form.category" class="form-input">
+                <option disabled value="">请选择分类</option>
+                <option
+                  v-for="entry in categoryOptions"
+                  :key="entry.key"
+                  :value="entry.key"
+                >
+                  {{ entry.label }}
+                </option>
+              </select>
+            </div>
+            <div v-else class="field-row">
+              <label class="field-label">成就分类</label>
+              <div class="achievement-category-tag">
+                {{ activeCategoryLabel }}
+              </div>
+            </div>
             <div class="field-row">
               <label class="field-label">成就名字</label>
               <input v-model="form.name" class="form-input" type="text" placeholder="请输入成就名称" />
@@ -290,8 +355,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import {
   createAchievement,
@@ -303,6 +368,7 @@ import { uploadMedia } from "../api/upload";
 import { API_BASE } from "../api/request";
 
 const router = useRouter();
+const route = useRoute();
 const profile = reactive(loadUser());
 const activeMenu = ref("achievements");
 const editorOpen = ref(false);
@@ -317,8 +383,21 @@ const editId = ref(null);
 const deleteDialogOpen = ref(false);
 const deleteBusy = ref(false);
 const sidebarOpen = ref(false);
+const achievementsOpen = ref(true);
+const activeCategory = ref("all");
 
 const achievements = ref([]);
+
+const achievementEntries = [
+  { key: "all", label: "全部" },
+  { key: "contest", label: "学科竞赛、文体艺术" },
+  { key: "paper", label: "发表学术论文" },
+  { key: "journal", label: "发表期刊作品" },
+  { key: "patent", label: "专利(著作权)授权数(项)" },
+  { key: "certificate", label: "职业资格证书" },
+  { key: "research", label: "学生参与教师科研项目情况" },
+  { key: "works", label: "创作、表演的代表性作品" },
+];
 
 const form = reactive({
   name: "",
@@ -328,9 +407,13 @@ const form = reactive({
   description: "",
   thoughts: "",
   imageUrl: "",
+  category: "",
 });
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
+const categoryOptions = computed(() =>
+  achievementEntries.filter((entry) => entry.key !== "all"),
+);
 
 const roleLabelMap = {
   STUDENT: "学生",
@@ -342,6 +425,29 @@ const roleLabel = computed(() => roleLabelMap[profile.role] || "学生");
 const avatarText = computed(() => {
   const name = profile.displayName || profile.username || "同学";
   return name.slice(0, 1).toUpperCase();
+});
+const activeCategoryLabel = computed(() => {
+  const match = achievementEntries.find((entry) => entry.key === activeCategory.value);
+  return match ? match.label : "全部";
+});
+const showCategorySelect = computed(() => activeCategory.value === "all");
+const filteredAchievements = computed(() => {
+  if (activeCategory.value === "all") {
+    return achievements.value;
+  }
+  return achievements.value.filter((item) => item.category === activeCategory.value);
+});
+const emptyMessage = computed(() => {
+  if (activeCategory.value === "all") {
+    return "还没有成就，点击右下角添加。";
+  }
+  return "该分类暂无成就，点击右下角添加。";
+});
+const addButtonLabel = computed(() => {
+  if (activeCategory.value === "all") {
+    return "添加成就";
+  }
+  return `添加${activeCategoryLabel.value}`;
 });
 
 function loadUser() {
@@ -375,6 +481,7 @@ function handleMenuClick(key) {
   }
   sidebarOpen.value = false;
   if (key === "achievements") {
+    handleAchievementEntry("all");
     return;
   }
   if (key === "my-info") {
@@ -388,6 +495,29 @@ function handleMenuClick(key) {
   router.push("/myinfos");
 }
 
+function toggleAchievements() {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  achievementsOpen.value = !achievementsOpen.value;
+  activeMenu.value = "achievements";
+  if (achievementsOpen.value) {
+    handleAchievementEntry("all");
+  }
+}
+
+function handleAchievementEntry(key) {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  const safeKey = achievementEntries.some((entry) => entry.key === key) ? key : "all";
+  activeCategory.value = safeKey;
+  achievementsOpen.value = true;
+  activeMenu.value = "achievements";
+  sidebarOpen.value = false;
+  router.push({ path: "/achievements", query: { category: safeKey } });
+}
+
 function openSidebar() {
   sidebarOpen.value = true;
 }
@@ -396,9 +526,10 @@ function closeSidebar() {
   sidebarOpen.value = false;
 }
 
-function openEditor() {
+function openEditorForCategory() {
   editId.value = null;
   resetForm();
+  form.category = activeCategory.value === "all" ? "" : activeCategory.value;
   editorOpen.value = true;
 }
 
@@ -419,6 +550,7 @@ function resetForm() {
   form.description = "";
   form.thoughts = "";
   form.imageUrl = "";
+  form.category = "";
   imagePreview.value = "";
 }
 
@@ -431,6 +563,7 @@ async function saveAchievement() {
     description: form.description.trim(),
     thoughts: form.thoughts.trim(),
     imageUrl: form.imageUrl || null,
+    category: form.category || (activeCategory.value === "all" ? null : activeCategory.value),
   };
   try {
     if (editId.value) {
@@ -488,6 +621,7 @@ function normalizeAchievement(item) {
     description: item.description,
     thoughts: item.thoughts,
     image: resolveMediaUrl(item.imageUrl),
+    category: item.category || "",
   };
 }
 
@@ -518,6 +652,7 @@ function editFromView() {
   form.awardDate = item.awardDate || "";
   form.description = item.description || "";
   form.thoughts = item.thoughts || "";
+  form.category = item.category || "";
   form.imageUrl = item.image ? item.image.replace(API_BASE, "") : "";
   imagePreview.value = item.image || "";
   viewOpen.value = false;
@@ -569,7 +704,29 @@ async function fetchAchievements() {
   }
 }
 
+function syncCategoryFromRoute() {
+  const rawCategory = route.query.category;
+  const safeCategory =
+    typeof rawCategory === "string" &&
+    achievementEntries.some((entry) => entry.key === rawCategory)
+      ? rawCategory
+      : "all";
+  activeCategory.value = safeCategory;
+  achievementsOpen.value = true;
+  if (rawCategory !== safeCategory) {
+    router.replace({ path: "/achievements", query: { category: safeCategory } });
+  }
+}
+
 onMounted(() => {
   fetchAchievements();
+  syncCategoryFromRoute();
 });
+
+watch(
+  () => route.query.category,
+  () => {
+    syncCategoryFromRoute();
+  },
+);
 </script>

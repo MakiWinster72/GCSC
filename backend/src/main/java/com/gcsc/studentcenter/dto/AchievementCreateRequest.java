@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class AchievementCreateRequest {
     private String name;
+    private String category;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate awardDate;
@@ -17,6 +18,14 @@ public class AchievementCreateRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public LocalDate getStartDate() {
