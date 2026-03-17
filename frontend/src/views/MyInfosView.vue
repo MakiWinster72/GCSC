@@ -122,16 +122,29 @@
             </label>
             <label class="field-card">
               <span class="info-label">年级</span>
-              <select v-model="info.classYear" class="info-input" :disabled="!isEditing">
+              <select
+                v-model="info.classYear"
+                class="info-input"
+                :disabled="!isEditing"
+              >
                 <option disabled value="">选择年级</option>
-                <option v-for="year in classYearOptions" :key="year" :value="year">
+                <option
+                  v-for="year in classYearOptions"
+                  :key="year"
+                  :value="year"
+                >
                   {{ year }}
                 </option>
               </select>
             </label>
             <label class="field-card">
               <span class="info-label">学院</span>
-              <input v-model="info.college" class="info-input" type="text" disabled />
+              <input
+                v-model="info.college"
+                class="info-input"
+                type="text"
+                disabled
+              />
             </label>
             <label class="field-card field-full">
               <span class="info-label">班级</span>
@@ -142,7 +155,11 @@
                   :disabled="!isEditing || !classMajorOptions.length"
                 >
                   <option disabled value="">选择专业</option>
-                  <option v-for="major in classMajorOptions" :key="major" :value="major">
+                  <option
+                    v-for="major in classMajorOptions"
+                    :key="major"
+                    :value="major"
+                  >
                     {{ major }}
                   </option>
                 </select>
@@ -171,9 +188,17 @@
             </label>
             <label class="field-card">
               <span class="info-label">学生类别</span>
-              <select v-model="info.studentCategory" class="info-input" :disabled="!isEditing">
+              <select
+                v-model="info.studentCategory"
+                class="info-input"
+                :disabled="!isEditing"
+              >
                 <option disabled value="">选择学生类别</option>
-                <option v-for="item in studentCategoryOptions" :key="item" :value="item">
+                <option
+                  v-for="item in studentCategoryOptions"
+                  :key="item"
+                  :value="item"
+                >
                   {{ item }}
                 </option>
               </select>
@@ -219,9 +244,17 @@
             </label>
             <label class="field-card">
               <span class="info-label">政治面貌</span>
-              <select v-model="info.politicalStatus" class="info-input" :disabled="!isEditing">
+              <select
+                v-model="info.politicalStatus"
+                class="info-input"
+                :disabled="!isEditing"
+              >
                 <option disabled value="">选择政治面貌</option>
-                <option v-for="item in politicalStatusOptions" :key="item" :value="item">
+                <option
+                  v-for="item in politicalStatusOptions"
+                  :key="item"
+                  :value="item"
+                >
                   {{ item }}
                 </option>
               </select>
@@ -313,9 +346,17 @@
             </label>
             <label class="field-card" v-if="!info.offCampusLiving">
               <span class="info-label">住宿校区</span>
-              <select v-model="info.dormCampus" class="info-input" :disabled="!isEditing || info.offCampusLiving">
+              <select
+                v-model="info.dormCampus"
+                class="info-input"
+                :disabled="!isEditing || info.offCampusLiving"
+              >
                 <option disabled value="">选择住宿校区</option>
-                <option v-for="item in dormCampusOptions" :key="item" :value="item">
+                <option
+                  v-for="item in dormCampusOptions"
+                  :key="item"
+                  :value="item"
+                >
                   {{ item }}
                 </option>
               </select>
@@ -777,7 +818,7 @@ const majorOptionsByCollege = {
   ],
 };
 const studentCategoryOptions = ["本科", "研究生"];
-const politicalStatusOptions = ["无", "共青团员", "入党积极分子", "预备党员", "中共党员"];
+const politicalStatusOptions = ["群众", "共青团员", "中共预备党员", "中共党员"];
 const dormCampusOptions = ["佛山校区", "广州校区"];
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
@@ -800,7 +841,6 @@ const roleLabel = computed(() => {
 const classMajorOptions = computed(() => {
   return majorOptionsByCollege[info.college] || [];
 });
-
 
 const dormBuildingDisabled = computed(
   () => !isEditing.value || info.offCampusLiving || !info.dormCampus,
@@ -829,10 +869,7 @@ const partyAppliedDisabled = computed(
   () => !isEditing.value || !info.leagueJoinDate || info.leagueDeveloping,
 );
 const applicationDateDisabled = computed(
-  () =>
-    !isEditing.value ||
-    partyAppliedDisabled.value ||
-    !info.partyApplied,
+  () => !isEditing.value || partyAppliedDisabled.value || !info.partyApplied,
 );
 const activistDateDisabled = computed(
   () =>
@@ -925,8 +962,6 @@ function resolveMediaUrl(url) {
 function goToSettings() {
   router.push("/settings");
 }
-
-
 
 function handleDigitsInput(field, maxLength, event) {
   const raw = event.target.value || "";
