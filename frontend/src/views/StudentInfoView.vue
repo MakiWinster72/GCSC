@@ -54,7 +54,7 @@
         <h1 class="feed-title">学生信息</h1>
       </header>
 
-      <div class="student-right-stack">
+      <section class="info-shell student-right-stack">
         <section class="info-card student-filter-card">
           <div class="student-filter-header">
             <div class="info-section-title">搜索</div>
@@ -221,7 +221,7 @@
             <button class="action-button" type="button">导出</button>
           </div>
         </section>
-      </div>
+      </section>
 
       <transition name="publisher-backdrop">
         <div
