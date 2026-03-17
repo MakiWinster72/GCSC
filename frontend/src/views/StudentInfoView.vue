@@ -66,7 +66,7 @@
             />
           </div>
           <div class="student-filter-grid">
-            <div class="student-filter-row student-filter-two">
+            <div class="student-filter-row">
               <div class="student-filter-field">
                 <span class="info-label">年级</span>
                 <div class="student-select">
@@ -79,62 +79,30 @@
                   </button>
                   <transition name="student-dropdown">
                     <div v-if="yearMenuOpen" class="student-select-menu">
-                    <button
-                      class="student-select-option"
-                      type="button"
-                      @click="selectYear('')"
-                    >
-                      全部
-                    </button>
-                    <button
-                      v-for="year in classYearOptions"
-                      :key="year"
-                      class="student-select-option"
-                      type="button"
-                      @click="selectYear(String(year))"
-                    >
-                      {{ year }}
-                    </button>
-                  </div>
-                </transition>
+                      <button
+                        class="student-select-option"
+                        type="button"
+                        @click="selectYear('')"
+                      >
+                        全部
+                      </button>
+                      <button
+                        v-for="year in classYearOptions"
+                        :key="year"
+                        class="student-select-option"
+                        type="button"
+                        @click="selectYear(String(year))"
+                      >
+                        {{ year }}
+                      </button>
+                    </div>
+                  </transition>
+                </div>
               </div>
             </div>
-            <div class="student-filter-field">
-              <span class="info-label">学院</span>
-                <div class="student-select">
-                  <button
-                    class="info-input student-select-trigger"
-                    type="button"
-                    @click.stop="toggleCollegeMenu"
-                  >
-                    {{ collegeLabel }}
-                  </button>
-                  <transition name="student-dropdown">
-                    <div v-if="collegeMenuOpen" class="student-select-menu">
-                    <button
-                      class="student-select-option"
-                      type="button"
-                      @click="selectCollege('')"
-                    >
-                      全部
-                    </button>
-                    <button
-                      v-for="college in collegeOptions"
-                      :key="college"
-                      class="student-select-option"
-                      type="button"
-                      @click="selectCollege(college)"
-                    >
-                      {{ college }}
-                    </button>
-                  </div>
-                </transition>
-              </div>
-            </div>
-          </div>
 
-          <div class="student-filter-row">
-            <span class="info-label">班级</span>
+            <div class="student-filter-row">
+              <span class="info-label">班级</span>
               <div class="student-select">
                 <button
                   class="info-input student-select-trigger"
@@ -145,26 +113,26 @@
                 </button>
                 <transition name="student-dropdown">
                   <div v-if="majorMenuOpen" class="student-select-menu">
-                  <button
-                    class="student-select-option"
-                    type="button"
-                    @click="selectMajor('')"
-                  >
-                    全部
-                  </button>
-                  <button
-                    v-for="major in availableMajors"
-                    :key="major"
-                    class="student-select-option"
-                    type="button"
-                    @click="selectMajor(major)"
-                  >
-                    {{ major }}
-                  </button>
-                </div>
-              </transition>
+                    <button
+                      class="student-select-option"
+                      type="button"
+                      @click="selectMajor('')"
+                    >
+                      全部
+                    </button>
+                    <button
+                      v-for="major in availableMajors"
+                      :key="major"
+                      class="student-select-option"
+                      type="button"
+                      @click="selectMajor(major)"
+                    >
+                      {{ major }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
             </div>
-          </div>
 
             <div class="student-filter-row student-filter-inline">
               <label class="info-choice">
@@ -381,7 +349,6 @@ const selectedIds = ref([]);
 const currentPage = ref(1);
 const pageInput = ref(null);
 const yearMenuOpen = ref(false);
-const collegeMenuOpen = ref(false);
 const majorMenuOpen = ref(false);
 const students = ref([]);
 const totalPages = ref(1);
@@ -394,32 +361,23 @@ const viewItem = ref(null);
 const viewLoading = ref(false);
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
-const collegeOptions = [
-  "大数据与人工智能学院",
-  "工商学院",
-  "会计学院",
-  "湾区与影视学院",
+const majorOptions = [
+  "软件工程",
+  "计算机科学与技术",
+  "计算机科学与技术（实验区）",
+  "电子商务",
+  "市场营销",
+  "工商管理",
+  "创业管理",
+  "工商管理（实验区）",
+  "会计学",
+  "审计学",
+  "国际会计（ACCA）",
+  "播音",
 ];
-const collegeMajorsMap = {
-  大数据与人工智能学院: [
-    "软件工程",
-    "计算机科学与技术",
-    "计算机科学与技术（实验区）",
-    "电子商务",
-  ],
-  工商学院: [
-    "市场营销",
-    "工商管理",
-    "创业管理",
-    "工商管理（实验区）",
-  ],
-  会计学院: ["会计学", "审计学", "国际会计（ACCA）"],
-  湾区与影视学院: ["播音"],
-};
 
 const filters = reactive({
   classYear: "",
-  college: "",
   major: "",
   isHkMoTw: false,
   isSpecial: false,
@@ -427,21 +385,15 @@ const filters = reactive({
 });
 
 const availableMajors = computed(() => {
-  if (!filters.college) {
-    const majors = Object.values(collegeMajorsMap).flat();
-    return Array.from(new Set(majors));
-  }
-  return collegeMajorsMap[filters.college] || [];
+  return majorOptions;
 });
 
 const yearLabel = computed(() => filters.classYear || "全部");
-const collegeLabel = computed(() => filters.college || "全部");
 const majorLabel = computed(() => filters.major || "全部");
 
 const hasActiveFilters = computed(() => {
   return Boolean(
     filters.classYear ||
-      filters.college ||
       filters.major ||
       filters.isHkMoTw ||
       filters.isSpecial ||
@@ -454,7 +406,6 @@ const pagedStudents = computed(() => students.value);
 watch(
   () => ({
     classYear: filters.classYear,
-    college: filters.college,
     major: filters.major,
     isHkMoTw: filters.isHkMoTw,
     isSpecial: filters.isSpecial,
@@ -487,9 +438,6 @@ async function fetchStudents() {
     };
     if (filters.classYear) {
       params.classYear = filters.classYear;
-    }
-    if (filters.college) {
-      params.college = filters.college;
     }
     if (filters.major) {
       params.major = filters.major;
@@ -527,7 +475,6 @@ async function fetchStudents() {
 function toggleYearMenu() {
   yearMenuOpen.value = !yearMenuOpen.value;
   if (yearMenuOpen.value) {
-    collegeMenuOpen.value = false;
     majorMenuOpen.value = false;
   }
 }
@@ -537,27 +484,10 @@ function selectYear(value) {
   yearMenuOpen.value = false;
 }
 
-function toggleCollegeMenu() {
-  collegeMenuOpen.value = !collegeMenuOpen.value;
-  if (collegeMenuOpen.value) {
-    yearMenuOpen.value = false;
-    majorMenuOpen.value = false;
-  }
-}
-
-function selectCollege(value) {
-  filters.college = value;
-  if (filters.college && !availableMajors.value.includes(filters.major)) {
-    filters.major = "";
-  }
-  collegeMenuOpen.value = false;
-}
-
 function toggleMajorMenu() {
   majorMenuOpen.value = !majorMenuOpen.value;
   if (majorMenuOpen.value) {
     yearMenuOpen.value = false;
-    collegeMenuOpen.value = false;
   }
 }
 
@@ -598,7 +528,6 @@ function handleDocumentClick(event) {
     return;
   }
   yearMenuOpen.value = false;
-  collegeMenuOpen.value = false;
   majorMenuOpen.value = false;
 }
 
