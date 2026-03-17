@@ -131,12 +131,7 @@
             </label>
             <label class="field-card">
               <span class="info-label">学院</span>
-              <select v-model="info.college" class="info-input" :disabled="!isEditing">
-                <option disabled value="">选择学院</option>
-                <option v-for="item in collegeOptions" :key="item" :value="item">
-                  {{ item }}
-                </option>
-              </select>
+              <input v-model="info.college" class="info-input" type="text" disabled />
             </label>
             <label class="field-card field-full">
               <span class="info-label">班级</span>
@@ -705,6 +700,7 @@ import { uploadMedia } from "../api/upload";
 import { API_BASE } from "../api/request";
 
 const router = useRouter();
+const FIXED_COLLEGE = "大数据与人工智能学院";
 
 const profile = reactive(loadUser());
 const activeMenu = ref("my-info");
@@ -720,7 +716,7 @@ const info = reactive({
   classMajor: "",
   classNo: 1,
   className: profile.className || "",
-  college: profile.college || "",
+  college: FIXED_COLLEGE,
   enrollmentDate: "",
   studentCategory: "",
   ethnicity: "",
@@ -767,7 +763,6 @@ const info = reactive({
 });
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
-const collegeOptions = ["大数据与人工智能学院"];
 const majorOptionsByCollege = {
   大数据与人工智能学院: [
     "计算机科学与技术",
@@ -985,7 +980,7 @@ async function confirmEdit() {
     classMajor: info.classMajor,
     classNo: info.classNo,
     className,
-    college: info.college,
+    college: FIXED_COLLEGE,
     enrollmentDate: info.enrollmentDate || null,
     studentCategory: info.studentCategory,
     ethnicity: info.ethnicity,
@@ -1098,7 +1093,7 @@ function applyProfileResponse(data) {
   info.classMajor = data.classMajor || "";
   info.classNo = data.classNo ?? 1;
   info.className = data.className || "";
-  info.college = data.college || "";
+  info.college = FIXED_COLLEGE;
   info.enrollmentDate = data.enrollmentDate || "";
   info.studentCategory = data.studentCategory || "";
   info.ethnicity = data.ethnicity || "";
@@ -1148,7 +1143,7 @@ function applyProfileResponse(data) {
   profile.avatarUrl = data.avatarUrl || profile.avatarUrl;
   profile.studentNo = data.studentNo || profile.studentNo;
   profile.className = data.className || profile.className;
-  profile.college = data.college || profile.college;
+  profile.college = FIXED_COLLEGE;
 
   saveUser(profile);
 }
@@ -1161,7 +1156,7 @@ function saveUser(data) {
     role: data.role || profile.role || "STUDENT",
     studentNo: data.studentNo || "",
     className: data.className || "",
-    college: data.college || "",
+    college: FIXED_COLLEGE,
   };
   localStorage.setItem("gcsc_user", JSON.stringify(user));
 }
@@ -1304,7 +1299,7 @@ function loadUser() {
       role: raw.role || "STUDENT",
       studentNo: raw.studentNo || "",
       className: raw.className || "",
-      college: raw.college || "",
+      college: FIXED_COLLEGE,
     };
   } catch {
     return {
@@ -1314,7 +1309,7 @@ function loadUser() {
       role: "STUDENT",
       studentNo: "",
       className: "",
-      college: "",
+      college: FIXED_COLLEGE,
     };
   }
 }

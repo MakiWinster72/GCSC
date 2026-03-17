@@ -19,6 +19,8 @@ import com.gcsc.studentcenter.repository.StudentProfileRepository;
 @Service
 public class StudentProfileService {
 
+    private static final String FIXED_COLLEGE = "大数据与人工智能学院";
+
     private final StudentProfileRepository studentProfileRepository;
     private final AppUserRepository appUserRepository;
 
@@ -63,7 +65,7 @@ public class StudentProfileService {
         profile.setClassMajor(normalize(request.getClassMajor()));
         profile.setClassNo(normalize(request.getClassNo()));
         profile.setClassName(resolveClassName(request));
-        profile.setCollege(normalize(request.getCollege()));
+        profile.setCollege(FIXED_COLLEGE);
         profile.setEnrollmentDate(request.getEnrollmentDate());
         profile.setStudentCategory(normalize(request.getStudentCategory()));
         profile.setEthnicity(normalize(request.getEthnicity()));
@@ -155,9 +157,7 @@ public class StudentProfileService {
         }
         user.setStudentNo(profile.getStudentNo());
         user.setClassName(profile.getClassName());
-        if (profile.getCollege() != null) {
-            user.setCollege(profile.getCollege());
-        }
+        user.setCollege(FIXED_COLLEGE);
         appUserRepository.save(user);
     }
 
