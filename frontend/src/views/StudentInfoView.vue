@@ -225,7 +225,7 @@
           </div>
 
           <div class="info-card">
-            <div class="info-section-title">个人信息</div>
+            <div class="info-section-title">学籍信息</div>
             <div class="info-form-grid">
               <div class="field-card">
                 <span class="info-label">名字</span>
@@ -235,93 +235,258 @@
                 <span class="info-label">学号</span>
                 <div class="info-input info-static">{{ viewItem.studentNo || "-" }}</div>
               </div>
-              <div class="field-card field-full">
-                <span class="info-label">班别</span>
+              <div class="field-card">
+                <span class="info-label">年级</span>
                 <div class="info-input info-static">
-                  {{ viewItem.classYear ? viewItem.classYear + "级" : "" }}{{ viewItem.classMajor || "" }}{{ viewItem.classNo ? viewItem.classNo + "班" : "" }}
+                  {{ viewItem.classYear ? viewItem.classYear + "级" : "-" }}
                 </div>
               </div>
               <div class="field-card">
                 <span class="info-label">学院</span>
                 <div class="info-input info-static">{{ viewItem.college || "-" }}</div>
               </div>
+              <div class="field-card field-full">
+                <span class="info-label">班级</span>
+                <div class="info-input info-static">
+                  {{ buildClassName(viewItem) || "-" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">入学时间</span>
+                <div class="info-input info-static">{{ viewItem.enrollmentDate || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">学生类别</span>
+                <div class="info-input info-static">{{ viewItem.studentCategory || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">班主任</span>
+                <div class="info-input info-static">{{ viewItem.classTeacher || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">辅导员</span>
+                <div class="info-input info-static">{{ viewItem.counselor || "-" }}</div>
+              </div>
             </div>
           </div>
 
           <div class="info-card">
-            <div class="info-section-title">联系方式</div>
+            <div class="info-section-title">个人证件与联系方式</div>
             <div class="info-form-grid">
               <div class="field-card">
-                <span class="info-label">电话号码</span>
+                <span class="info-label">民族</span>
+                <div class="info-input info-static">{{ viewItem.ethnicity || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">政治面貌</span>
+                <div class="info-input info-static">{{ viewItem.politicalStatus || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
                 <div class="info-input info-static">{{ viewItem.phone || "-" }}</div>
               </div>
               <div class="field-card">
-                <span class="info-label">紧急联系电话</span>
-                <div class="info-input info-static">{{ viewItem.emergencyPhone || "-" }}</div>
-              </div>
-              <div class="field-card field-full">
-                <span class="info-label">紧急联系人关系</span>
-                <div class="info-input info-static">{{ viewItem.emergencyRelation || "-" }}</div>
-              </div>
-              <div class="field-card field-full">
-                <span class="info-label">现住址</span>
-                <div class="info-input info-static">{{ viewItem.address || "-" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-section-title">党团信息</div>
-            <div class="info-form-grid">
-              <div class="field-card">
-                <span class="info-label">团员编号</span>
-                <div class="info-input info-static">{{ viewItem.leagueNo || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">入党申请</span>
-                <div class="info-input info-static">
-                  {{ viewItem.partyApplied ? "是" : "否" }}
-                </div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">积极分子日期</span>
-                <div class="info-input info-static">{{ viewItem.activistDate || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">入党申请日期</span>
-                <div class="info-input info-static">{{ viewItem.applicationDate || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">是否未发展党员</span>
-                <div class="info-input info-static">
-                  {{ viewItem.notDeveloped ? "是" : "否" }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-section-title">其他信息</div>
-            <div class="info-form-grid">
-              <div class="field-card">
-                <span class="info-label">身份证号</span>
+                <span class="info-label">身份证件号</span>
                 <div class="info-input info-static">{{ viewItem.idNo || "-" }}</div>
               </div>
               <div class="field-card">
                 <span class="info-label">籍贯</span>
                 <div class="info-input info-static">{{ viewItem.nativePlace || "-" }}</div>
               </div>
-              <div class="field-card">
-                <span class="info-label">港澳台</span>
+              <div class="field-card field-full">
+                <span class="info-label">住址</span>
+                <div class="info-input info-static">{{ viewItem.address || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">住宿信息</div>
+            <div class="info-form-grid">
+              <div class="field-card field-full">
+                <span class="info-label">是否在外居住</span>
                 <div class="info-input info-static">
-                  {{ viewItem.hkMoTw ? "是" : "否" }}
+                  {{ viewItem.offCampusLiving ? "是" : "否" }}
+                </div>
+              </div>
+              <div class="field-card field-full" v-if="viewItem.offCampusLiving">
+                <span class="info-label">外居住详细地址</span>
+                <div class="info-input info-static">{{ viewItem.offCampusAddress || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿校区</span>
+                <div class="info-input info-static">{{ viewItem.dormCampus || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿楼栋</span>
+                <div class="info-input info-static">{{ viewItem.dormBuilding || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿房间</span>
+                <div class="info-input info-static">{{ viewItem.dormRoom || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">团组织与入党信息</div>
+            <div class="info-form-grid three">
+              <div class="field-card field-full">
+                <span class="info-label">是否入团</span>
+                <div class="info-input info-static">
+                  {{ viewItem.leagueJoined ? "是" : "否" }}
                 </div>
               </div>
               <div class="field-card">
-                <span class="info-label">特殊学生</span>
+                <span class="info-label">提交入团申请书时间</span>
                 <div class="info-input info-static">
-                  {{ viewItem.specialStudent ? "是" : "否" }}
+                  {{ viewItem.leagueApplicationDate || "-" }}
                 </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">入团时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.leagueJoinDate, viewItem.leagueDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">团号</span>
+                <div class="info-input info-static">{{ viewItem.leagueNo || "-" }}</div>
+              </div>
+              <div class="field-card field-full">
+                <span class="info-label">是否申请入党</span>
+                <div class="info-input info-static">
+                  {{ viewItem.partyApplied ? "是" : "否" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">提交入党申请书时间</span>
+                <div class="info-input info-static">
+                  {{ viewItem.applicationDate || "-" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">确定积极分子时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.activistDate, viewItem.activistDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">上党课时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.partyTrainingDate, viewItem.partyTrainingPending, "暂未报名") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">确定发展对象时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.developmentTargetDate, viewItem.developmentTargetDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">接收为预备党员时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.probationaryMemberDate, viewItem.probationaryDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">转为正式党员时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.fullMemberDate, viewItem.fullMemberDeveloping, "正在发展") }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">教育经历</div>
+            <div v-if="educationRows.length" class="education-table-wrap">
+              <table class="education-table">
+                <thead>
+                  <tr>
+                    <th>时间段</th>
+                    <th>学校名称</th>
+                    <th>学历</th>
+                    <th>证明人</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in educationRows" :key="`edu-view-${index}`">
+                    <td>
+                      <div class="education-period">
+                        <div class="info-input info-static">{{ item.startDate || "-" }}</div>
+                        <span class="education-sep">至</span>
+                        <div class="info-input info-static">
+                          {{ item.isCurrent ? "至今" : item.endDate || "-" }}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.schoolName || "-" }}</div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.educationLevel || "-" }}</div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.witness || "-" }}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="empty-tip">暂无教育经历</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">家庭信息</div>
+            <div class="info-form-grid family-grid">
+              <div class="family-section-title">父亲</div>
+              <div class="field-card">
+                <span class="info-label">姓名</span>
+                <div class="info-input info-static">{{ viewItem.fatherName || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
+                <div class="info-input info-static">{{ viewItem.fatherPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">工作单位</span>
+                <div class="info-input info-static">{{ viewItem.fatherWorkUnit || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">职务</span>
+                <div class="info-input info-static">{{ viewItem.fatherTitle || "-" }}</div>
+              </div>
+              <div class="family-section-title">母亲</div>
+              <div class="field-card">
+                <span class="info-label">姓名</span>
+                <div class="info-input info-static">{{ viewItem.motherName || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
+                <div class="info-input info-static">{{ viewItem.motherPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">工作单位</span>
+                <div class="info-input info-static">{{ viewItem.motherWorkUnit || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">职务</span>
+                <div class="info-input info-static">{{ viewItem.motherTitle || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">紧急联系人</div>
+            <div class="info-form-grid">
+              <div class="field-card">
+                <span class="info-label">紧急联系人电话</span>
+                <div class="info-input info-static">{{ viewItem.emergencyPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">紧急联系人的关系</span>
+                <div class="info-input info-static">{{ viewItem.emergencyRelation || "-" }}</div>
               </div>
             </div>
           </div>
@@ -392,6 +557,25 @@ const hasActiveFilters = computed(() => {
 });
 
 const pagedStudents = computed(() => students.value);
+const educationRows = computed(() => {
+  const items = viewItem.value?.educationExperiences;
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items.filter((item) => {
+    if (!item) {
+      return false;
+    }
+    return (
+      item.startDate ||
+      item.endDate ||
+      item.schoolName ||
+      item.educationLevel ||
+      item.witness ||
+      item.isCurrent
+    );
+  });
+});
 
 watch(
   () => ({
@@ -508,6 +692,26 @@ function applyPageInput() {
   }
   const safePage = Math.min(Math.max(1, pageInput.value), totalPages.value);
   currentPage.value = safePage;
+}
+
+function formatDateOrStatus(dateValue, statusFlag, statusText) {
+  if (statusFlag) {
+    return statusText;
+  }
+  return dateValue || "-";
+}
+
+function buildClassName(item) {
+  if (!item) {
+    return "";
+  }
+  if (item.className) {
+    return item.className;
+  }
+  const safeYear = item.classYear ? `${item.classYear}级` : "";
+  const safeMajor = item.classMajor || "";
+  const safeNo = item.classNo ? `${item.classNo}班` : "";
+  return `${safeYear}${safeMajor}${safeNo}`.trim();
 }
 
 function normalizeClassNo() {
