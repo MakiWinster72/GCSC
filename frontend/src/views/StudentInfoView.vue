@@ -83,13 +83,53 @@
             </div>
 
             <div class="student-filter-row">
-              <span class="info-label">班级</span>
-              <select v-model="filters.major" class="info-input">
-                <option value="">全部</option>
-                <option v-for="major in availableMajors" :key="major" :value="major">
-                  {{ major }}
-                </option>
-              </select>
+              <div class="student-filter-field">
+                <span class="info-label">专业</span>
+                <select v-model="filters.major" class="info-input">
+                  <option value="">全部</option>
+                  <option
+                    v-for="major in availableMajors"
+                    :key="major"
+                    :value="major"
+                  >
+                    {{ major }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="student-filter-row">
+              <div class="student-filter-field">
+                <span class="info-label">班级</span>
+                <div class="student-stepper">
+                  <button
+                    class="stepper-button"
+                    type="button"
+                    :disabled="!canDecrementClass"
+                    @click="decrementClass"
+                  >
+                    −
+                  </button>
+                  <input
+                    v-model="filters.classNo"
+                    class="info-input stepper-input"
+                    type="number"
+                    min="1"
+                    max="10"
+                    step="1"
+                    placeholder="全部"
+                    @input="normalizeClassNo"
+                  />
+                  <button
+                    class="stepper-button"
+                    type="button"
+                    :disabled="!canIncrementClass"
+                    @click="incrementClass"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="student-filter-row student-filter-inline">
@@ -316,25 +356,20 @@ const viewClosing = ref(false);
 const viewItem = ref(null);
 const viewLoading = ref(false);
 
-const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
+const classYearOptions = Array.from({ length: 11 }, (_, index) => 2020 + index);
 const majorOptions = [
-  "软件工程",
   "计算机科学与技术",
   "计算机科学与技术（实验区）",
+  "软件工程",
   "电子商务",
-  "市场营销",
-  "工商管理",
-  "创业管理",
-  "工商管理（实验区）",
-  "会计学",
-  "审计学",
-  "国际会计（ACCA）",
-  "播音",
+  "大数据管理与应用（佛山校区全学段）",
+  "大数据管理与应用（数字治理）",
 ];
 
 const filters = reactive({
   classYear: "",
   major: "",
+  classNo: "",
   isHkMoTw: false,
   isSpecial: false,
   keyword: "",
@@ -349,6 +384,7 @@ const hasActiveFilters = computed(() => {
   return Boolean(
     filters.classYear ||
       filters.major ||
+      filters.classNo ||
       filters.isHkMoTw ||
       filters.isSpecial ||
       filters.keyword,
@@ -361,6 +397,7 @@ watch(
   () => ({
     classYear: filters.classYear,
     major: filters.major,
+    classNo: filters.classNo,
     isHkMoTw: filters.isHkMoTw,
     isSpecial: filters.isSpecial,
     keyword: filters.keyword,
@@ -395,6 +432,9 @@ async function fetchStudents() {
     }
     if (filters.major) {
       params.major = filters.major;
+    }
+    if (filters.classNo) {
+      params.classNo = Number(filters.classNo);
     }
     if (filters.isHkMoTw) {
       params.hkMoTw = true;
@@ -468,6 +508,48 @@ function applyPageInput() {
   }
   const safePage = Math.min(Math.max(1, pageInput.value), totalPages.value);
   currentPage.value = safePage;
+}
+
+function normalizeClassNo() {
+  if (filters.classNo === "") {
+    return;
+  }
+  const next = Number(filters.classNo);
+  if (Number.isNaN(next)) {
+    filters.classNo = "";
+    return;
+  }
+  const clamped = Math.min(Math.max(1, next), 10);
+  filters.classNo = String(clamped);
+}
+
+const canDecrementClass = computed(() => true);
+const canIncrementClass = computed(() => true);
+
+function decrementClass() {
+  const current = Number(filters.classNo);
+  if (!filters.classNo || Number.isNaN(current)) {
+    filters.classNo = "10";
+    return;
+  }
+  if (current <= 1) {
+    filters.classNo = "";
+    return;
+  }
+  filters.classNo = String(current - 1);
+}
+
+function incrementClass() {
+  const current = Number(filters.classNo);
+  if (!filters.classNo || Number.isNaN(current)) {
+    filters.classNo = "1";
+    return;
+  }
+  if (current >= 10) {
+    filters.classNo = "";
+    return;
+  }
+  filters.classNo = String(current + 1);
 }
 
 const roleLabelMap = {
@@ -567,6 +649,7 @@ function loadUser() {
 
 .student-filter-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
 }
 
@@ -585,11 +668,39 @@ function loadUser() {
   gap: 8px;
 }
 
+.student-stepper {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  gap: 10px;
+  align-items: center;
+}
+
+.stepper-button {
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 107, 114, 0.25);
+  background: rgba(255, 255, 255, 0.6);
+  color: #0f4d55;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stepper-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.stepper-input {
+  text-align: center;
+}
+
 
 .student-filter-inline {
   display: flex;
   gap: 18px;
   align-items: center;
+  grid-column: 1 / -1;
 }
 
 .student-results-card {
