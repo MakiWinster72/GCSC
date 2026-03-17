@@ -91,9 +91,6 @@
     <main class="dashboard-right">
       <header class="feed-header">
         <h1 class="feed-title">个人成就</h1>
-        <div class="achievement-category-pill">
-          {{ activeCategoryLabel }}
-        </div>
       </header>
 
       <section v-if="activeCategory === 'all'" class="info-card achievement-intro-card">
