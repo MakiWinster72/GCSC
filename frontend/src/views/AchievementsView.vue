@@ -245,7 +245,7 @@
           </button>
 
           <div class="achievement-fields">
-            <div v-if="showCategorySelect" class="field-row">
+            <div class="field-row">
               <label class="field-label">成就分类</label>
               <select v-model="form.category" class="form-input">
                 <option disabled value="">请选择分类</option>
@@ -257,12 +257,6 @@
                   {{ entry.label }}
                 </option>
               </select>
-            </div>
-            <div v-else class="field-row">
-              <label class="field-label">成就分类</label>
-              <div class="achievement-category-tag">
-                {{ activeCategoryLabel }}
-              </div>
             </div>
             <div class="field-row">
               <label class="field-label">成就名字</label>
@@ -430,7 +424,6 @@ const activeCategoryLabel = computed(() => {
   const match = achievementEntries.find((entry) => entry.key === activeCategory.value);
   return match ? match.label : "全部";
 });
-const showCategorySelect = computed(() => activeCategory.value === "all");
 const filteredAchievements = computed(() => {
   if (activeCategory.value === "all") {
     return achievements.value;
