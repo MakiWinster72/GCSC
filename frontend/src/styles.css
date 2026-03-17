@@ -1385,6 +1385,13 @@ body {
   letter-spacing: 0.3px;
 }
 
+.info-hint {
+  font-size: 12px;
+  color: #9aa7ad;
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .info-hero-subtitle {
   font-size: 13px;
   color: #5e7680;

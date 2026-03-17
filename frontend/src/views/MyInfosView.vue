@@ -396,8 +396,8 @@
                   :disabled="dormRoomDisabled"
                 />
                 <span class="class-text">号</span>
-                <span class="class-text">如：223 -> 2 层 23 号</span>
               </div>
+              <div class="info-hint">如：223 -> 2 层 23 号</div>
             </label>
           </div>
         </div>
@@ -605,6 +605,7 @@
         </div>
 
         <div class="info-card">
+          <!-- TODO: 单亲/离异等待现场演示求助 -->
           <div class="info-section-title">家庭信息</div>
           <div class="info-form-grid family-grid">
             <div class="family-section-title">父亲</div>
@@ -640,6 +641,9 @@
                 placeholder="请输入父亲工作单位"
                 :disabled="!isEditing"
               />
+              <div class="info-hint">
+                填写公司名字即可，若开小店则填写个体户，若无固定单位则填写散工，无业则写在家
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">职务</span>
@@ -650,6 +654,7 @@
                 placeholder="请输入父亲职务"
                 :disabled="!isEditing"
               />
+              <div class="info-hint">无业则填写“务农”</div>
             </label>
             <div class="family-section-title">母亲</div>
             <label class="field-card">
