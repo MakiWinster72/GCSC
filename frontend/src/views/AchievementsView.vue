@@ -117,6 +117,7 @@
             'achievement-card-patent': item.category === 'patent',
             'achievement-card-certificate': item.category === 'certificate',
             'achievement-card-research': item.category === 'research',
+            'achievement-card-works': item.category === 'works',
           }"
           @click="openDetail(item)"
         >
@@ -228,6 +229,26 @@
               {{ formatResearchTeacher(item.fields) }}
             </div>
             <div class="achievement-research-tag" aria-hidden="true">科研项目</div>
+          </div>
+          <div v-else-if="item.category === 'works'" class="achievement-card-body">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksCategory(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksOccasion(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksDate(item.fields) }}
+            </div>
+            <div class="achievement-works-tag" aria-hidden="true">
+              {{ formatWorksTag(item.fields) }}
+            </div>
+            <div class="achievement-card-organizer">
+              {{ formatWorksOrganizer(item.fields) }}
+            </div>
           </div>
           <div v-else class="achievement-card-body">
             <div class="achievement-card-title">{{ item.title || "-" }}</div>
@@ -405,6 +426,26 @@
             </div>
             <div class="achievement-card-text">
               {{ formatResearchTeacher(viewItem.fields) }}
+            </div>
+          </div>
+          <div v-else-if="viewItem.category === 'works'">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ viewItem.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksCategory(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksOccasion(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatWorksDate(viewItem.fields) }}
+            </div>
+            <div class="achievement-works-tag" aria-hidden="true">
+              {{ formatWorksTag(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-organizer">
+              {{ formatWorksOrganizer(viewItem.fields) }}
             </div>
           </div>
             <div v-else>
@@ -1089,6 +1130,15 @@ function loadUser() {
   }
 }
 
+function getCurrentStudentNo() {
+  try {
+    const raw = JSON.parse(localStorage.getItem("gcsc_user") || "{}");
+    return raw.studentNo || profile.studentNo || "";
+  } catch {
+    return profile.studentNo || "";
+  }
+}
+
 function handleMenuClick(key) {
   if (!isMenuEnabled(key)) {
     return;
@@ -1339,6 +1389,26 @@ function formatResearchTeacher(fields = {}) {
   return `教师工号：${fields.teacherNo || "-"}`;
 }
 
+function formatWorksCategory(fields = {}) {
+  return fields.workCategory || "-";
+}
+
+function formatWorksOccasion(fields = {}) {
+  return fields.publishOccasion || "-";
+}
+
+function formatWorksDate(fields = {}) {
+  return fields.publishDate || "-";
+}
+
+function formatWorksTag(fields = {}) {
+  return fields.workCategory || "作品";
+}
+
+function formatWorksOrganizer(fields = {}) {
+  return `主办单位：${fields.organizer || "-"}`;
+}
+
 function dedupeAchievements(list) {
   const seen = new Set();
   return list.filter((item) => {
@@ -1485,7 +1555,7 @@ function applyFieldDefaults() {
     (field) => field.key === "studentName",
   );
   if (hasStudentNo && !form.fields.studentNo) {
-    form.fields.studentNo = profile.studentNo || "";
+    form.fields.studentNo = getCurrentStudentNo();
   }
   if (hasStudentName && !form.fields.studentName) {
     form.fields.studentName = profile.displayName || profile.username || "";
