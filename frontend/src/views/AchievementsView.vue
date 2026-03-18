@@ -1197,15 +1197,20 @@ async function saveAchievement() {
   try {
     if (editId.value) {
       const { data } = await updateAchievement(category, editId.value, payload);
-      achievements.value = achievements.value.map((item) =>
-        item.id === data.id ? normalizeAchievement(data) : item,
+      achievements.value = dedupeAchievements(
+        achievements.value.map((item) =>
+          item.id === data.id ? normalizeAchievement(data) : item,
+        ),
       );
       if (viewItem.value && viewItem.value.id === data.id) {
         viewItem.value = normalizeAchievement(data);
       }
     } else {
       const { data } = await createAchievement(category, payload);
-      achievements.value = [normalizeAchievement(data), ...achievements.value];
+      achievements.value = dedupeAchievements([
+        normalizeAchievement(data),
+        ...achievements.value,
+      ]);
     }
     resetForm();
     closeEditor();
@@ -1344,6 +1349,21 @@ function formatResearchStudent(fields = {}) {
   return fields.studentName || "-";
 }
 
+function dedupeAchievements(list) {
+  const seen = new Set();
+  return list.filter((item) => {
+    if (!item || item.id == null) {
+      return true;
+    }
+    const key = `${item.category || ""}:${item.id}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 function normalizeAchievement(item) {
   const config = categoryFieldMap[item.category] || null;
   const fields = item.fields || {};
@@ -1439,7 +1459,7 @@ async function fetchAchievements() {
   try {
     const { data } = await getAchievements();
     achievements.value = Array.isArray(data)
-      ? data.map(normalizeAchievement)
+      ? dedupeAchievements(data.map(normalizeAchievement))
       : [];
     errorMessage.value = "";
   } catch (err) {
