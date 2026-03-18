@@ -441,9 +441,6 @@
             <div class="achievement-card-text">
               {{ formatWorksDate(viewItem.fields) }}
             </div>
-            <div class="achievement-works-tag" aria-hidden="true">
-              {{ formatWorksTag(viewItem.fields) }}
-            </div>
             <div class="achievement-card-organizer">
               {{ formatWorksOrganizer(viewItem.fields) }}
             </div>
