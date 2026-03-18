@@ -115,6 +115,8 @@
             'achievement-card-paper': item.category === 'paper',
             'achievement-card-journal': item.category === 'journal',
             'achievement-card-patent': item.category === 'patent',
+            'achievement-card-certificate': item.category === 'certificate',
+            'achievement-card-research': item.category === 'research',
           }"
           @click="openDetail(item)"
         >
@@ -194,6 +196,41 @@
             <div class="achievement-patent-tag" aria-hidden="true">
               {{ formatPatentTag(item.fields) }}
             </div>
+          </div>
+          <div
+            v-else-if="item.category === 'certificate'"
+            class="achievement-card-body"
+          >
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateType(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateOwner(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateDate(item.fields) }}
+            </div>
+            <div class="achievement-certificate-tag" aria-hidden="true">
+              职业资格证书
+            </div>
+          </div>
+          <div v-else-if="item.category === 'research'" class="achievement-card-body">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchLeader(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchTeacher(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchStudent(item.fields) }}
+            </div>
+            <div class="achievement-research-tag" aria-hidden="true">科研项目</div>
           </div>
           <div v-else class="achievement-card-body">
             <div class="achievement-card-title">{{ item.title || "-" }}</div>
@@ -346,6 +383,34 @@
             </div>
             <div class="achievement-card-text">
               {{ formatPatentDate(viewItem.fields) }}
+            </div>
+          </div>
+          <div v-else-if="viewItem.category === 'certificate'">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ viewItem.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateType(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateOwner(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatCertificateDate(viewItem.fields) }}
+            </div>
+          </div>
+          <div v-else-if="viewItem.category === 'research'">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ viewItem.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchLeader(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchTeacher(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatResearchStudent(viewItem.fields) }}
             </div>
           </div>
             <div v-else>
@@ -1253,6 +1318,30 @@ function formatPatentDate(fields = {}) {
 
 function formatPatentTag(fields = {}) {
   return fields.patentType || "专利";
+}
+
+function formatCertificateType(fields = {}) {
+  return fields.certificateType || "-";
+}
+
+function formatCertificateOwner(fields = {}) {
+  return fields.studentName || "-";
+}
+
+function formatCertificateDate(fields = {}) {
+  return fields.obtainDate || "-";
+}
+
+function formatResearchLeader(fields = {}) {
+  return fields.projectLeader || "-";
+}
+
+function formatResearchTeacher(fields = {}) {
+  return fields.teacherNo || "-";
+}
+
+function formatResearchStudent(fields = {}) {
+  return fields.studentName || "-";
 }
 
 function normalizeAchievement(item) {
