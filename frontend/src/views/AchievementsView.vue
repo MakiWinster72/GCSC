@@ -111,7 +111,11 @@
           v-for="item in filteredAchievements"
           :key="item.id"
           class="achievement-card"
-          :class="{ 'achievement-card-paper': item.category === 'paper' }"
+          :class="{
+            'achievement-card-paper': item.category === 'paper',
+            'achievement-card-journal': item.category === 'journal',
+            'achievement-card-patent': item.category === 'patent',
+          }"
           @click="openDetail(item)"
         >
           <div class="achievement-card-image">
@@ -144,20 +148,52 @@
               {{ formatContestOrganizer(item.fields) }}
             </div>
           </div>
-            <div v-else-if="item.category === 'paper'" class="achievement-card-body">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ item.title || "-" }}
-              </div>
-              <div class="achievement-card-text">
-                {{ formatPaperJournal(item.fields) }}
-              </div>
-              <div class="achievement-card-text">
-                {{ formatPaperAuthors(item.fields) }}
-              </div>
+          <div v-else-if="item.category === 'paper'" class="achievement-card-body">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPaperJournal(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPaperAuthors(item.fields) }}
+            </div>
             <div class="achievement-card-text">
               {{ formatPaperDate(item.fields) }}
             </div>
             <div class="achievement-paper-tag" aria-hidden="true">学术论文</div>
+          </div>
+          <div v-else-if="item.category === 'journal'" class="achievement-card-body">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatJournalPublication(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatJournalAuthor(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatJournalDate(item.fields) }}
+            </div>
+            <div class="achievement-journal-tag" aria-hidden="true">期刊作品</div>
+          </div>
+          <div v-else-if="item.category === 'patent'" class="achievement-card-body">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ item.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentGrantNo(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentInventor(item.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentDate(item.fields) }}
+            </div>
+            <div class="achievement-patent-tag" aria-hidden="true">
+              {{ formatPatentTag(item.fields) }}
+            </div>
           </div>
           <div v-else class="achievement-card-body">
             <div class="achievement-card-title">{{ item.title || "-" }}</div>
@@ -280,8 +316,36 @@
               <div class="achievement-card-text">
                 {{ formatPaperAuthors(viewItem.fields) }}
               </div>
+              <div class="achievement-card-text">
+                {{ formatPaperDate(viewItem.fields) }}
+              </div>
+          </div>
+          <div v-else-if="viewItem.category === 'journal'">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ viewItem.title || "-" }}
+            </div>
             <div class="achievement-card-text">
-              {{ formatPaperDate(viewItem.fields) }}
+              {{ formatJournalPublication(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatJournalAuthor(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatJournalDate(viewItem.fields) }}
+            </div>
+          </div>
+          <div v-else-if="viewItem.category === 'patent'">
+            <div class="achievement-card-title achievement-paper-title">
+              {{ viewItem.title || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentGrantNo(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentInventor(viewItem.fields) }}
+            </div>
+            <div class="achievement-card-text">
+              {{ formatPatentDate(viewItem.fields) }}
             </div>
           </div>
             <div v-else>
@@ -1159,6 +1223,36 @@ function formatPaperAuthors(fields = {}) {
 
 function formatPaperDate(fields = {}) {
   return fields.publishDate || "-";
+}
+
+function formatJournalPublication(fields = {}) {
+  return fields.publicationName || "-";
+}
+
+function formatJournalAuthor(fields = {}) {
+  return fields.studentName || "-";
+}
+
+function formatJournalDate(fields = {}) {
+  return fields.publishDate || "-";
+}
+
+function formatPatentGrantNo(fields = {}) {
+  return fields.grantNo || "-";
+}
+
+function formatPatentInventor(fields = {}) {
+  const name = fields.studentName || "-";
+  const first = fields.firstInventor ? `（${fields.firstInventor}）` : "";
+  return `${name}${first}`;
+}
+
+function formatPatentDate(fields = {}) {
+  return fields.grantDate || "-";
+}
+
+function formatPatentTag(fields = {}) {
+  return fields.patentType || "专利";
 }
 
 function normalizeAchievement(item) {

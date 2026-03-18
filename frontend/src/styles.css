@@ -1129,6 +1129,24 @@ body {
   padding-bottom: 28px;
 }
 
+.achievement-card-journal {
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-card-journal .achievement-card-body {
+  padding-bottom: 28px;
+}
+
+.achievement-card-patent {
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-card-patent .achievement-card-body {
+  padding-bottom: 28px;
+}
+
 .achievement-paper-title {
   display: block;
   font-size: 16px;
@@ -1150,6 +1168,32 @@ body {
 }
 
 .achievement-paper-tag {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(13, 63, 69, 0.2);
+  font-family: "Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-style: italic;
+  pointer-events: none;
+}
+
+.achievement-journal-tag {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(13, 63, 69, 0.2);
+  font-family: "Montserrat", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-style: italic;
+  pointer-events: none;
+}
+
+.achievement-patent-tag {
   position: absolute;
   right: 14px;
   bottom: 10px;
