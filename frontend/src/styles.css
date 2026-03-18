@@ -1701,6 +1701,13 @@ body {
   letter-spacing: 0.3px;
 }
 
+.info-hint {
+  font-size: 12px;
+  color: #9aa7ad;
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .info-hero-subtitle {
   font-size: 13px;
   color: #5e7680;
@@ -1826,6 +1833,145 @@ body {
 .info-inline-date .info-input {
   flex: 1;
   min-width: 180px;
+}
+
+.education-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.education-table {
+  width: 100%;
+  min-width: 760px;
+  display: block;
+  --edu-cols: minmax(240px, 1.6fr) minmax(160px, 1.4fr) minmax(120px, 1fr)
+    minmax(120px, 1fr);
+}
+
+.education-table thead {
+  display: block;
+}
+
+.education-table tbody {
+  display: block;
+  position: relative;
+}
+
+.education-table thead tr,
+.education-table tbody tr {
+  display: grid;
+  grid-template-columns: var(--edu-cols);
+  align-items: center;
+}
+
+.education-table thead th {
+  text-align: left;
+  font-size: 12px;
+  color: #5b717a;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.education-table th,
+.education-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.education-table tbody tr {
+  border-top: 1px solid rgba(3, 107, 114, 0.08);
+}
+
+.education-table tbody tr:nth-child(even) {
+  background: rgba(3, 107, 114, 0.03);
+}
+
+.education-row-enter-active,
+.education-row-leave-active {
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+}
+
+.education-row-enter-from,
+.education-row-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.education-row-move {
+  transition: transform 260ms ease;
+}
+
+.education-row-leave-active {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.education-period {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.education-sep {
+  color: #6a7d85;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.education-table .info-input[type="date"] {
+  min-width: 0;
+}
+
+.education-table .info-input {
+  width: 100%;
+}
+
+.education-controls-wrap {
+  border-top: 1px solid rgba(3, 107, 114, 0.08);
+  min-width: 760px;
+}
+
+.education-controls {
+  display: flex;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.education-control {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(3, 107, 114, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f4f57;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.education-control:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(3, 107, 114, 0.4);
+}
+
+.education-control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .info-choice {

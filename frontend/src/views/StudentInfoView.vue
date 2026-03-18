@@ -54,7 +54,7 @@
         <h1 class="feed-title">学生信息</h1>
       </header>
 
-      <div class="student-right-stack">
+      <section class="info-shell student-right-stack">
         <section class="info-card student-filter-card">
           <div class="student-filter-header">
             <div class="info-section-title">搜索</div>
@@ -66,105 +66,71 @@
             />
           </div>
           <div class="student-filter-grid">
-            <div class="student-filter-row student-filter-two">
+            <div class="student-filter-row">
               <div class="student-filter-field">
                 <span class="info-label">年级</span>
-                <div class="student-select">
-                  <button
-                    class="info-input student-select-trigger"
-                    type="button"
-                    @click.stop="toggleYearMenu"
+                <select v-model="filters.classYear" class="info-input">
+                  <option value="">全部</option>
+                  <option
+                    v-for="year in classYearOptions"
+                    :key="year"
+                    :value="String(year)"
                   >
-                    {{ yearLabel }}
-                  </button>
-                  <transition name="student-dropdown">
-                    <div v-if="yearMenuOpen" class="student-select-menu">
-                    <button
-                      class="student-select-option"
-                      type="button"
-                      @click="selectYear('')"
-                    >
-                      全部
-                    </button>
-                    <button
-                      v-for="year in classYearOptions"
-                      :key="year"
-                      class="student-select-option"
-                      type="button"
-                      @click="selectYear(String(year))"
-                    >
-                      {{ year }}
-                    </button>
-                  </div>
-                </transition>
+                    {{ year }}
+                  </option>
+                </select>
               </div>
             </div>
-            <div class="student-filter-field">
-              <span class="info-label">学院</span>
-                <div class="student-select">
-                  <button
-                    class="info-input student-select-trigger"
-                    type="button"
-                    @click.stop="toggleCollegeMenu"
-                  >
-                    {{ collegeLabel }}
-                  </button>
-                  <transition name="student-dropdown">
-                    <div v-if="collegeMenuOpen" class="student-select-menu">
-                    <button
-                      class="student-select-option"
-                      type="button"
-                      @click="selectCollege('')"
-                    >
-                      全部
-                    </button>
-                    <button
-                      v-for="college in collegeOptions"
-                      :key="college"
-                      class="student-select-option"
-                      type="button"
-                      @click="selectCollege(college)"
-                    >
-                      {{ college }}
-                    </button>
-                  </div>
-                </transition>
-              </div>
-            </div>
-          </div>
 
-          <div class="student-filter-row">
-            <span class="info-label">班级</span>
-              <div class="student-select">
-                <button
-                  class="info-input student-select-trigger"
-                  type="button"
-                  @click.stop="toggleMajorMenu"
-                >
-                  {{ majorLabel }}
-                </button>
-                <transition name="student-dropdown">
-                  <div v-if="majorMenuOpen" class="student-select-menu">
-                  <button
-                    class="student-select-option"
-                    type="button"
-                    @click="selectMajor('')"
-                  >
-                    全部
-                  </button>
-                  <button
+            <div class="student-filter-row">
+              <div class="student-filter-field">
+                <span class="info-label">专业</span>
+                <select v-model="filters.major" class="info-input">
+                  <option value="">全部</option>
+                  <option
                     v-for="major in availableMajors"
                     :key="major"
-                    class="student-select-option"
-                    type="button"
-                    @click="selectMajor(major)"
+                    :value="major"
                   >
                     {{ major }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="student-filter-row">
+              <div class="student-filter-field">
+                <span class="info-label">班级</span>
+                <div class="student-stepper">
+                  <button
+                    class="stepper-button"
+                    type="button"
+                    :disabled="!canDecrementClass"
+                    @click="decrementClass"
+                  >
+                    −
+                  </button>
+                  <input
+                    v-model="filters.classNo"
+                    class="info-input stepper-input"
+                    type="number"
+                    min="1"
+                    max="10"
+                    step="1"
+                    placeholder="全部"
+                    @input="normalizeClassNo"
+                  />
+                  <button
+                    class="stepper-button"
+                    type="button"
+                    :disabled="!canIncrementClass"
+                    @click="incrementClass"
+                  >
+                    +
                   </button>
                 </div>
-              </transition>
+              </div>
             </div>
-          </div>
 
             <div class="student-filter-row student-filter-inline">
               <label class="info-choice">
@@ -221,7 +187,7 @@
             <button class="action-button" type="button">导出</button>
           </div>
         </section>
-      </div>
+      </section>
 
       <transition name="publisher-backdrop">
         <div
@@ -259,7 +225,7 @@
           </div>
 
           <div class="info-card">
-            <div class="info-section-title">个人信息</div>
+            <div class="info-section-title">学籍信息</div>
             <div class="info-form-grid">
               <div class="field-card">
                 <span class="info-label">名字</span>
@@ -269,93 +235,258 @@
                 <span class="info-label">学号</span>
                 <div class="info-input info-static">{{ viewItem.studentNo || "-" }}</div>
               </div>
-              <div class="field-card field-full">
-                <span class="info-label">班别</span>
+              <div class="field-card">
+                <span class="info-label">年级</span>
                 <div class="info-input info-static">
-                  {{ viewItem.classYear ? viewItem.classYear + "级" : "" }}{{ viewItem.classMajor || "" }}{{ viewItem.classNo ? viewItem.classNo + "班" : "" }}
+                  {{ viewItem.classYear ? viewItem.classYear + "级" : "-" }}
                 </div>
               </div>
               <div class="field-card">
                 <span class="info-label">学院</span>
                 <div class="info-input info-static">{{ viewItem.college || "-" }}</div>
               </div>
+              <div class="field-card field-full">
+                <span class="info-label">班级</span>
+                <div class="info-input info-static">
+                  {{ buildClassName(viewItem) || "-" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">入学时间</span>
+                <div class="info-input info-static">{{ viewItem.enrollmentDate || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">学生类别</span>
+                <div class="info-input info-static">{{ viewItem.studentCategory || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">班主任</span>
+                <div class="info-input info-static">{{ viewItem.classTeacher || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">辅导员</span>
+                <div class="info-input info-static">{{ viewItem.counselor || "-" }}</div>
+              </div>
             </div>
           </div>
 
           <div class="info-card">
-            <div class="info-section-title">联系方式</div>
+            <div class="info-section-title">个人证件与联系方式</div>
             <div class="info-form-grid">
               <div class="field-card">
-                <span class="info-label">电话号码</span>
+                <span class="info-label">民族</span>
+                <div class="info-input info-static">{{ viewItem.ethnicity || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">政治面貌</span>
+                <div class="info-input info-static">{{ viewItem.politicalStatus || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
                 <div class="info-input info-static">{{ viewItem.phone || "-" }}</div>
               </div>
               <div class="field-card">
-                <span class="info-label">紧急联系电话</span>
-                <div class="info-input info-static">{{ viewItem.emergencyPhone || "-" }}</div>
-              </div>
-              <div class="field-card field-full">
-                <span class="info-label">紧急联系人关系</span>
-                <div class="info-input info-static">{{ viewItem.emergencyRelation || "-" }}</div>
-              </div>
-              <div class="field-card field-full">
-                <span class="info-label">现住址</span>
-                <div class="info-input info-static">{{ viewItem.address || "-" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-section-title">党团信息</div>
-            <div class="info-form-grid">
-              <div class="field-card">
-                <span class="info-label">团员编号</span>
-                <div class="info-input info-static">{{ viewItem.leagueNo || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">入党申请</span>
-                <div class="info-input info-static">
-                  {{ viewItem.partyApplied ? "是" : "否" }}
-                </div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">积极分子日期</span>
-                <div class="info-input info-static">{{ viewItem.activistDate || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">入党申请日期</span>
-                <div class="info-input info-static">{{ viewItem.applicationDate || "-" }}</div>
-              </div>
-              <div class="field-card">
-                <span class="info-label">是否未发展党员</span>
-                <div class="info-input info-static">
-                  {{ viewItem.notDeveloped ? "是" : "否" }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-section-title">其他信息</div>
-            <div class="info-form-grid">
-              <div class="field-card">
-                <span class="info-label">身份证号</span>
+                <span class="info-label">身份证件号</span>
                 <div class="info-input info-static">{{ viewItem.idNo || "-" }}</div>
               </div>
               <div class="field-card">
                 <span class="info-label">籍贯</span>
                 <div class="info-input info-static">{{ viewItem.nativePlace || "-" }}</div>
               </div>
-              <div class="field-card">
-                <span class="info-label">港澳台</span>
+              <div class="field-card field-full">
+                <span class="info-label">住址</span>
+                <div class="info-input info-static">{{ viewItem.address || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">住宿信息</div>
+            <div class="info-form-grid">
+              <div class="field-card field-full">
+                <span class="info-label">是否在外居住</span>
                 <div class="info-input info-static">
-                  {{ viewItem.hkMoTw ? "是" : "否" }}
+                  {{ viewItem.offCampusLiving ? "是" : "否" }}
+                </div>
+              </div>
+              <div class="field-card field-full" v-if="viewItem.offCampusLiving">
+                <span class="info-label">外居住详细地址</span>
+                <div class="info-input info-static">{{ viewItem.offCampusAddress || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿校区</span>
+                <div class="info-input info-static">{{ viewItem.dormCampus || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿楼栋</span>
+                <div class="info-input info-static">{{ viewItem.dormBuilding || "-" }}</div>
+              </div>
+              <div class="field-card" v-if="!viewItem.offCampusLiving">
+                <span class="info-label">住宿房间</span>
+                <div class="info-input info-static">{{ viewItem.dormRoom || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">团组织与入党信息</div>
+            <div class="info-form-grid three">
+              <div class="field-card field-full">
+                <span class="info-label">是否入团</span>
+                <div class="info-input info-static">
+                  {{ viewItem.leagueJoined ? "是" : "否" }}
                 </div>
               </div>
               <div class="field-card">
-                <span class="info-label">特殊学生</span>
+                <span class="info-label">提交入团申请书时间</span>
                 <div class="info-input info-static">
-                  {{ viewItem.specialStudent ? "是" : "否" }}
+                  {{ viewItem.leagueApplicationDate || "-" }}
                 </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">入团时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.leagueJoinDate, viewItem.leagueDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">团号</span>
+                <div class="info-input info-static">{{ viewItem.leagueNo || "-" }}</div>
+              </div>
+              <div class="field-card field-full">
+                <span class="info-label">是否申请入党</span>
+                <div class="info-input info-static">
+                  {{ viewItem.partyApplied ? "是" : "否" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">提交入党申请书时间</span>
+                <div class="info-input info-static">
+                  {{ viewItem.applicationDate || "-" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">确定积极分子时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.activistDate, viewItem.activistDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">上党课时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.partyTrainingDate, viewItem.partyTrainingPending, "暂未报名") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">确定发展对象时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.developmentTargetDate, viewItem.developmentTargetDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">接收为预备党员时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.probationaryMemberDate, viewItem.probationaryDeveloping, "正在发展") }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">转为正式党员时间</span>
+                <div class="info-input info-static">
+                  {{ formatDateOrStatus(viewItem.fullMemberDate, viewItem.fullMemberDeveloping, "正在发展") }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">教育经历</div>
+            <div v-if="educationRows.length" class="education-table-wrap">
+              <table class="education-table">
+                <thead>
+                  <tr>
+                    <th>时间段</th>
+                    <th>学校名称</th>
+                    <th>学历</th>
+                    <th>证明人</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in educationRows" :key="`edu-view-${index}`">
+                    <td>
+                      <div class="education-period">
+                        <div class="info-input info-static">{{ item.startDate || "-" }}</div>
+                        <span class="education-sep">至</span>
+                        <div class="info-input info-static">
+                          {{ item.isCurrent ? "至今" : item.endDate || "-" }}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.schoolName || "-" }}</div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.educationLevel || "-" }}</div>
+                    </td>
+                    <td>
+                      <div class="info-input info-static">{{ item.witness || "-" }}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="empty-tip">暂无教育经历</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">家庭信息</div>
+            <div class="info-form-grid family-grid">
+              <div class="family-section-title">父亲</div>
+              <div class="field-card">
+                <span class="info-label">姓名</span>
+                <div class="info-input info-static">{{ viewItem.fatherName || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
+                <div class="info-input info-static">{{ viewItem.fatherPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">工作单位</span>
+                <div class="info-input info-static">{{ viewItem.fatherWorkUnit || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">职务</span>
+                <div class="info-input info-static">{{ viewItem.fatherTitle || "-" }}</div>
+              </div>
+              <div class="family-section-title">母亲</div>
+              <div class="field-card">
+                <span class="info-label">姓名</span>
+                <div class="info-input info-static">{{ viewItem.motherName || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">手机号码</span>
+                <div class="info-input info-static">{{ viewItem.motherPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">工作单位</span>
+                <div class="info-input info-static">{{ viewItem.motherWorkUnit || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">职务</span>
+                <div class="info-input info-static">{{ viewItem.motherTitle || "-" }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-section-title">紧急联系人</div>
+            <div class="info-form-grid">
+              <div class="field-card">
+                <span class="info-label">紧急联系人电话</span>
+                <div class="info-input info-static">{{ viewItem.emergencyPhone || "-" }}</div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">紧急联系人的关系</span>
+                <div class="info-input info-static">{{ viewItem.emergencyRelation || "-" }}</div>
               </div>
             </div>
           </div>
@@ -366,7 +497,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfileById, searchStudentProfiles } from "../api/profile";
@@ -380,9 +511,6 @@ const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 const selectedIds = ref([]);
 const currentPage = ref(1);
 const pageInput = ref(null);
-const yearMenuOpen = ref(false);
-const collegeMenuOpen = ref(false);
-const majorMenuOpen = ref(false);
 const students = ref([]);
 const totalPages = ref(1);
 const totalItems = ref(0);
@@ -393,56 +521,35 @@ const viewClosing = ref(false);
 const viewItem = ref(null);
 const viewLoading = ref(false);
 
-const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
-const collegeOptions = [
-  "大数据与人工智能学院",
-  "工商学院",
-  "会计学院",
-  "湾区与影视学院",
+const classYearOptions = Array.from({ length: 11 }, (_, index) => 2020 + index);
+const majorOptions = [
+  "计算机科学与技术",
+  "计算机科学与技术（实验区）",
+  "软件工程",
+  "电子商务",
+  "大数据管理与应用（佛山校区全学段）",
+  "大数据管理与应用（数字治理）",
 ];
-const collegeMajorsMap = {
-  大数据与人工智能学院: [
-    "软件工程",
-    "计算机科学与技术",
-    "计算机科学与技术（实验区）",
-    "电子商务",
-  ],
-  工商学院: [
-    "市场营销",
-    "工商管理",
-    "创业管理",
-    "工商管理（实验区）",
-  ],
-  会计学院: ["会计学", "审计学", "国际会计（ACCA）"],
-  湾区与影视学院: ["播音"],
-};
 
 const filters = reactive({
   classYear: "",
-  college: "",
   major: "",
+  classNo: "",
   isHkMoTw: false,
   isSpecial: false,
   keyword: "",
 });
 
 const availableMajors = computed(() => {
-  if (!filters.college) {
-    const majors = Object.values(collegeMajorsMap).flat();
-    return Array.from(new Set(majors));
-  }
-  return collegeMajorsMap[filters.college] || [];
+  return majorOptions;
 });
 
-const yearLabel = computed(() => filters.classYear || "全部");
-const collegeLabel = computed(() => filters.college || "全部");
-const majorLabel = computed(() => filters.major || "全部");
 
 const hasActiveFilters = computed(() => {
   return Boolean(
     filters.classYear ||
-      filters.college ||
       filters.major ||
+      filters.classNo ||
       filters.isHkMoTw ||
       filters.isSpecial ||
       filters.keyword,
@@ -450,12 +557,31 @@ const hasActiveFilters = computed(() => {
 });
 
 const pagedStudents = computed(() => students.value);
+const educationRows = computed(() => {
+  const items = viewItem.value?.educationExperiences;
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items.filter((item) => {
+    if (!item) {
+      return false;
+    }
+    return (
+      item.startDate ||
+      item.endDate ||
+      item.schoolName ||
+      item.educationLevel ||
+      item.witness ||
+      item.isCurrent
+    );
+  });
+});
 
 watch(
   () => ({
     classYear: filters.classYear,
-    college: filters.college,
     major: filters.major,
+    classNo: filters.classNo,
     isHkMoTw: filters.isHkMoTw,
     isSpecial: filters.isSpecial,
     keyword: filters.keyword,
@@ -488,11 +614,11 @@ async function fetchStudents() {
     if (filters.classYear) {
       params.classYear = filters.classYear;
     }
-    if (filters.college) {
-      params.college = filters.college;
-    }
     if (filters.major) {
       params.major = filters.major;
+    }
+    if (filters.classNo) {
+      params.classNo = Number(filters.classNo);
     }
     if (filters.isHkMoTw) {
       params.hkMoTw = true;
@@ -524,48 +650,6 @@ async function fetchStudents() {
   }
 }
 
-function toggleYearMenu() {
-  yearMenuOpen.value = !yearMenuOpen.value;
-  if (yearMenuOpen.value) {
-    collegeMenuOpen.value = false;
-    majorMenuOpen.value = false;
-  }
-}
-
-function selectYear(value) {
-  filters.classYear = value;
-  yearMenuOpen.value = false;
-}
-
-function toggleCollegeMenu() {
-  collegeMenuOpen.value = !collegeMenuOpen.value;
-  if (collegeMenuOpen.value) {
-    yearMenuOpen.value = false;
-    majorMenuOpen.value = false;
-  }
-}
-
-function selectCollege(value) {
-  filters.college = value;
-  if (filters.college && !availableMajors.value.includes(filters.major)) {
-    filters.major = "";
-  }
-  collegeMenuOpen.value = false;
-}
-
-function toggleMajorMenu() {
-  majorMenuOpen.value = !majorMenuOpen.value;
-  if (majorMenuOpen.value) {
-    yearMenuOpen.value = false;
-    collegeMenuOpen.value = false;
-  }
-}
-
-function selectMajor(value) {
-  filters.major = value;
-  majorMenuOpen.value = false;
-}
-
 function openDetail(item) {
   viewOpen.value = true;
   viewClosing.value = false;
@@ -593,22 +677,8 @@ function closeView() {
   }, 260);
 }
 
-function handleDocumentClick(event) {
-  if (event.target.closest(".student-select")) {
-    return;
-  }
-  yearMenuOpen.value = false;
-  collegeMenuOpen.value = false;
-  majorMenuOpen.value = false;
-}
-
 onMounted(() => {
-  document.addEventListener("click", handleDocumentClick);
   fetchStudents();
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleDocumentClick);
 });
 
 function setPage(page) {
@@ -622,6 +692,68 @@ function applyPageInput() {
   }
   const safePage = Math.min(Math.max(1, pageInput.value), totalPages.value);
   currentPage.value = safePage;
+}
+
+function formatDateOrStatus(dateValue, statusFlag, statusText) {
+  if (statusFlag) {
+    return statusText;
+  }
+  return dateValue || "-";
+}
+
+function buildClassName(item) {
+  if (!item) {
+    return "";
+  }
+  if (item.className) {
+    return item.className;
+  }
+  const safeYear = item.classYear ? `${item.classYear}级` : "";
+  const safeMajor = item.classMajor || "";
+  const safeNo = item.classNo ? `${item.classNo}班` : "";
+  return `${safeYear}${safeMajor}${safeNo}`.trim();
+}
+
+function normalizeClassNo() {
+  if (filters.classNo === "") {
+    return;
+  }
+  const next = Number(filters.classNo);
+  if (Number.isNaN(next)) {
+    filters.classNo = "";
+    return;
+  }
+  const clamped = Math.min(Math.max(1, next), 10);
+  filters.classNo = String(clamped);
+}
+
+const canDecrementClass = computed(() => true);
+const canIncrementClass = computed(() => true);
+
+function decrementClass() {
+  const current = Number(filters.classNo);
+  if (!filters.classNo || Number.isNaN(current)) {
+    filters.classNo = "10";
+    return;
+  }
+  if (current <= 1) {
+    filters.classNo = "";
+    return;
+  }
+  filters.classNo = String(current - 1);
+}
+
+function incrementClass() {
+  const current = Number(filters.classNo);
+  if (!filters.classNo || Number.isNaN(current)) {
+    filters.classNo = "1";
+    return;
+  }
+  if (current >= 10) {
+    filters.classNo = "";
+    return;
+  }
+  filters.classNo = String(current + 1);
 }
 
 const roleLabelMap = {
@@ -721,6 +853,7 @@ function loadUser() {
 
 .student-filter-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
 }
 
@@ -739,77 +872,39 @@ function loadUser() {
   gap: 8px;
 }
 
-.student-select {
-  position: relative;
-  overflow: visible;
-}
-
-.student-select-trigger {
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-
-.student-select-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  max-height: 190px;
-  overflow-y: auto;
-  border-radius: 16px;
-  border: 1px solid rgba(3, 107, 114, 0.18);
-  background-color: rgba(255, 255, 255, 0.6);
-  background-image: linear-gradient(
-    130deg,
-    rgba(205, 255, 249, 0.9),
-    rgba(197, 217, 226, 0.7)
-  );
-  box-shadow: 0 18px 38px rgba(3, 107, 114, 0.18);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  z-index: 30;
-  padding: 6px;
+.student-stepper {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  gap: 10px;
+  align-items: center;
 }
 
-.student-select-option {
-  border: none;
-  background: transparent;
-  text-align: left;
-  padding: 8px 10px;
-  border-radius: 10px;
-  cursor: pointer;
+.stepper-button {
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 107, 114, 0.25);
+  background: rgba(255, 255, 255, 0.6);
   color: #0f4d55;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.student-select-option:hover {
-  background: rgba(205, 255, 249, 0.9);
+.stepper-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.student-dropdown-enter-active,
-.student-dropdown-leave-active {
-  transition: opacity 160ms ease, transform 160ms ease;
+.stepper-input {
+  text-align: center;
 }
 
-.student-dropdown-enter-from,
-.student-dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-6px) scale(0.98);
-}
-
-.student-dropdown-enter-to,
-.student-dropdown-leave-from {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
 
 .student-filter-inline {
   display: flex;
   gap: 18px;
   align-items: center;
+  grid-column: 1 / -1;
 }
 
 .student-results-card {
