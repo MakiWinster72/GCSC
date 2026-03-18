@@ -227,9 +227,6 @@
             <div class="achievement-card-text">
               {{ formatResearchTeacher(item.fields) }}
             </div>
-            <div class="achievement-card-text">
-              {{ formatResearchStudent(item.fields) }}
-            </div>
             <div class="achievement-research-tag" aria-hidden="true">科研项目</div>
           </div>
           <div v-else class="achievement-card-body">
@@ -408,9 +405,6 @@
             </div>
             <div class="achievement-card-text">
               {{ formatResearchTeacher(viewItem.fields) }}
-            </div>
-            <div class="achievement-card-text">
-              {{ formatResearchStudent(viewItem.fields) }}
             </div>
           </div>
             <div v-else>
@@ -1338,15 +1332,11 @@ function formatCertificateDate(fields = {}) {
 }
 
 function formatResearchLeader(fields = {}) {
-  return fields.projectLeader || "-";
+  return `项目负责人：${fields.projectLeader || "-"}`;
 }
 
 function formatResearchTeacher(fields = {}) {
-  return fields.teacherNo || "-";
-}
-
-function formatResearchStudent(fields = {}) {
-  return fields.studentName || "-";
+  return `教师工号：${fields.teacherNo || "-"}`;
 }
 
 function dedupeAchievements(list) {
