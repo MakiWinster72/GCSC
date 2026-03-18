@@ -983,6 +983,53 @@ body {
   gap: 12px;
 }
 
+.achievement-dynamic-fields {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 26px rgba(3, 107, 114, 0.08);
+}
+
+.achievement-dynamic-fields .field-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.achievement-dynamic-fields .field-label {
+  font-size: 12px;
+  color: #47666f;
+  letter-spacing: 0.2px;
+}
+
+.achievement-dynamic-fields .form-input,
+.achievement-dynamic-fields .publisher-input {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.achievement-dynamic-fields .publisher-input {
+  min-height: 90px;
+  resize: vertical;
+  border: 1px solid rgba(3, 107, 114, 0.18);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 960px) {
+  .achievement-dynamic-fields .field-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 .field-row {
   display: grid;
   gap: 8px;

@@ -93,7 +93,10 @@
         <h1 class="feed-title">个人成就</h1>
       </header>
 
-      <section v-if="activeCategory === 'all'" class="info-card achievement-intro-card">
+      <section
+        v-if="activeCategory === 'all'"
+        class="info-card achievement-intro-card"
+      >
         <div class="info-section-title">全部</div>
         <p class="achievement-intro-text">这里存放了我所有的成就！</p>
       </section>
@@ -117,7 +120,10 @@
           <div class="achievement-card-body">
             <div class="achievement-card-title">{{ item.name }}</div>
             <div class="achievement-card-dates">
-              <span>起止：{{ item.startDate || "-" }} {{ item.endDate || "-" }}</span>
+              <span
+                >起止：{{ item.startDate || "-" }}
+                {{ item.endDate || "-" }}</span
+              >
               <span class="date-spacer"></span>
               <span>获得日期：{{ item.awardDate || "-" }}</span>
             </div>
@@ -199,17 +205,28 @@
           <div class="achievement-detail-body">
             <div class="achievement-card-title">{{ viewItem.name }}</div>
             <div class="achievement-card-dates">
-              <span>起止：{{ viewItem.startDate || "-" }} {{ viewItem.endDate || "-" }}</span>
+              <span
+                >起止：{{ viewItem.startDate || "-" }}
+                {{ viewItem.endDate || "-" }}</span
+              >
               <span class="date-spacer"></span>
               <span>获得日期：{{ viewItem.awardDate || "-" }}</span>
             </div>
-            <div class="achievement-card-text">{{ viewItem.description || "-" }}</div>
-            <div class="achievement-card-text">{{ viewItem.thoughts || "-" }}</div>
+            <div class="achievement-card-text">
+              {{ viewItem.description || "-" }}
+            </div>
+            <div class="achievement-card-text">
+              {{ viewItem.thoughts || "-" }}
+            </div>
             <div class="achievement-card-actions">
               <button class="post-action" type="button" @click="editFromView">
                 编辑
               </button>
-              <button class="post-action danger" type="button" @click="openDelete">
+              <button
+                class="post-action danger"
+                type="button"
+                @click="openDelete"
+              >
                 删除
               </button>
             </div>
@@ -230,7 +247,9 @@
         :aria-hidden="!editorOpen"
       >
         <header class="publisher-header">
-          <div class="publisher-title">{{ editId ? "编辑成就" : "新增成就" }}</div>
+          <div class="publisher-title">
+            {{ editId ? "编辑成就" : "新增成就" }}
+          </div>
           <button class="publisher-close" type="button" @click="closeEditor">
             关闭
           </button>
@@ -255,56 +274,49 @@
                 </option>
               </select>
             </div>
-            <div class="field-row">
-              <label class="field-label">成就名字</label>
-              <input v-model="form.name" class="form-input" type="text" placeholder="请输入成就名称" />
+            <div v-if="activeCategoryHint" class="achievement-hint">
+              <ol class="achievement-hint-list">
+                <li v-for="item in activeCategoryHint.notes" :key="item">
+                  {{ item }}
+                </li>
+              </ol>
             </div>
-
-            <div class="field-row">
-              <label class="field-label">获得日期</label>
-              <div class="date-range-inline">
-                <label class="date-input inline">
-                  <span class="date-label">开始</span>
-                  <input v-model="form.startDate" class="date-input-field" type="date" />
-                </label>
-                <span class="date-spacer"></span>
-                <label class="date-input inline">
-                  <span class="date-label">结束</span>
-                  <input v-model="form.endDate" class="date-input-field" type="date" />
-                </label>
-                <span class="date-spacer"></span>
-                <label class="date-input inline">
-                  <span class="date-label">获得日期</span>
-                  <input v-model="form.awardDate" class="date-input-field" type="date" />
-                </label>
+            <div v-if="!activeFormConfig" class="empty-tip">
+              请选择成就分类后填写对应信息。
+            </div>
+            <div v-else class="achievement-dynamic-fields">
+              <div
+                v-for="field in activeFormConfig.fields"
+                :key="field.key"
+                class="field-row"
+              >
+                <label class="field-label">{{ field.label }}</label>
+                <input
+                  v-if="field.kind === 'input'"
+                  v-model="form.fields[field.key]"
+                  class="form-input"
+                  :type="field.type || 'text'"
+                  :placeholder="field.placeholder || ''"
+                />
+                <textarea
+                  v-else
+                  v-model="form.fields[field.key]"
+                  class="publisher-input"
+                  :rows="field.rows || 2"
+                  :placeholder="field.placeholder || ''"
+                ></textarea>
               </div>
-            </div>
-
-            <div class="field-row">
-              <label class="field-label">成就描述</label>
-              <textarea
-                v-model="form.description"
-                class="publisher-input"
-                rows="2"
-                placeholder="描述该成就的背景或亮点"
-              ></textarea>
-            </div>
-
-            <div class="field-row">
-              <label class="field-label">个人感想</label>
-              <textarea
-                v-model="form.thoughts"
-                class="publisher-input"
-                rows="2"
-                placeholder="写下你的感受或收获"
-              ></textarea>
             </div>
 
             <div class="achievement-actions">
               <button class="ghost-button" type="button" @click="closeEditor">
                 取消
               </button>
-              <button class="action-button" type="button" @click="saveAchievement">
+              <button
+                class="action-button"
+                type="button"
+                @click="saveAchievement"
+              >
                 {{ editId ? "保存修改" : "保存成就" }}
               </button>
             </div>
@@ -327,7 +339,12 @@
             <button class="ghost-button" type="button" @click="closeDelete">
               取消
             </button>
-            <button class="action-button" type="button" :disabled="deleteBusy" @click="confirmDelete">
+            <button
+              class="action-button"
+              type="button"
+              :disabled="deleteBusy"
+              @click="confirmDelete"
+            >
               确定删除
             </button>
           </div>
@@ -391,20 +408,403 @@ const achievementEntries = [
 ];
 
 const form = reactive({
-  name: "",
-  startDate: "",
-  endDate: "",
-  awardDate: "",
-  description: "",
-  thoughts: "",
   imageUrl: "",
   category: "",
+  fields: {},
 });
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 const categoryOptions = computed(() =>
   achievementEntries.filter((entry) => entry.key !== "all"),
 );
+const categoryFieldMap = {
+  contest: {
+    titleKey: "contestName",
+    dateKey: "awardDate",
+    noteKey: "remark",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "contestName",
+        label: "竞赛名称",
+        kind: "input",
+        placeholder: "请输入竞赛名称",
+      },
+      {
+        key: "organizer",
+        label: "主办单位",
+        kind: "input",
+        placeholder: "请输入主办单位",
+      },
+      {
+        key: "contestCategory",
+        label: "竞赛类别",
+        kind: "input",
+        placeholder: "国家级/省部级/校级",
+      },
+      {
+        key: "awardCategory",
+        label: "获奖类别",
+        kind: "input",
+        placeholder: "国家级/省部级/校级",
+      },
+      {
+        key: "awardLevel",
+        label: "获奖等级",
+        kind: "input",
+        placeholder: "特等奖/一等奖/二等奖/三等奖",
+      },
+      {
+        key: "contestType",
+        label: "竞赛类型",
+        kind: "input",
+        placeholder: "互联网+/挑战杯/创青春/其他",
+      },
+      { key: "awardDate", label: "获奖时间", kind: "input", type: "date" },
+      {
+        key: "awardCount",
+        label: "获奖人数",
+        kind: "input",
+        placeholder: "请输入获奖人数",
+      },
+      {
+        key: "teamMembers",
+        label: "团队其他成员",
+        kind: "input",
+        placeholder: "按证书顺序填写",
+      },
+      {
+        key: "instructors",
+        label: "指导老师",
+        kind: "input",
+        placeholder: "可填写多名老师",
+      },
+      { key: "remark", label: "备注", kind: "input", placeholder: "团体/个人" },
+    ],
+  },
+  paper: {
+    titleKey: "paperTitle",
+    dateKey: "publishDate",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "paperTitle",
+        label: "论文名称",
+        kind: "input",
+        placeholder: "请输入论文名称",
+      },
+      {
+        key: "journalName",
+        label: "发表期刊",
+        kind: "input",
+        placeholder: "请输入期刊名称",
+      },
+      { key: "publishDate", label: "发表时间", kind: "input", type: "date" },
+      {
+        key: "authorOrder",
+        label: "作者排序",
+        kind: "input",
+        placeholder: "如：第一作者",
+      },
+      {
+        key: "indexed",
+        label: "收录情况",
+        kind: "input",
+        placeholder: "如：EI/SCI/北大核心",
+      },
+    ],
+  },
+  journal: {
+    titleKey: "workTitle",
+    dateKey: "publishDate",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "workTitle",
+        label: "作品名称",
+        kind: "input",
+        placeholder: "请输入作品名称",
+      },
+      {
+        key: "publicationName",
+        label: "发表刊物名称",
+        kind: "input",
+        placeholder: "请输入刊物名称",
+      },
+      { key: "publishDate", label: "发表时间", kind: "input", type: "date" },
+    ],
+  },
+  patent: {
+    titleKey: "patentName",
+    dateKey: "grantDate",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "patentName",
+        label: "名称",
+        kind: "input",
+        placeholder: "请输入专利/著作权名称",
+      },
+      {
+        key: "patentType",
+        label: "类别",
+        kind: "input",
+        placeholder: "发明/实用新型/外观设计/软件著作权",
+      },
+      {
+        key: "grantNo",
+        label: "授权号",
+        kind: "input",
+        placeholder: "请输入授权号",
+      },
+      { key: "grantDate", label: "获批时间", kind: "input", type: "date" },
+      {
+        key: "firstInventor",
+        label: "是否第一发明人",
+        kind: "input",
+        placeholder: "是/否",
+      },
+    ],
+  },
+  certificate: {
+    titleKey: "certificateName",
+    dateKey: "obtainDate",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "certificateType",
+        label: "证书类别",
+        kind: "input",
+        placeholder: "专业技术人员/技能人员",
+      },
+      {
+        key: "certificateName",
+        label: "证书名称",
+        kind: "input",
+        placeholder: "请输入证书名称",
+      },
+      { key: "obtainDate", label: "获得时间", kind: "input", type: "date" },
+    ],
+  },
+  research: {
+    titleKey: "projectName",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "projectName",
+        label: "参与科研项目名称",
+        kind: "input",
+        placeholder: "请输入项目名称",
+      },
+      {
+        key: "teacherNo",
+        label: "教师工号",
+        kind: "input",
+        placeholder: "请输入教师工号",
+      },
+      {
+        key: "projectLeader",
+        label: "项目负责人",
+        kind: "input",
+        placeholder: "请输入负责人姓名",
+      },
+    ],
+  },
+  works: {
+    titleKey: "workName",
+    dateKey: "publishDate",
+    noteKey: "note",
+    fields: [
+      {
+        key: "studentNo",
+        label: "学号",
+        kind: "input",
+        placeholder: "请输入学号",
+      },
+      {
+        key: "studentName",
+        label: "学生姓名",
+        kind: "input",
+        placeholder: "请输入学生姓名",
+      },
+      {
+        key: "workName",
+        label: "作品名称",
+        kind: "input",
+        placeholder: "请输入作品名称",
+      },
+      {
+        key: "workCategory",
+        label: "类别",
+        kind: "input",
+        placeholder: "理论类/创作类/表演类",
+      },
+      {
+        key: "workType",
+        label: "类型",
+        kind: "input",
+        placeholder: "大型/中型/小型作品",
+      },
+      { key: "publishDate", label: "发布时间", kind: "input", type: "date" },
+      {
+        key: "publishOccasion",
+        label: "发布场合",
+        kind: "input",
+        placeholder: "请输入发布场合",
+      },
+      {
+        key: "organizer",
+        label: "主办单位",
+        kind: "input",
+        placeholder: "请输入主办单位",
+      },
+      {
+        key: "impactScope",
+        label: "影响范围",
+        kind: "input",
+        placeholder: "全国/区域/省内",
+      },
+      {
+        key: "note",
+        label: "说明",
+        kind: "textarea",
+        rows: 2,
+        placeholder: "补充说明",
+      },
+    ],
+  },
+};
+const categoryHints = {
+  contest: {
+    notes: [
+      "学科竞赛获奖指本科生校级及以上竞赛类活动获奖。其中省级以上统计范围为：全国大学生电子设计竞赛、全国大学生电子设计竞赛嵌入式专题竞赛、全国大学生数学建模竞赛、全国大学生广告艺术设计大赛、全国大学生英语竞赛、全国大学生英语演讲竞赛、全国大学生化学实验竞赛、全国大学生电子商务竞赛、全国大学生机械创新设计大赛、全国周培源大学生力学竞赛、全国大学生结构设计竞赛、“挑战杯”全国大学生科技作品竞赛、“挑战杯”全国大学生创业计划大赛、美国数学模型竞赛（MCM）、美国大学生程序设计竞赛（ACM）、国际大学生机械设计竞赛、全国临床技能大赛及其他具有全球影响和全国影响的比赛等。",
+      "文体艺术获奖指本科生在国内外及省、部级等文艺、体育竞赛中获得的奖项数。切勿与前项学科竞赛获奖重复。",
+      "“竞赛名称”填写须完整、规范，如：第十三届“挑战杯”中国大学生创业计划竞赛，第十五届大学生科技学术季活动之广东大学生社会治理调研大赛。",
+      "主办单位：以活动通知和荣誉证书上的记载为准。填写单位规范全称，多个单位联合主办的，填写“第一主办单位名称+等”，如“共青团广东省委员会等”。",
+      "获奖时间具体到月，如“2024年10月”。",
+      "获奖类别：限选国家级、省部级、校级。国际级竞赛等同于国家级，全国性行业协会主办赛事等同省部级。",
+      "获奖等级：指特等奖、一等奖、二等奖、三等奖；冠军、亚军、季军；金奖、银奖、铜奖。",
+      "竞赛类型：“互联网+”创新创业大赛、挑战杯、创青春中国青年创新创业大赛、其他。",
+      "指导老师：以正式获奖通知文件或荣誉证书记载为准，指导老师多人的，全部填写。比赛未设指导老师或无指导老师的，可不填。",
+      "备注：团体、个人。",
+    ],
+    fields:
+      "学号 学生姓名 竞赛名称 主办单位 竞赛类别 获奖类别 获奖等级 竞赛类型 获奖时间 获奖人数 团队其他成员（请按证书顺序撰写） 指导老师 备注",
+  },
+  paper: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "发表期刊如是论文集，需在刊物名称中括号备注。",
+      "佐证材料需提供：(1)期刊封面、目录、论文全文或见刊证明、论文全文；(2)已被权威数据库收录的需提供检索证明。",
+    ],
+    fields: "学号 学生姓名 论文名称 发表期刊 发表时间 作者排序 收录情况",
+  },
+  journal: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "作品指在校本科生在国内外正式出版刊物或重大活动上以第一作者发表作品的数量（例如：诗歌、散文、小说等）。",
+    ],
+    fields: "学号 学生姓名 作品名称 发表刊物名称 发表时间",
+  },
+  patent: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "专利类别指发明专利、实用新型专利、外观设计专利、软件著作权。",
+    ],
+    fields: "学号 学生姓名 名称 类别 授权号 获批时间 是否第一发明人",
+  },
+  certificate: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "证书类别指包括专业技术人员职业资格、技能人员职业资格。",
+      "证书指在人力资源社会保障部公布的《国家职业资格目录（2021年版）》内的职业资格证。",
+    ],
+    fields: "学号 学生姓名 证书类别 证书名称 获得时间",
+  },
+  research: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "参与科研项目指本科生参加的各类教师主持的国家、省部纵向项目，以及学校科技管理部门科研考核统计的横向项目（自然年内在研项目）。",
+    ],
+    fields: "学号 学生姓名 参与科研项目名称 教师工号 项目负责人",
+  },
+  works: {
+    notes: [
+      "发表时间具体到月，如“2024年10月”。",
+      "类别：理论类、创作类、表演类。",
+      "类型:指大型作品、中型作品、小型作品。其中大型作品、中型作品、小型作品的划分，依据音乐、戏剧、影视类作品的规模（包括作品时长、技术含量、参与程度等）。",
+      "影响范围：指全国（含国际）、区域、省内。",
+    ],
+    fields:
+      "学号 学生姓名 作品名称 类别 类型 发布时间 发布场合 主办单位 影响范围 说明",
+  },
+};
 
 const roleLabelMap = {
   STUDENT: "学生",
@@ -418,14 +818,36 @@ const avatarText = computed(() => {
   return name.slice(0, 1).toUpperCase();
 });
 const activeCategoryLabel = computed(() => {
-  const match = achievementEntries.find((entry) => entry.key === activeCategory.value);
+  const match = achievementEntries.find(
+    (entry) => entry.key === activeCategory.value,
+  );
   return match ? match.label : "全部";
+});
+const editorCategory = computed(() => {
+  if (form.category) {
+    return form.category;
+  }
+  return activeCategory.value === "all" ? "" : activeCategory.value;
+});
+const activeCategoryHint = computed(() => {
+  if (!editorCategory.value) {
+    return null;
+  }
+  return categoryHints[editorCategory.value] || null;
+});
+const activeFormConfig = computed(() => {
+  if (!editorCategory.value) {
+    return null;
+  }
+  return categoryFieldMap[editorCategory.value] || null;
 });
 const filteredAchievements = computed(() => {
   if (activeCategory.value === "all") {
     return achievements.value;
   }
-  return achievements.value.filter((item) => item.category === activeCategory.value);
+  return achievements.value.filter(
+    (item) => item.category === activeCategory.value,
+  );
 });
 const emptyMessage = computed(() => {
   if (activeCategory.value === "all") {
@@ -500,7 +922,9 @@ function handleAchievementEntry(key) {
   if (!isMenuEnabled("achievements")) {
     return;
   }
-  const safeKey = achievementEntries.some((entry) => entry.key === key) ? key : "all";
+  const safeKey = achievementEntries.some((entry) => entry.key === key)
+    ? key
+    : "all";
   activeCategory.value = safeKey;
   achievementsOpen.value = true;
   activeMenu.value = "achievements";
@@ -520,6 +944,7 @@ function openEditorForCategory() {
   editId.value = null;
   resetForm();
   form.category = activeCategory.value === "all" ? "" : activeCategory.value;
+  applyFieldDefaults();
   editorOpen.value = true;
 }
 
@@ -533,27 +958,36 @@ function goToSettings() {
 }
 
 function resetForm() {
-  form.name = "";
-  form.startDate = "";
-  form.endDate = "";
-  form.awardDate = "";
-  form.description = "";
-  form.thoughts = "";
   form.imageUrl = "";
   form.category = "";
+  form.fields = {};
   imagePreview.value = "";
 }
 
 async function saveAchievement() {
+  const config = activeFormConfig.value;
+  if (!config) {
+    errorMessage.value = "请先选择成就分类";
+    return;
+  }
+  const titleKey = config.titleKey;
+  const noteKey = config.noteKey;
+  const dateKey = config.dateKey;
+  const description = config.fields
+    .filter((field) => field.key !== titleKey && field.key !== noteKey)
+    .map((field) => `${field.label}：${form.fields[field.key] || ""}`)
+    .join("\n");
   const payload = {
-    name: form.name.trim(),
-    startDate: form.startDate || null,
-    endDate: form.endDate || null,
-    awardDate: form.awardDate || null,
-    description: form.description.trim(),
-    thoughts: form.thoughts.trim(),
+    name: (form.fields[titleKey] || "").trim(),
+    startDate: null,
+    endDate: null,
+    awardDate: dateKey ? form.fields[dateKey] || null : null,
+    description,
+    thoughts: noteKey ? (form.fields[noteKey] || "").trim() : "",
     imageUrl: form.imageUrl || null,
-    category: form.category || (activeCategory.value === "all" ? null : activeCategory.value),
+    category:
+      form.category ||
+      (activeCategory.value === "all" ? null : activeCategory.value),
   };
   try {
     if (editId.value) {
@@ -636,15 +1070,11 @@ function editFromView() {
   }
   const item = viewItem.value;
   editId.value = item.id;
-  form.name = item.name || "";
-  form.startDate = item.startDate || "";
-  form.endDate = item.endDate || "";
-  form.awardDate = item.awardDate || "";
-  form.description = item.description || "";
-  form.thoughts = item.thoughts || "";
   form.category = item.category || "";
+  form.fields = {};
   form.imageUrl = item.image ? item.image.replace(API_BASE, "") : "";
   imagePreview.value = item.image || "";
+  applyFieldValuesFromItem(item);
   viewOpen.value = false;
   viewClosing.value = true;
   editorOpen.value = true;
@@ -673,7 +1103,9 @@ async function confirmDelete() {
   deleteBusy.value = true;
   try {
     await deleteAchievement(viewItem.value.id);
-    achievements.value = achievements.value.filter((item) => item.id !== viewItem.value.id);
+    achievements.value = achievements.value.filter(
+      (item) => item.id !== viewItem.value.id,
+    );
     closeDelete();
     closeView();
   } catch (err) {
@@ -686,7 +1118,9 @@ async function confirmDelete() {
 async function fetchAchievements() {
   try {
     const { data } = await getAchievements();
-    achievements.value = Array.isArray(data) ? data.map(normalizeAchievement) : [];
+    achievements.value = Array.isArray(data)
+      ? data.map(normalizeAchievement)
+      : [];
     errorMessage.value = "";
   } catch (err) {
     achievements.value = [];
@@ -704,8 +1138,73 @@ function syncCategoryFromRoute() {
   activeCategory.value = safeCategory;
   achievementsOpen.value = true;
   if (rawCategory !== safeCategory) {
-    router.replace({ path: "/achievements", query: { category: safeCategory } });
+    router.replace({
+      path: "/achievements",
+      query: { category: safeCategory },
+    });
   }
+}
+
+function parseDescription(text) {
+  const result = {};
+  (text || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .forEach((line) => {
+      let index = line.indexOf("：");
+      if (index < 0) {
+        index = line.indexOf(":");
+      }
+      if (index < 0) {
+        return;
+      }
+      const label = line.slice(0, index).trim();
+      const value = line.slice(index + 1).trim();
+      result[label] = value;
+    });
+  return result;
+}
+
+function applyFieldDefaults() {
+  const config = activeFormConfig.value;
+  if (!config) {
+    return;
+  }
+  const hasStudentNo = config.fields.some((field) => field.key === "studentNo");
+  const hasStudentName = config.fields.some(
+    (field) => field.key === "studentName",
+  );
+  if (hasStudentNo && !form.fields.studentNo) {
+    form.fields.studentNo = profile.studentNo || "";
+  }
+  if (hasStudentName && !form.fields.studentName) {
+    form.fields.studentName = profile.displayName || profile.username || "";
+  }
+}
+
+function applyFieldValuesFromItem(item) {
+  const config = activeFormConfig.value;
+  if (!config) {
+    return;
+  }
+  const byLabel = parseDescription(item.description || "");
+  config.fields.forEach((field) => {
+    if (field.key === config.titleKey) {
+      form.fields[field.key] = item.name || "";
+      return;
+    }
+    if (field.key === config.noteKey) {
+      form.fields[field.key] = item.thoughts || "";
+      return;
+    }
+    if (field.key === config.dateKey) {
+      form.fields[field.key] = item.awardDate || "";
+      return;
+    }
+    form.fields[field.key] = byLabel[field.label] || "";
+  });
+  applyFieldDefaults();
 }
 
 onMounted(() => {
@@ -717,6 +1216,13 @@ watch(
   () => route.query.category,
   () => {
     syncCategoryFromRoute();
+  },
+);
+
+watch(
+  () => form.category,
+  () => {
+    applyFieldDefaults();
   },
 );
 </script>
