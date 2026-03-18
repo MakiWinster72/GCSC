@@ -2734,6 +2734,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .achievement-card-image {
+    width: min(240px, 78%);
+    justify-self: center;
+  }
+
   .achievement-view {
     width: min(960px, calc(100vw - 20px));
     bottom: 10px;
