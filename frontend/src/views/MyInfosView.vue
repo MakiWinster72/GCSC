@@ -39,20 +39,52 @@
       </section>
 
       <section class="menu-card">
-        <button
-          v-for="item in menuItems"
-          :key="item.key"
-          class="menu-item"
-          :class="{
-            active: activeMenu === item.key,
-            disabled: !isMenuEnabled(item.key),
-          }"
-          type="button"
-          :disabled="!isMenuEnabled(item.key)"
-          @click="handleMenuClick(item.key)"
-        >
-          {{ item.label }}
-        </button>
+        <template v-for="item in menuItems" :key="item.key">
+          <div
+            v-if="item.key === 'achievements'"
+            class="menu-drawer"
+            :class="{ open: achievementsOpen }"
+          >
+            <button
+              class="menu-item menu-drawer-trigger"
+              :class="{
+                active: activeMenu === item.key,
+                disabled: !isMenuEnabled(item.key),
+              }"
+              type="button"
+              :disabled="!isMenuEnabled(item.key)"
+              @click="toggleAchievements"
+            >
+              <span>{{ item.label }}</span>
+              <span class="menu-drawer-caret" aria-hidden="true"></span>
+            </button>
+            <div v-show="achievementsOpen" class="menu-drawer-panel">
+            <button
+              v-for="entry in achievementEntries"
+              :key="entry.key"
+              class="menu-drawer-item"
+              :class="{ active: activeAchievement === entry.key }"
+              type="button"
+              @click="handleAchievementEntry(entry.key)"
+            >
+              {{ entry.label }}
+            </button>
+          </div>
+        </div>
+          <button
+            v-else
+            class="menu-item"
+            :class="{
+              active: activeMenu === item.key,
+              disabled: !isMenuEnabled(item.key),
+            }"
+            type="button"
+            :disabled="!isMenuEnabled(item.key)"
+            @click="handleMenuClick(item.key)"
+          >
+            {{ item.label }}
+          </button>
+        </template>
       </section>
     </aside>
 
@@ -869,9 +901,11 @@ const FIXED_COLLEGE = "大数据与人工智能学院";
 
 const profile = reactive(loadUser());
 const activeMenu = ref("my-info");
+const activeAchievement = ref("all");
 const isEditing = ref(false);
 const avatarInput = ref(null);
 const sidebarOpen = ref(false);
+const achievementsOpen = ref(false);
 const educationTableWrap = ref(null);
 
 const info = reactive({
@@ -1000,6 +1034,16 @@ async function animateEducationHeightWithUpdate(updateFn) {
 }
 
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
+const achievementEntries = [
+  { key: "all", label: "全部" },
+  { key: "contest", label: "学科竞赛、文体艺术" },
+  { key: "paper", label: "发表学术论文" },
+  { key: "journal", label: "发表期刊作品" },
+  { key: "patent", label: "专利(著作权)授权数(项)" },
+  { key: "certificate", label: "职业资格证书" },
+  { key: "research", label: "学生参与教师科研项目情况" },
+  { key: "works", label: "创作、表演的代表性作品" },
+];
 
 const avatarText = computed(() => {
   const name = profile.displayName || profile.username || "同学";
@@ -1149,7 +1193,7 @@ function handleMenuClick(key) {
     return;
   }
   if (key === "achievements") {
-    router.push("/achievements");
+    toggleAchievements();
     return;
   }
   if (key === "student-info") {
@@ -1157,6 +1201,28 @@ function handleMenuClick(key) {
     return;
   }
   router.push("/myinfos");
+}
+
+function toggleAchievements() {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  achievementsOpen.value = !achievementsOpen.value;
+  if (achievementsOpen.value) {
+    activeMenu.value = "achievements";
+    handleAchievementEntry("all");
+  }
+}
+
+function handleAchievementEntry(key) {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  const safeKey = achievementEntries.some((entry) => entry.key === key) ? key : "all";
+  activeAchievement.value = safeKey;
+  activeMenu.value = "achievements";
+  sidebarOpen.value = false;
+  router.push({ path: "/achievements", query: { category: safeKey } });
 }
 
 function openSidebar() {

@@ -773,7 +773,7 @@ function handleMenuClick(key) {
     return;
   }
   if (key === "achievements") {
-    router.push("/achievements");
+    router.push({ path: "/achievements", query: { category: "all" } });
     return;
   }
   if (key === "my-info") {
