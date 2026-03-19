@@ -686,7 +686,13 @@
           @click="closeExportDialog"
         ></div>
       </transition>
-      <section class="export-dialog" :class="{ open: exportDialogOpen }">
+      <section
+        class="export-dialog"
+        :class="{
+          open: exportDialogOpen,
+          split: exportPreviewOpen || exportPreviewClosing,
+        }"
+      >
         <header class="export-dialog-header">
           <div class="export-dialog-title">
             导出信息选择
@@ -752,6 +758,13 @@
             取消
           </button>
           <button
+            class="ghost-button"
+            type="button"
+            @click="toggleExportPreview"
+          >
+            {{ exportPreviewOpen ? "关闭预览" : "预览" }}
+          </button>
+          <button
             class="action-button export-confirm"
             type="button"
             :disabled="exporting"
@@ -760,6 +773,59 @@
             {{ exporting ? "导出中..." : "确认导出" }}
           </button>
         </footer>
+      </section>
+
+      <section
+        class="export-preview-view"
+        :class="{ open: exportPreviewOpen, closing: exportPreviewClosing }"
+        :aria-hidden="!exportPreviewOpen"
+      >
+        <header class="export-preview-header">
+          <div class="export-preview-title">导出预览</div>
+          <button
+            class="ghost-button"
+            type="button"
+            @click="toggleExportPreview"
+          >
+            关闭
+          </button>
+        </header>
+        <div class="export-preview-body">
+          <div v-if="previewLoading" class="empty-tip">加载预览中...</div>
+          <div v-else-if="!previewSheets.length" class="empty-tip">
+            暂无可预览内容
+          </div>
+          <div v-else class="export-preview-grid">
+            <table class="export-preview-table">
+              <thead>
+                <tr>
+                  <th v-for="(cell, index) in previewHeader" :key="index">
+                    {{ cell }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rowIndex) in previewRows" :key="rowIndex">
+                  <td v-for="(cell, cellIndex) in row" :key="cellIndex">
+                    {{ cell }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="export-preview-tabs" v-if="previewSheets.length">
+            <button
+              v-for="sheet in previewSheets"
+              :key="sheet.id"
+              class="export-preview-tab"
+              :class="{ active: sheet.id === previewActiveSheet }"
+              type="button"
+              @click="setPreviewSheet(sheet.id)"
+            >
+              {{ sheet.label }}
+            </button>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -793,6 +859,12 @@ const viewItem = ref(null);
 const viewLoading = ref(false);
 const selectAllLoading = ref(false);
 const exportDialogOpen = ref(false);
+const exportPreviewOpen = ref(false);
+const exportPreviewClosing = ref(false);
+const previewActiveSheet = ref("main");
+const previewLoading = ref(false);
+const previewDetailRows = ref([]);
+let previewRequestId = 0;
 const achievementsOpen = ref(false);
 const achievementsClosing = ref(false);
 
@@ -1414,6 +1486,109 @@ const PARTY_FIELD_META = {
   },
 };
 
+function shouldIncludeMainSheet(selectedKeys) {
+  const hasEdu = EDUCATION_FIELD_ORDER.some((key) => selectedKeys.has(key));
+  const hasParty = PARTY_FIELD_ORDER.some((key) => selectedKeys.has(key));
+  const hasNonBaseMain = MAIN_FIELD_ORDER.some(
+    (key) => !IDENTITY_KEYS.includes(key) && selectedKeys.has(key),
+  );
+  const hasAnyMain = MAIN_FIELD_ORDER.some((key) => selectedKeys.has(key));
+  if (hasEdu || hasParty) {
+    return hasNonBaseMain;
+  }
+  return hasAnyMain;
+}
+
+const previewStudents = computed(() => previewDetailRows.value);
+const previewSelectedKeys = computed(() => getSelectedExportKeys());
+const previewSheets = computed(() => {
+  const keys = previewSelectedKeys.value;
+  const sheets = [];
+  if (shouldIncludeMainSheet(keys)) {
+    const table = buildStudentTable(previewStudents.value, keys);
+    if (table) {
+      sheets.push({ id: "main", label: "学生", table });
+    }
+  }
+  const educationTable = buildEducationTable(previewStudents.value, keys);
+  if (educationTable) {
+    sheets.push({ id: "education", label: "教育经历", table: educationTable });
+  }
+  const partyTable = buildPartyTable(previewStudents.value, keys);
+  if (partyTable) {
+    sheets.push({ id: "party", label: "团组织与入党信息", table: partyTable });
+  }
+  return sheets;
+});
+
+const activePreviewTable = computed(() => {
+  const sheet = previewSheets.value.find(
+    (item) => item.id === previewActiveSheet.value,
+  );
+  return sheet?.table || [];
+});
+
+const previewHeader = computed(() => activePreviewTable.value[0] || []);
+const previewRows = computed(() => activePreviewTable.value.slice(1, 6));
+
+watch(previewSheets, (sheets) => {
+  if (!sheets.length) {
+    previewActiveSheet.value = "main";
+    return;
+  }
+  if (!sheets.find((sheet) => sheet.id === previewActiveSheet.value)) {
+    previewActiveSheet.value = sheets[0].id;
+  }
+});
+
+async function refreshPreviewData() {
+  if (!exportPreviewOpen.value) {
+    return;
+  }
+  const ids = selectedIds.value.slice(0, 3);
+  if (!ids.length) {
+    previewDetailRows.value = [];
+    return;
+  }
+  previewLoading.value = true;
+  const requestId = (previewRequestId += 1);
+  try {
+    const results = await Promise.all(
+      ids.map((id) =>
+        getStudentProfileById(id)
+          .then(({ data }) => data || null)
+          .catch(() => null),
+      ),
+    );
+    if (requestId !== previewRequestId) {
+      return;
+    }
+    previewDetailRows.value = results.filter(Boolean);
+  } finally {
+    if (requestId === previewRequestId) {
+      previewLoading.value = false;
+    }
+  }
+}
+
+watch(exportPreviewOpen, (open) => {
+  if (open) {
+    refreshPreviewData();
+  }
+});
+
+watch(selectedIds, () => {
+  refreshPreviewData();
+});
+
+watch(
+  exportSelections,
+  () => {
+    refreshPreviewData();
+  },
+  { deep: true },
+);
+
 function getSelectedExportKeys() {
   return new Set(
     Object.entries(exportSelections)
@@ -1428,6 +1603,8 @@ function openExportDialog() {
 
 function closeExportDialog() {
   exportDialogOpen.value = false;
+  exportPreviewOpen.value = false;
+  exportPreviewClosing.value = false;
 }
 
 function isGroupSelected(group) {
@@ -1454,18 +1631,23 @@ function toggleAllSelections(checked) {
   });
 }
 
-function shouldIncludeMainSheet(selectedKeys) {
-  const hasEdu = EDUCATION_FIELD_ORDER.some((key) => selectedKeys.has(key));
-  const hasParty = PARTY_FIELD_ORDER.some((key) => selectedKeys.has(key));
-  const hasNonBaseMain = MAIN_FIELD_ORDER.some(
-    (key) => !IDENTITY_KEYS.includes(key) && selectedKeys.has(key),
-  );
-  const hasAnyMain = MAIN_FIELD_ORDER.some((key) => selectedKeys.has(key));
-  if (hasEdu || hasParty) {
-    return hasNonBaseMain;
-  }
-  return hasAnyMain;
+function setPreviewSheet(id) {
+  previewActiveSheet.value = id;
 }
+
+function toggleExportPreview() {
+  if (exportPreviewOpen.value) {
+    exportPreviewOpen.value = false;
+    exportPreviewClosing.value = true;
+    setTimeout(() => {
+      exportPreviewClosing.value = false;
+    }, 260);
+    return;
+  }
+  exportPreviewOpen.value = true;
+  exportPreviewClosing.value = false;
+}
+
 
 async function confirmExport() {
   const success = await handleExport();
@@ -2055,6 +2237,16 @@ function loadUser() {
   pointer-events: auto;
 }
 
+.export-dialog.split {
+  left: 16px;
+  width: min(560px, calc(50vw - 24px));
+  transform: translate(0, 120%) scale(0.98);
+}
+
+.export-dialog.split.open {
+  transform: translate(0, 0) scale(1);
+}
+
 .export-dialog-header {
   display: flex;
   align-items: center;
@@ -2145,6 +2337,152 @@ function loadUser() {
 
 .export-confirm {
   padding: 0 22px;
+}
+
+.export-preview-view {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: min(720px, calc(50vw - 24px));
+  height: 80vh;
+  transform: translate(0, 120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    140deg,
+    rgba(205, 255, 249, 0.92),
+    rgba(197, 217, 226, 0.78)
+  );
+  box-shadow: 0 28px 70px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  z-index: 92;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.75s ease,
+    filter 0.75s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 14px 16px;
+}
+
+.export-preview-view.open {
+  transform: translate(0, 0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+  pointer-events: auto;
+}
+
+.export-preview-view.closing {
+  transform: translate(0, 120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+}
+
+.export-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.export-preview-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f4d55;
+}
+
+.export-preview-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.export-preview-grid {
+  flex: 1;
+  min-height: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  overflow: auto;
+}
+
+.export-preview-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+  color: #1f4f57;
+}
+
+.export-preview-table th,
+.export-preview-table td {
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.export-preview-table th {
+  background: rgba(205, 255, 249, 0.8);
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.export-preview-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.export-preview-tab {
+  border-radius: 10px;
+  border: 1px solid rgba(3, 107, 114, 0.25);
+  background: rgba(255, 255, 255, 0.7);
+  color: #0f4d55;
+  height: 32px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.export-preview-tab.active {
+  background: rgba(205, 255, 249, 0.9);
+  border-color: rgba(3, 107, 114, 0.45);
+}
+
+@media (max-width: 1100px) {
+  .export-dialog.split {
+    left: 50%;
+    width: min(980px, calc(100vw - 32px));
+    transform: translate(-50%, 120%) scale(0.98);
+  }
+
+  .export-dialog.split.open {
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  .export-preview-view {
+    left: 50%;
+    right: auto;
+    width: min(980px, calc(100vw - 32px));
+    height: 80vh;
+    transform: translate(-50%, 120%) scale(0.98);
+  }
+
+  .export-preview-view.open {
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  .export-preview-view.closing {
+    transform: translate(-50%, 120%) scale(0.98);
+  }
 }
 
 .student-detail-body {
