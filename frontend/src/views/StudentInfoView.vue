@@ -790,7 +790,7 @@
         :aria-hidden="!exportPreviewOpen"
       >
         <header class="export-preview-header">
-          <div class="export-preview-title">导出预览</div>
+          <div class="export-preview-title">导出预览(仅显示前三人)</div>
           <button
             class="ghost-button"
             type="button"
