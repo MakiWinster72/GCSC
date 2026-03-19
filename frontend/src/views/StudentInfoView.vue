@@ -1070,11 +1070,16 @@ async function handleExport() {
     }
     const table = buildStudentTable(rows);
     const worksheet = XLSX.utils.aoa_to_sheet(table);
+    worksheet["!cols"] = computeColumnWidths(table);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
-    const educationSheet = XLSX.utils.aoa_to_sheet(buildEducationTable(rows));
+    const educationTable = buildEducationTable(rows);
+    const educationSheet = XLSX.utils.aoa_to_sheet(educationTable);
+    educationSheet["!cols"] = computeColumnWidths(educationTable);
     XLSX.utils.book_append_sheet(workbook, educationSheet, "教育经历");
-    const partySheet = XLSX.utils.aoa_to_sheet(buildPartyTable(rows));
+    const partyTable = buildPartyTable(rows);
+    const partySheet = XLSX.utils.aoa_to_sheet(partyTable);
+    partySheet["!cols"] = computeColumnWidths(partyTable);
     XLSX.utils.book_append_sheet(workbook, partySheet, "团组织与入党信息");
     XLSX.writeFile(workbook, `students_export_${formatTimestamp()}.xlsx`, {
       compression: true,
@@ -1170,6 +1175,23 @@ function buildStudentTable(rows) {
     item.emergencyRelation || "",
   ]);
   return [header, ...body];
+}
+
+function computeColumnWidths(table) {
+  const widths = [];
+  table.forEach((row) => {
+    row.forEach((cell, index) => {
+      const text = cell == null ? "" : String(cell);
+      const length = text.length;
+      const minWidth = 8;
+      const maxWidth = 40;
+      const width = Math.min(Math.max(length + 2, minWidth), maxWidth);
+      if (!widths[index] || width > widths[index].wch) {
+        widths[index] = { wch: width };
+      }
+    });
+  });
+  return widths;
 }
 
 function buildEducationTable(rows) {
