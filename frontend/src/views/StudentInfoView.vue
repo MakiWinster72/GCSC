@@ -1108,25 +1108,13 @@ function buildStudentTable(rows) {
     "身份证号",
     "籍贯",
     "住址",
-    "港澳台",
-    "特殊学生",
     "是否在外居住",
     "外居住地址",
     "住宿校区",
     "住宿楼栋",
     "住宿房间",
-    "是否入团",
-    "提交入团申请书时间",
-    "入团时间",
-    "团号",
-    "是否申请入党",
-    "提交入党申请书时间",
-    "确定积极分子时间",
-    "上党课时间",
-    "确定发展对象时间",
-    "接收为预备党员时间",
-    "转为正式党员时间",
-    "教育经历",
+    "港澳台",
+    "特殊学生",
     "父亲姓名",
     "父亲电话",
     "父亲工作单位",
@@ -1156,41 +1144,13 @@ function buildStudentTable(rows) {
     item.idNo || "",
     item.nativePlace || "",
     item.address || "",
-    formatYesNo(item.hkMoTw),
-    formatYesNo(item.specialStudent),
     formatYesNo(item.offCampusLiving),
     item.offCampusAddress || "",
     item.dormCampus || "",
     item.dormBuilding || "",
     item.dormRoom || "",
-    formatYesNo(item.leagueJoined),
-    item.leagueApplicationDate || "",
-    formatDateOrStatus(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
-    item.leagueNo || "",
-    formatYesNo(item.partyApplied),
-    item.applicationDate || "",
-    formatDateOrStatus(item.activistDate, item.activistDeveloping, "正在发展"),
-    formatDateOrStatus(
-      item.partyTrainingDate,
-      item.partyTrainingPending,
-      "暂未报名",
-    ),
-    formatDateOrStatus(
-      item.developmentTargetDate,
-      item.developmentTargetDeveloping,
-      "正在发展",
-    ),
-    formatDateOrStatus(
-      item.probationaryMemberDate,
-      item.probationaryDeveloping,
-      "正在发展",
-    ),
-    formatDateOrStatus(
-      item.fullMemberDate,
-      item.fullMemberDeveloping,
-      "正在发展",
-    ),
-    formatEducationText(item.educationExperiences),
+    formatYesNo(item.hkMoTw),
+    formatYesNo(item.specialStudent),
     item.fatherName || "",
     item.fatherPhone || "",
     item.fatherWorkUnit || "",
@@ -1217,14 +1177,7 @@ function buildEducationTable(rows) {
       ? item.educationExperiences.filter(Boolean)
       : [];
     if (!experiences.length) {
-      lines.push([
-        base.studentNo,
-        base.name,
-        "",
-        "",
-        "",
-        "",
-      ]);
+      lines.push([base.studentNo, base.name, "", "", "", ""]);
       return;
     }
     experiences.forEach((edu) => {
@@ -1267,12 +1220,24 @@ function buildPartyTable(rows) {
       item.fullName || item.name || "",
       formatYesNo(item.leagueJoined),
       item.leagueApplicationDate || "",
-      formatDateOrStatus(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
+      formatDateOrStatus(
+        item.leagueJoinDate,
+        item.leagueDeveloping,
+        "正在发展",
+      ),
       item.leagueNo || "",
       formatYesNo(item.partyApplied),
       item.applicationDate || "",
-      formatDateOrStatus(item.activistDate, item.activistDeveloping, "正在发展"),
-      formatDateOrStatus(item.partyTrainingDate, item.partyTrainingPending, "暂未报名"),
+      formatDateOrStatus(
+        item.activistDate,
+        item.activistDeveloping,
+        "正在发展",
+      ),
+      formatDateOrStatus(
+        item.partyTrainingDate,
+        item.partyTrainingPending,
+        "暂未报名",
+      ),
       formatDateOrStatus(
         item.developmentTargetDate,
         item.developmentTargetDeveloping,
@@ -1283,7 +1248,11 @@ function buildPartyTable(rows) {
         item.probationaryDeveloping,
         "正在发展",
       ),
-      formatDateOrStatus(item.fullMemberDate, item.fullMemberDeveloping, "正在发展"),
+      formatDateOrStatus(
+        item.fullMemberDate,
+        item.fullMemberDeveloping,
+        "正在发展",
+      ),
     ]);
   });
   return lines;
