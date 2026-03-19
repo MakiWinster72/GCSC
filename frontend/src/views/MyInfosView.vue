@@ -415,10 +415,53 @@
             </div>
             <label class="field-card field-full" v-if="info.offCampusLiving">
               <span class="info-label">外居住详细地址</span>
-              <!-- TODO: 做地址选择器 -->
+              <div class="info-inline address-inline">
+                <select
+                  v-model="info.offCampusProvince"
+                  class="info-input"
+                  :disabled="!isEditing"
+                >
+                  <option disabled value="">选择省份</option>
+                  <option
+                    v-for="item in addressProvinceOptions"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </option>
+                </select>
+                <select
+                  v-model="info.offCampusCity"
+                  class="info-input"
+                  :disabled="!isEditing || !offCampusCityOptions.length"
+                >
+                  <option disabled value="">选择城市</option>
+                  <option
+                    v-for="item in offCampusCityOptions"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </option>
+                </select>
+                <select
+                  v-model="info.offCampusCounty"
+                  class="info-input"
+                  :disabled="!isEditing || !offCampusCountyOptions.length"
+                >
+                  <option disabled value="">选择区县</option>
+                  <option
+                    v-for="item in offCampusCountyOptions"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </option>
+                </select>
+              </div>
               <input
-                v-model="info.offCampusAddress"
-                class="info-input"
+                v-model="info.offCampusDetail"
+                class="info-input address-detail"
                 type="text"
                 placeholder="请输入详细地址"
                 :disabled="!isEditing"
@@ -1001,6 +1044,10 @@ const info = reactive({
   addressCity: "",
   addressCounty: "",
   addressDetail: "",
+  offCampusProvince: "",
+  offCampusCity: "",
+  offCampusCounty: "",
+  offCampusDetail: "",
   idNo: "",
   nativePlace: "",
   leagueNo: "",
@@ -1149,6 +1196,21 @@ const addressCountyOptions = computed(() => {
   const province = regionData.find((item) => item.value === info.addressProvince);
   const city = province?.children?.find(
     (entry) => entry.value === info.addressCity,
+  );
+  return city?.children || [];
+});
+const offCampusCityOptions = computed(() => {
+  const province = regionData.find(
+    (item) => item.value === info.offCampusProvince,
+  );
+  return province?.children || [];
+});
+const offCampusCountyOptions = computed(() => {
+  const province = regionData.find(
+    (item) => item.value === info.offCampusProvince,
+  );
+  const city = province?.children?.find(
+    (entry) => entry.value === info.offCampusCity,
   );
   return city?.children || [];
 });
@@ -1423,6 +1485,13 @@ async function confirmEdit() {
     info.addressDetail,
     info.address,
   );
+  const offCampusAddress = buildAddress(
+    info.offCampusProvince,
+    info.offCampusCity,
+    info.offCampusCounty,
+    info.offCampusDetail,
+    info.offCampusAddress,
+  );
   const dormRoom = buildDormRoom(
     info.dormFloor,
     info.dormRoomNo,
@@ -1455,7 +1524,7 @@ async function confirmEdit() {
     dormBuilding: info.dormBuilding,
     dormRoom,
     offCampusLiving: info.offCampusLiving,
-    offCampusAddress: info.offCampusAddress,
+    offCampusAddress,
     classTeacher: info.classTeacher,
     counselor: info.counselor,
     phone: info.phone,
@@ -1666,6 +1735,11 @@ function applyProfileResponse(data) {
   info.dormRoomNo = parsedDormRoom.roomNo;
   info.offCampusLiving = Boolean(data.offCampusLiving);
   info.offCampusAddress = data.offCampusAddress || "";
+  const parsedOffCampusAddress = parseAddressToRegion(info.offCampusAddress);
+  info.offCampusProvince = parsedOffCampusAddress.province;
+  info.offCampusCity = parsedOffCampusAddress.city;
+  info.offCampusCounty = parsedOffCampusAddress.county;
+  info.offCampusDetail = parsedOffCampusAddress.detail;
   info.classTeacher = data.classTeacher || "";
   info.counselor = data.counselor || "";
   info.phone = data.phone || "";
@@ -1767,6 +1841,10 @@ watch(
       info.dormRoomNo = "";
     } else {
       info.offCampusAddress = "";
+      info.offCampusProvince = "";
+      info.offCampusCity = "";
+      info.offCampusCounty = "";
+      info.offCampusDetail = "";
     }
   },
 );
@@ -1822,6 +1900,48 @@ watch(
       )
     ) {
       info.addressCounty = "";
+    }
+  },
+);
+
+watch(
+  () => info.offCampusProvince,
+  () => {
+    if (!info.offCampusProvince) {
+      info.offCampusCity = "";
+      info.offCampusCounty = "";
+      return;
+    }
+    if (
+      !offCampusCityOptions.value.some(
+        (item) => item.value === info.offCampusCity,
+      )
+    ) {
+      info.offCampusCity = "";
+    }
+    if (
+      !offCampusCountyOptions.value.some(
+        (item) => item.value === info.offCampusCounty,
+      )
+    ) {
+      info.offCampusCounty = "";
+    }
+  },
+);
+
+watch(
+  () => info.offCampusCity,
+  () => {
+    if (!info.offCampusCity) {
+      info.offCampusCounty = "";
+      return;
+    }
+    if (
+      !offCampusCountyOptions.value.some(
+        (item) => item.value === info.offCampusCounty,
+      )
+    ) {
+      info.offCampusCounty = "";
     }
   },
 );
