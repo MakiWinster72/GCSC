@@ -217,7 +217,7 @@
               class="action-button"
               type="button"
               :disabled="exportDisabled"
-              @click="handleExport"
+              @click="openExportDialog"
             >
               {{ exportLabel }}
             </button>
@@ -678,6 +678,89 @@
           ></iframe>
         </div>
       </section>
+
+      <transition name="publisher-backdrop">
+        <div
+          v-if="exportDialogOpen"
+          class="export-dialog-backdrop"
+          @click="closeExportDialog"
+        ></div>
+      </transition>
+      <section class="export-dialog" :class="{ open: exportDialogOpen }">
+        <header class="export-dialog-header">
+          <div class="export-dialog-title">
+            导出信息选择
+            <label class="export-all-toggle">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                @change="toggleAllSelections($event.target.checked)"
+              />
+              <span>全选</span>
+            </label>
+          </div>
+          <button class="ghost-button" type="button" @click="closeExportDialog">
+            关闭
+          </button>
+        </header>
+        <div class="export-dialog-body">
+          <div
+            v-for="group in exportGroups"
+            :key="group.id"
+            class="export-group"
+          >
+            <label class="export-group-title">
+              <span>{{ group.label }}</span>
+              <input
+                type="checkbox"
+                :checked="isGroupSelected(group)"
+                @change="toggleGroupSelection(group, $event.target.checked)"
+              />
+            </label>
+            <div class="export-group-options">
+              <template v-if="group.id === 'family'">
+                <div
+                  v-for="(row, index) in familyRows"
+                  :key="`family-row-${index}`"
+                  class="export-option-row"
+                >
+                  <label
+                    v-for="field in row"
+                    :key="field.key"
+                    class="export-option"
+                  >
+                    <input v-model="exportSelections[field.key]" type="checkbox" />
+                    <span>{{ field.label }}</span>
+                  </label>
+                </div>
+              </template>
+              <template v-else>
+                <label
+                  v-for="field in group.fields"
+                  :key="field.key"
+                  class="export-option"
+                >
+                  <input v-model="exportSelections[field.key]" type="checkbox" />
+                  <span>{{ field.label }}</span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </div>
+        <footer class="export-dialog-actions">
+          <button class="ghost-button" type="button" @click="closeExportDialog">
+            取消
+          </button>
+          <button
+            class="action-button export-confirm"
+            type="button"
+            :disabled="exporting"
+            @click="confirmExport"
+          >
+            {{ exporting ? "导出中..." : "确认导出" }}
+          </button>
+        </footer>
+      </section>
     </main>
   </div>
 </template>
@@ -709,6 +792,7 @@ const viewClosing = ref(false);
 const viewItem = ref(null);
 const viewLoading = ref(false);
 const selectAllLoading = ref(false);
+const exportDialogOpen = ref(false);
 const achievementsOpen = ref(false);
 const achievementsClosing = ref(false);
 
@@ -729,6 +813,133 @@ const filters = reactive({
   isHkMoTw: false,
   isSpecial: false,
   keyword: "",
+});
+
+const exportGroups = [
+  {
+    id: "base",
+    label: "基础信息",
+    fields: [
+      { key: "name", label: "姓名", defaultSelected: true },
+      { key: "className", label: "班级", defaultSelected: true },
+      { key: "studentNo", label: "学号", defaultSelected: true },
+    ],
+  },
+  {
+    id: "school",
+    label: "学籍信息",
+    fields: [
+      { key: "enrollmentDate", label: "入学时间" },
+      { key: "studentCategory", label: "学生类别" },
+      { key: "classTeacher", label: "班主任" },
+      { key: "counselor", label: "辅导员" },
+    ],
+  },
+  {
+    id: "identity",
+    label: "个人证件与联系方式",
+    fields: [
+      { key: "ethnicity", label: "民族" },
+      { key: "politicalStatus", label: "政治面貌" },
+      { key: "phone", label: "手机号码" },
+      { key: "idNo", label: "身份证号" },
+      { key: "nativePlace", label: "籍贯" },
+      { key: "address", label: "住址" },
+    ],
+  },
+  {
+    id: "dorm",
+    label: "住宿信息",
+    fields: [
+      { key: "offCampusLiving", label: "是否在外居住" },
+      { key: "offCampusAddress", label: "外居住地址" },
+      { key: "dormCampus", label: "住宿校区" },
+      { key: "dormBuilding", label: "住宿楼栋" },
+      { key: "dormRoom", label: "住宿房间" },
+    ],
+  },
+  {
+    id: "family",
+    label: "家庭信息",
+    fields: [
+      { key: "fatherName", label: "父亲姓名" },
+      { key: "fatherPhone", label: "父亲电话" },
+      { key: "fatherWorkUnit", label: "父亲工作单位" },
+      { key: "fatherTitle", label: "父亲职务" },
+      { key: "motherName", label: "母亲姓名" },
+      { key: "motherPhone", label: "母亲电话" },
+      { key: "motherWorkUnit", label: "母亲工作单位" },
+      { key: "motherTitle", label: "母亲职务" },
+      { key: "hkMoTw", label: "港澳台" },
+      { key: "specialStudent", label: "特殊学生" },
+    ],
+  },
+  {
+    id: "emergency",
+    label: "紧急联系人",
+    fields: [
+      { key: "emergencyPhone", label: "紧急联系人电话" },
+      { key: "emergencyRelation", label: "紧急联系人关系" },
+    ],
+  },
+  {
+    id: "education",
+    label: "教育经历",
+    fields: [
+      { key: "eduPeriod", label: "时间段" },
+      { key: "eduSchoolName", label: "学校名称" },
+      { key: "eduEducationLevel", label: "学历" },
+      { key: "eduWitness", label: "证明人" },
+    ],
+  },
+  {
+    id: "party",
+    label: "团组织与入党信息",
+    fields: [
+      { key: "leagueJoined", label: "是否入团" },
+      { key: "leagueApplicationDate", label: "提交入团申请书时间" },
+      { key: "leagueJoinDate", label: "入团时间" },
+      { key: "leagueNo", label: "团号" },
+      { key: "partyApplied", label: "是否申请入党" },
+      { key: "applicationDate", label: "提交入党申请书时间" },
+      { key: "activistDate", label: "确定积极分子时间" },
+      { key: "partyTrainingDate", label: "上党课时间" },
+      { key: "developmentTargetDate", label: "确定发展对象时间" },
+      { key: "probationaryMemberDate", label: "接收为预备党员时间" },
+      { key: "fullMemberDate", label: "转为正式党员时间" },
+    ],
+  },
+];
+
+const exportSelections = reactive(initExportSelections());
+
+function initExportSelections() {
+  const selections = {};
+  exportGroups.forEach((group) => {
+    group.fields.forEach((field) => {
+      selections[field.key] = Boolean(field.defaultSelected);
+    });
+  });
+  return selections;
+}
+
+const familyRows = computed(() => {
+  const group = exportGroups.find((item) => item.id === "family");
+  if (!group) {
+    return [];
+  }
+  const byKey = Object.fromEntries(group.fields.map((field) => [field.key, field]));
+  return [
+    ["fatherName", "fatherPhone", "fatherWorkUnit", "fatherTitle"]
+      .map((key) => byKey[key])
+      .filter(Boolean),
+    ["motherName", "motherPhone", "motherWorkUnit", "motherTitle"]
+      .map((key) => byKey[key])
+      .filter(Boolean),
+    ["hkMoTw", "specialStudent"]
+      .map((key) => byKey[key])
+      .filter(Boolean),
+  ];
 });
 
 const availableMajors = computed(() => {
@@ -1045,13 +1256,216 @@ async function selectAllFiltered() {
   }
 }
 
+const IDENTITY_FIELDS = [
+  { key: "name", label: "姓名", getter: (item) => item.fullName || item.name || "" },
+  { key: "className", label: "班级", getter: (item) => buildClassName(item) || "" },
+  { key: "studentNo", label: "学号", getter: (item) => item.studentNo || "" },
+];
+
+const MAIN_FIELD_ORDER = [
+  "name",
+  "className",
+  "studentNo",
+  "enrollmentDate",
+  "studentCategory",
+  "classTeacher",
+  "counselor",
+  "ethnicity",
+  "politicalStatus",
+  "phone",
+  "idNo",
+  "nativePlace",
+  "address",
+  "offCampusLiving",
+  "offCampusAddress",
+  "dormCampus",
+  "dormBuilding",
+  "dormRoom",
+  "hkMoTw",
+  "specialStudent",
+  "fatherName",
+  "fatherPhone",
+  "fatherWorkUnit",
+  "fatherTitle",
+  "motherName",
+  "motherPhone",
+  "motherWorkUnit",
+  "motherTitle",
+  "emergencyPhone",
+  "emergencyRelation",
+];
+
+const MAIN_FIELD_META = {
+  name: { label: "姓名", getter: (item) => item.fullName || item.name || "" },
+  className: { label: "班级", getter: (item) => buildClassName(item) || "" },
+  studentNo: { label: "学号", getter: (item) => item.studentNo || "" },
+  enrollmentDate: { label: "入学时间", getter: (item) => item.enrollmentDate || "" },
+  studentCategory: { label: "学生类别", getter: (item) => item.studentCategory || "" },
+  classTeacher: { label: "班主任", getter: (item) => item.classTeacher || "" },
+  counselor: { label: "辅导员", getter: (item) => item.counselor || "" },
+  ethnicity: { label: "民族", getter: (item) => item.ethnicity || "" },
+  politicalStatus: { label: "政治面貌", getter: (item) => item.politicalStatus || "" },
+  phone: { label: "手机号码", getter: (item) => item.phone || "" },
+  idNo: { label: "身份证号", getter: (item) => item.idNo || "" },
+  nativePlace: { label: "籍贯", getter: (item) => item.nativePlace || "" },
+  address: { label: "住址", getter: (item) => item.address || "" },
+  offCampusLiving: {
+    label: "是否在外居住",
+    getter: (item) => formatYesNo(item.offCampusLiving),
+  },
+  offCampusAddress: { label: "外居住地址", getter: (item) => item.offCampusAddress || "" },
+  dormCampus: { label: "住宿校区", getter: (item) => item.dormCampus || "" },
+  dormBuilding: { label: "住宿楼栋", getter: (item) => item.dormBuilding || "" },
+  dormRoom: { label: "住宿房间", getter: (item) => item.dormRoom || "" },
+  hkMoTw: { label: "港澳台", getter: (item) => formatYesNo(item.hkMoTw) },
+  specialStudent: {
+    label: "特殊学生",
+    getter: (item) => formatYesNo(item.specialStudent),
+  },
+  fatherName: { label: "父亲姓名", getter: (item) => item.fatherName || "" },
+  fatherPhone: { label: "父亲电话", getter: (item) => item.fatherPhone || "" },
+  fatherWorkUnit: { label: "父亲工作单位", getter: (item) => item.fatherWorkUnit || "" },
+  fatherTitle: { label: "父亲职务", getter: (item) => item.fatherTitle || "" },
+  motherName: { label: "母亲姓名", getter: (item) => item.motherName || "" },
+  motherPhone: { label: "母亲电话", getter: (item) => item.motherPhone || "" },
+  motherWorkUnit: { label: "母亲工作单位", getter: (item) => item.motherWorkUnit || "" },
+  motherTitle: { label: "母亲职务", getter: (item) => item.motherTitle || "" },
+  emergencyPhone: { label: "紧急联系人电话", getter: (item) => item.emergencyPhone || "" },
+  emergencyRelation: {
+    label: "紧急联系人关系",
+    getter: (item) => item.emergencyRelation || "",
+  },
+};
+
+const EDUCATION_FIELD_ORDER = [
+  "eduPeriod",
+  "eduSchoolName",
+  "eduEducationLevel",
+  "eduWitness",
+];
+
+const EDUCATION_FIELD_META = {
+  eduPeriod: {
+    label: "时间段",
+    getter: (item, edu) => {
+      const start = edu?.startDate || "";
+      const end = edu?.isCurrent ? "至今" : edu?.endDate || "";
+      return [start, end].filter(Boolean).join("~");
+    },
+  },
+  eduSchoolName: { label: "学校名称", getter: (item, edu) => edu?.schoolName || "" },
+  eduEducationLevel: { label: "学历", getter: (item, edu) => edu?.educationLevel || "" },
+  eduWitness: { label: "证明人", getter: (item, edu) => edu?.witness || "" },
+};
+
+const PARTY_FIELD_ORDER = [
+  "leagueJoined",
+  "leagueApplicationDate",
+  "leagueJoinDate",
+  "leagueNo",
+  "partyApplied",
+  "applicationDate",
+  "activistDate",
+  "partyTrainingDate",
+  "developmentTargetDate",
+  "probationaryMemberDate",
+  "fullMemberDate",
+];
+
+const PARTY_FIELD_META = {
+  leagueJoined: { label: "是否入团", getter: (item) => formatYesNo(item.leagueJoined) },
+  leagueApplicationDate: {
+    label: "提交入团申请书时间",
+    getter: (item) => item.leagueApplicationDate || "",
+  },
+  leagueJoinDate: {
+    label: "入团时间",
+    getter: (item) => formatDateOrEmpty(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
+  },
+  leagueNo: { label: "团号", getter: (item) => item.leagueNo || "" },
+  partyApplied: { label: "是否申请入党", getter: (item) => formatYesNo(item.partyApplied) },
+  applicationDate: {
+    label: "提交入党申请书时间",
+    getter: (item) => item.applicationDate || "",
+  },
+  activistDate: {
+    label: "确定积极分子时间",
+    getter: (item) => formatDateOrEmpty(item.activistDate, item.activistDeveloping, "正在发展"),
+  },
+  partyTrainingDate: {
+    label: "上党课时间",
+    getter: (item) => formatDateOrEmpty(item.partyTrainingDate, item.partyTrainingPending, "暂未报名"),
+  },
+  developmentTargetDate: {
+    label: "确定发展对象时间",
+    getter: (item) =>
+      formatDateOrEmpty(item.developmentTargetDate, item.developmentTargetDeveloping, "正在发展"),
+  },
+  probationaryMemberDate: {
+    label: "接收为预备党员时间",
+    getter: (item) =>
+      formatDateOrEmpty(item.probationaryMemberDate, item.probationaryDeveloping, "正在发展"),
+  },
+  fullMemberDate: {
+    label: "转为正式党员时间",
+    getter: (item) => formatDateOrEmpty(item.fullMemberDate, item.fullMemberDeveloping, "正在发展"),
+  },
+};
+
+function getSelectedExportKeys() {
+  return new Set(
+    Object.entries(exportSelections)
+      .filter(([, value]) => Boolean(value))
+      .map(([key]) => key),
+  );
+}
+
+function openExportDialog() {
+  exportDialogOpen.value = true;
+}
+
+function closeExportDialog() {
+  exportDialogOpen.value = false;
+}
+
+function isGroupSelected(group) {
+  return group.fields.every((field) => exportSelections[field.key]);
+}
+
+const isAllSelected = computed(() =>
+  exportGroups.every((group) =>
+    group.fields.every((field) => exportSelections[field.key]),
+  ),
+);
+
+function toggleGroupSelection(group, checked) {
+  group.fields.forEach((field) => {
+    exportSelections[field.key] = checked;
+  });
+}
+
+function toggleAllSelections(checked) {
+  exportGroups.forEach((group) => {
+    group.fields.forEach((field) => {
+      exportSelections[field.key] = checked;
+    });
+  });
+}
+
+async function confirmExport() {
+  const success = await handleExport();
+  if (success) {
+    closeExportDialog();
+  }
+}
+
 async function handleExport() {
   if (exporting.value) {
-    return;
+    return false;
   }
   if (!selectedIds.value.length) {
     window.alert("请先选择学生再导出。");
-    return;
+    return false;
   }
   exporting.value = true;
   try {
@@ -1066,21 +1480,32 @@ async function handleExport() {
     const rows = results.filter(Boolean);
     if (!rows.length) {
       window.alert("没有获取到学生详情，请稍后再试。");
-      return;
+      return false;
     }
-    const table = buildStudentTable(rows);
-    const worksheet = XLSX.utils.aoa_to_sheet(table);
-    worksheet["!cols"] = computeColumnWidths(table);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
-    const educationTable = buildEducationTable(rows);
-    const educationSheet = XLSX.utils.aoa_to_sheet(educationTable);
-    educationSheet["!cols"] = computeColumnWidths(educationTable);
-    XLSX.utils.book_append_sheet(workbook, educationSheet, "教育经历");
-    const partyTable = buildPartyTable(rows);
-    const partySheet = XLSX.utils.aoa_to_sheet(partyTable);
-    partySheet["!cols"] = computeColumnWidths(partyTable);
-    XLSX.utils.book_append_sheet(workbook, partySheet, "团组织与入党信息");
+    const selectedKeys = getSelectedExportKeys();
+    if (!selectedKeys.size) {
+      window.alert("请选择至少一个导出字段。");
+      return false;
+    }
+    const table = buildStudentTable(rows, selectedKeys);
+    if (table) {
+      const worksheet = XLSX.utils.aoa_to_sheet(table);
+      worksheet["!cols"] = computeColumnWidths(table);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
+    }
+    const educationTable = buildEducationTable(rows, selectedKeys);
+    if (educationTable) {
+      const educationSheet = XLSX.utils.aoa_to_sheet(educationTable);
+      educationSheet["!cols"] = computeColumnWidths(educationTable);
+      XLSX.utils.book_append_sheet(workbook, educationSheet, "教育经历");
+    }
+    const partyTable = buildPartyTable(rows, selectedKeys);
+    if (partyTable) {
+      const partySheet = XLSX.utils.aoa_to_sheet(partyTable);
+      partySheet["!cols"] = computeColumnWidths(partyTable);
+      XLSX.utils.book_append_sheet(workbook, partySheet, "团组织与入党信息");
+    }
     XLSX.writeFile(workbook, `students_export_${formatTimestamp()}.xlsx`, {
       compression: true,
     });
@@ -1099,73 +1524,18 @@ async function handleExport() {
   } finally {
     exporting.value = false;
   }
+  return true;
 }
 
-function buildStudentTable(rows) {
-  const header = [
-    "姓名",
-    "学号",
-    "班级名称",
-    "入学时间",
-    "学生类别",
-    "班主任",
-    "辅导员",
-    "民族",
-    "政治面貌",
-    "手机号码",
-    "身份证号",
-    "籍贯",
-    "住址",
-    "是否在外居住",
-    "外居住地址",
-    "住宿校区",
-    "住宿楼栋",
-    "住宿房间",
-    "港澳台",
-    "特殊学生",
-    "父亲姓名",
-    "父亲电话",
-    "父亲工作单位",
-    "父亲职务",
-    "母亲姓名",
-    "母亲电话",
-    "母亲工作单位",
-    "母亲职务",
-    "紧急联系人电话",
-    "紧急联系人关系",
-  ];
-  const body = rows.map((item) => [
-    item.fullName || item.name || "",
-    item.studentNo || "",
-    buildClassName(item) || "",
-    item.enrollmentDate || "",
-    item.studentCategory || "",
-    item.classTeacher || "",
-    item.counselor || "",
-    item.ethnicity || "",
-    item.politicalStatus || "",
-    item.phone || "",
-    item.idNo || "",
-    item.nativePlace || "",
-    item.address || "",
-    formatYesNo(item.offCampusLiving),
-    item.offCampusAddress || "",
-    item.dormCampus || "",
-    item.dormBuilding || "",
-    item.dormRoom || "",
-    formatYesNo(item.hkMoTw),
-    formatYesNo(item.specialStudent),
-    item.fatherName || "",
-    item.fatherPhone || "",
-    item.fatherWorkUnit || "",
-    item.fatherTitle || "",
-    item.motherName || "",
-    item.motherPhone || "",
-    item.motherWorkUnit || "",
-    item.motherTitle || "",
-    item.emergencyPhone || "",
-    item.emergencyRelation || "",
-  ]);
+function buildStudentTable(rows, selectedKeys) {
+  const activeFields = MAIN_FIELD_ORDER.filter((key) => selectedKeys.has(key));
+  if (!activeFields.length) {
+    return null;
+  }
+  const header = activeFields.map((key) => MAIN_FIELD_META[key].label);
+  const body = rows.map((item) =>
+    activeFields.map((key) => MAIN_FIELD_META[key].getter(item)),
+  );
   return [header, ...body];
 }
 
@@ -1186,96 +1556,61 @@ function computeColumnWidths(table) {
   return widths;
 }
 
-function buildEducationTable(rows) {
-  const header = ["学号", "姓名", "时间段", "学校名称", "学历", "证明人"];
+function buildEducationTable(rows, selectedKeys) {
+  const activeIdentity = IDENTITY_FIELDS.filter((field) =>
+    selectedKeys.has(field.key),
+  );
+  const activeFields = EDUCATION_FIELD_ORDER.filter((key) =>
+    selectedKeys.has(key),
+  );
+  if (!activeFields.length) {
+    return null;
+  }
+  const header = [
+    ...activeIdentity.map((field) => field.label),
+    ...activeFields.map((key) => EDUCATION_FIELD_META[key].label),
+  ];
   const lines = [header];
   rows.forEach((item) => {
-    const base = {
-      studentNo: item.studentNo || "",
-      name: item.fullName || item.name || "",
-    };
+    const identityValues = activeIdentity.map((field) => field.getter(item));
     const experiences = Array.isArray(item.educationExperiences)
       ? item.educationExperiences.filter(Boolean)
       : [];
     if (!experiences.length) {
-      lines.push([base.studentNo, base.name, "", "", "", ""]);
+      lines.push([...identityValues, ...activeFields.map(() => "")]);
       return;
     }
     experiences.forEach((edu) => {
-      const start = edu.startDate || "";
-      const end = edu.isCurrent ? "至今" : edu.endDate || "";
-      const period = [start, end].filter(Boolean).join("~");
       lines.push([
-        base.studentNo,
-        base.name,
-        period,
-        edu.schoolName || "",
-        edu.educationLevel || "",
-        edu.witness || "",
+        ...identityValues,
+        ...activeFields.map((key) =>
+          EDUCATION_FIELD_META[key].getter(item, edu),
+        ),
       ]);
     });
   });
   return lines;
 }
 
-function buildPartyTable(rows) {
+function buildPartyTable(rows, selectedKeys) {
+  const activeIdentity = IDENTITY_FIELDS.filter((field) =>
+    selectedKeys.has(field.key),
+  );
+  const activeFields = PARTY_FIELD_ORDER.filter((key) =>
+    selectedKeys.has(key),
+  );
+  if (!activeFields.length) {
+    return null;
+  }
   const header = [
-    "姓名",
-    "班级",
-    "学号",
-    "是否入团",
-    "提交入团申请书时间",
-    "入团时间",
-    "团号",
-    "是否申请入党",
-    "提交入党申请书时间",
-    "确定积极分子时间",
-    "上党课时间",
-    "确定发展对象时间",
-    "接收为预备党员时间",
-    "转为正式党员时间",
+    ...activeIdentity.map((field) => field.label),
+    ...activeFields.map((key) => PARTY_FIELD_META[key].label),
   ];
   const lines = [header];
   rows.forEach((item) => {
     lines.push([
-      item.fullName || item.name || "",
-      buildClassName(item) || "",
-      item.studentNo || "",
-      formatYesNo(item.leagueJoined),
-      item.leagueApplicationDate || "",
-      formatDateOrEmpty(
-        item.leagueJoinDate,
-        item.leagueDeveloping,
-        "正在发展",
-      ),
-      item.leagueNo || "",
-      formatYesNo(item.partyApplied),
-      item.applicationDate || "",
-      formatDateOrEmpty(
-        item.activistDate,
-        item.activistDeveloping,
-        "正在发展",
-      ),
-      formatDateOrEmpty(
-        item.partyTrainingDate,
-        item.partyTrainingPending,
-        "暂未报名",
-      ),
-      formatDateOrEmpty(
-        item.developmentTargetDate,
-        item.developmentTargetDeveloping,
-        "正在发展",
-      ),
-      formatDateOrEmpty(
-        item.probationaryMemberDate,
-        item.probationaryDeveloping,
-        "正在发展",
-      ),
-      formatDateOrEmpty(
-        item.fullMemberDate,
-        item.fullMemberDeveloping,
-        "正在发展",
-      ),
+      ...activeIdentity.map((field) => field.getter(item)),
+      ...activeFields.map((key) => PARTY_FIELD_META[key].getter(item)),
     ]);
   });
   return lines;
@@ -1660,6 +1995,139 @@ function loadUser() {
 .student-detail-view::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+.export-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 80;
+}
+
+.export-dialog {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  width: min(860px, calc(100vw - 32px));
+  transform: translate(-50%, 120%) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(
+    140deg,
+    rgba(205, 255, 249, 0.96),
+    rgba(197, 217, 226, 0.85)
+  );
+  box-shadow: 0 26px 60px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  z-index: 90;
+  transition:
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.6s ease;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.export-dialog.open {
+  transform: translate(-50%, 0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.export-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 10px;
+  border-bottom: 1px solid rgba(3, 107, 114, 0.12);
+}
+
+.export-dialog-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f4d55;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.export-all-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #2d5d64;
+}
+
+.export-dialog-body {
+  padding: 14px 18px 8px;
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.export-group {
+  border-radius: 14px;
+  border: 1px solid rgba(3, 107, 114, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.export-group-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f4d55;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-group-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.export-option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  width: 100%;
+}
+
+.export-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #2d5d64;
+}
+
+.export-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid rgba(3, 107, 114, 0.12);
+  align-items: center;
+}
+
+.export-dialog-actions .ghost-button,
+.export-dialog-actions .export-confirm {
+  width: auto;
+  min-width: 110px;
+  height: 40px;
+}
+
+.export-confirm {
+  padding: 0 22px;
 }
 
 .student-detail-body {
