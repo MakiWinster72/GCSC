@@ -1097,10 +1097,13 @@ const currentEducationIndex = computed(() =>
   educationItems.findIndex((entry) => entry.isCurrent),
 );
 
-function handleEducationCurrentChange(item, index) {
+async function handleEducationCurrentChange(item, index) {
   if (item.isCurrent) {
     item.endDate = "";
-    clearEducationRowsAfter(index);
+    await animateEducationHeightWithUpdate(() => {
+      clearEducationRowsAfter(index);
+      pruneEducationRowsAfter(index);
+    });
   }
 }
 
@@ -1128,6 +1131,32 @@ function clearEducationRowsAfter(index) {
     entry.witness = "";
     entry.isCurrent = false;
   });
+}
+
+function pruneEducationRowsAfter(index) {
+  if (educationItems.length <= index + 1) {
+    return;
+  }
+  const kept = educationItems.slice(0, index + 1);
+  educationItems.slice(index + 1).forEach((entry) => {
+    if (!isEducationRowEmpty(entry)) {
+      kept.push(entry);
+    }
+  });
+  if (kept.length !== educationItems.length) {
+    educationItems.splice(0, educationItems.length, ...kept);
+  }
+}
+
+function isEducationRowEmpty(entry) {
+  return (
+    !entry.startDate &&
+    !entry.endDate &&
+    !entry.schoolName &&
+    !entry.educationLevel &&
+    !entry.witness &&
+    !entry.isCurrent
+  );
 }
 
 const dormBuildingDisabled = computed(
