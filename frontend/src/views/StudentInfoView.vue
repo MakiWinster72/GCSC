@@ -736,7 +736,10 @@
                     :key="field.key"
                     class="export-option"
                   >
-                    <input v-model="exportSelections[field.key]" type="checkbox" />
+                    <input
+                      v-model="exportSelections[field.key]"
+                      type="checkbox"
+                    />
                     <span>{{ field.label }}</span>
                   </label>
                 </div>
@@ -747,7 +750,10 @@
                   :key="field.key"
                   class="export-option"
                 >
-                  <input v-model="exportSelections[field.key]" type="checkbox" />
+                  <input
+                    v-model="exportSelections[field.key]"
+                    type="checkbox"
+                  />
                   <span>{{ field.label }}</span>
                 </label>
               </template>
@@ -761,7 +767,9 @@
           <button
             class="ghost-button"
             type="button"
-            @click="exportPreviewOpen ? closeExportPreview() : openExportPreview()"
+            @click="
+              exportPreviewOpen ? closeExportPreview() : openExportPreview()
+            "
           >
             {{ exportPreviewOpen ? "关闭预览" : "预览" }}
           </button>
@@ -782,7 +790,7 @@
         :aria-hidden="!exportPreviewOpen"
       >
         <header class="export-preview-header">
-          <div class="export-preview-title">导出预览</div>
+          <div class="export-preview-title">导出预览(仅显示前三人)</div>
           <button
             class="ghost-button"
             type="button"
@@ -1017,7 +1025,9 @@ const familyRows = computed(() => {
   if (!group) {
     return [];
   }
-  const byKey = Object.fromEntries(group.fields.map((field) => [field.key, field]));
+  const byKey = Object.fromEntries(
+    group.fields.map((field) => [field.key, field]),
+  );
   return [
     ["fatherName", "fatherPhone", "fatherWorkUnit", "fatherTitle"]
       .map((key) => byKey[key])
@@ -1025,9 +1035,7 @@ const familyRows = computed(() => {
     ["motherName", "motherPhone", "motherWorkUnit", "motherTitle"]
       .map((key) => byKey[key])
       .filter(Boolean),
-    ["hkMoTw", "specialStudent"]
-      .map((key) => byKey[key])
-      .filter(Boolean),
+    ["hkMoTw", "specialStudent"].map((key) => byKey[key]).filter(Boolean),
   ];
 });
 
@@ -1346,8 +1354,16 @@ async function selectAllFiltered() {
 }
 
 const IDENTITY_FIELDS = [
-  { key: "name", label: "姓名", getter: (item) => item.fullName || item.name || "" },
-  { key: "className", label: "班级", getter: (item) => buildClassName(item) || "" },
+  {
+    key: "name",
+    label: "姓名",
+    getter: (item) => item.fullName || item.name || "",
+  },
+  {
+    key: "className",
+    label: "班级",
+    getter: (item) => buildClassName(item) || "",
+  },
   { key: "studentNo", label: "学号", getter: (item) => item.studentNo || "" },
 ];
 
@@ -1390,12 +1406,21 @@ const MAIN_FIELD_META = {
   name: { label: "姓名", getter: (item) => item.fullName || item.name || "" },
   className: { label: "班级", getter: (item) => buildClassName(item) || "" },
   studentNo: { label: "学号", getter: (item) => item.studentNo || "" },
-  enrollmentDate: { label: "入学时间", getter: (item) => item.enrollmentDate || "" },
-  studentCategory: { label: "学生类别", getter: (item) => item.studentCategory || "" },
+  enrollmentDate: {
+    label: "入学时间",
+    getter: (item) => item.enrollmentDate || "",
+  },
+  studentCategory: {
+    label: "学生类别",
+    getter: (item) => item.studentCategory || "",
+  },
   classTeacher: { label: "班主任", getter: (item) => item.classTeacher || "" },
   counselor: { label: "辅导员", getter: (item) => item.counselor || "" },
   ethnicity: { label: "民族", getter: (item) => item.ethnicity || "" },
-  politicalStatus: { label: "政治面貌", getter: (item) => item.politicalStatus || "" },
+  politicalStatus: {
+    label: "政治面貌",
+    getter: (item) => item.politicalStatus || "",
+  },
   phone: { label: "手机号码", getter: (item) => item.phone || "" },
   idNo: { label: "身份证号", getter: (item) => item.idNo || "" },
   nativePlace: { label: "籍贯", getter: (item) => item.nativePlace || "" },
@@ -1404,9 +1429,15 @@ const MAIN_FIELD_META = {
     label: "是否在外居住",
     getter: (item) => formatYesNo(item.offCampusLiving),
   },
-  offCampusAddress: { label: "外居住地址", getter: (item) => item.offCampusAddress || "" },
+  offCampusAddress: {
+    label: "外居住地址",
+    getter: (item) => item.offCampusAddress || "",
+  },
   dormCampus: { label: "住宿校区", getter: (item) => item.dormCampus || "" },
-  dormBuilding: { label: "住宿楼栋", getter: (item) => item.dormBuilding || "" },
+  dormBuilding: {
+    label: "住宿楼栋",
+    getter: (item) => item.dormBuilding || "",
+  },
   dormRoom: { label: "住宿房间", getter: (item) => item.dormRoom || "" },
   hkMoTw: { label: "港澳台", getter: (item) => formatYesNo(item.hkMoTw) },
   specialStudent: {
@@ -1415,13 +1446,22 @@ const MAIN_FIELD_META = {
   },
   fatherName: { label: "父亲姓名", getter: (item) => item.fatherName || "" },
   fatherPhone: { label: "父亲电话", getter: (item) => item.fatherPhone || "" },
-  fatherWorkUnit: { label: "父亲工作单位", getter: (item) => item.fatherWorkUnit || "" },
+  fatherWorkUnit: {
+    label: "父亲工作单位",
+    getter: (item) => item.fatherWorkUnit || "",
+  },
   fatherTitle: { label: "父亲职务", getter: (item) => item.fatherTitle || "" },
   motherName: { label: "母亲姓名", getter: (item) => item.motherName || "" },
   motherPhone: { label: "母亲电话", getter: (item) => item.motherPhone || "" },
-  motherWorkUnit: { label: "母亲工作单位", getter: (item) => item.motherWorkUnit || "" },
+  motherWorkUnit: {
+    label: "母亲工作单位",
+    getter: (item) => item.motherWorkUnit || "",
+  },
   motherTitle: { label: "母亲职务", getter: (item) => item.motherTitle || "" },
-  emergencyPhone: { label: "紧急联系人电话", getter: (item) => item.emergencyPhone || "" },
+  emergencyPhone: {
+    label: "紧急联系人电话",
+    getter: (item) => item.emergencyPhone || "",
+  },
   emergencyRelation: {
     label: "紧急联系人关系",
     getter: (item) => item.emergencyRelation || "",
@@ -1444,8 +1484,14 @@ const EDUCATION_FIELD_META = {
       return [start, end].filter(Boolean).join("~");
     },
   },
-  eduSchoolName: { label: "学校名称", getter: (item, edu) => edu?.schoolName || "" },
-  eduEducationLevel: { label: "学历", getter: (item, edu) => edu?.educationLevel || "" },
+  eduSchoolName: {
+    label: "学校名称",
+    getter: (item, edu) => edu?.schoolName || "",
+  },
+  eduEducationLevel: {
+    label: "学历",
+    getter: (item, edu) => edu?.educationLevel || "",
+  },
   eduWitness: { label: "证明人", getter: (item, edu) => edu?.witness || "" },
 };
 
@@ -1464,42 +1510,68 @@ const PARTY_FIELD_ORDER = [
 ];
 
 const PARTY_FIELD_META = {
-  leagueJoined: { label: "是否入团", getter: (item) => formatYesNo(item.leagueJoined) },
+  leagueJoined: {
+    label: "是否入团",
+    getter: (item) => formatYesNo(item.leagueJoined),
+  },
   leagueApplicationDate: {
     label: "提交入团申请书时间",
     getter: (item) => item.leagueApplicationDate || "",
   },
   leagueJoinDate: {
     label: "入团时间",
-    getter: (item) => formatDateOrEmpty(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
+    getter: (item) =>
+      formatDateOrEmpty(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
   },
   leagueNo: { label: "团号", getter: (item) => item.leagueNo || "" },
-  partyApplied: { label: "是否申请入党", getter: (item) => formatYesNo(item.partyApplied) },
+  partyApplied: {
+    label: "是否申请入党",
+    getter: (item) => formatYesNo(item.partyApplied),
+  },
   applicationDate: {
     label: "提交入党申请书时间",
     getter: (item) => item.applicationDate || "",
   },
   activistDate: {
     label: "确定积极分子时间",
-    getter: (item) => formatDateOrEmpty(item.activistDate, item.activistDeveloping, "正在发展"),
+    getter: (item) =>
+      formatDateOrEmpty(item.activistDate, item.activistDeveloping, "正在发展"),
   },
   partyTrainingDate: {
     label: "上党课时间",
-    getter: (item) => formatDateOrEmpty(item.partyTrainingDate, item.partyTrainingPending, "暂未报名"),
+    getter: (item) =>
+      formatDateOrEmpty(
+        item.partyTrainingDate,
+        item.partyTrainingPending,
+        "暂未报名",
+      ),
   },
   developmentTargetDate: {
     label: "确定发展对象时间",
     getter: (item) =>
-      formatDateOrEmpty(item.developmentTargetDate, item.developmentTargetDeveloping, "正在发展"),
+      formatDateOrEmpty(
+        item.developmentTargetDate,
+        item.developmentTargetDeveloping,
+        "正在发展",
+      ),
   },
   probationaryMemberDate: {
     label: "接收为预备党员时间",
     getter: (item) =>
-      formatDateOrEmpty(item.probationaryMemberDate, item.probationaryDeveloping, "正在发展"),
+      formatDateOrEmpty(
+        item.probationaryMemberDate,
+        item.probationaryDeveloping,
+        "正在发展",
+      ),
   },
   fullMemberDate: {
     label: "转为正式党员时间",
-    getter: (item) => formatDateOrEmpty(item.fullMemberDate, item.fullMemberDeveloping, "正在发展"),
+    getter: (item) =>
+      formatDateOrEmpty(
+        item.fullMemberDate,
+        item.fullMemberDeveloping,
+        "正在发展",
+      ),
   },
 };
 
@@ -1507,9 +1579,17 @@ const ACHIEVEMENT_CATEGORIES = [
   { key: "contest", label: "学科竞赛、文体艺术", selectKey: "ach_contest" },
   { key: "paper", label: "发表学术论文", selectKey: "ach_paper" },
   { key: "journal", label: "发表期刊作品", selectKey: "ach_journal" },
-  { key: "patent", label: "专利（著作权）授权数（项）", selectKey: "ach_patent" },
+  {
+    key: "patent",
+    label: "专利（著作权）授权数（项）",
+    selectKey: "ach_patent",
+  },
   { key: "certificate", label: "职业资格证书", selectKey: "ach_certificate" },
-  { key: "research", label: "学生参与教师科研项目情况", selectKey: "ach_research" },
+  {
+    key: "research",
+    label: "学生参与教师科研项目情况",
+    selectKey: "ach_research",
+  },
   { key: "works", label: "创作、表演的代表性作品", selectKey: "ach_works" },
 ];
 
@@ -1793,7 +1873,6 @@ function closeExportPreview() {
   }, 260);
 }
 
-
 async function confirmExport() {
   const success = await handleExport();
   if (success) {
@@ -1831,12 +1910,12 @@ async function handleExport() {
       return false;
     }
     if (shouldIncludeMainSheet(selectedKeys)) {
-    const table = buildStudentTable(rows, selectedKeys);
-    if (table) {
-      const worksheet = XLSX.utils.aoa_to_sheet(table);
-      worksheet["!cols"] = computeColumnWidths(table);
-      XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
-    }
+      const table = buildStudentTable(rows, selectedKeys);
+      if (table) {
+        const worksheet = XLSX.utils.aoa_to_sheet(table);
+        worksheet["!cols"] = computeColumnWidths(table);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
+      }
     }
     const educationTable = buildEducationTable(rows, selectedKeys);
     if (educationTable) {
@@ -1865,7 +1944,10 @@ async function handleExport() {
         selectedKeys.has(field.key),
       ).length;
       activeAchievementCategories.forEach((category, index) => {
-        const cell = XLSX.utils.encode_cell({ r: 0, c: baseFieldCount + index });
+        const cell = XLSX.utils.encode_cell({
+          r: 0,
+          c: baseFieldCount + index,
+        });
         if (!overviewSheet[cell]) {
           return;
         }
@@ -1975,9 +2057,7 @@ function buildPartyTable(rows, selectedKeys) {
   const activeIdentity = IDENTITY_FIELDS.filter((field) =>
     selectedKeys.has(field.key),
   );
-  const activeFields = PARTY_FIELD_ORDER.filter((key) =>
-    selectedKeys.has(key),
-  );
+  const activeFields = PARTY_FIELD_ORDER.filter((key) => selectedKeys.has(key));
   if (!activeFields.length) {
     return null;
   }
