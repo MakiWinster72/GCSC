@@ -1585,10 +1585,11 @@ function applyEducationExperiences(rawItems) {
     witness: item?.witness || "",
     isCurrent: Boolean(item?.isCurrent),
   }));
-  while (normalized.length < 5) {
-    normalized.push(createEducationItem());
+  const filtered = normalized.filter((item) => !isEducationRowEmpty(item));
+  if (!filtered.length) {
+    filtered.push(createEducationItem());
   }
-  educationItems.splice(0, educationItems.length, ...normalized);
+  educationItems.splice(0, educationItems.length, ...filtered);
 }
 
 function saveUser(data) {
