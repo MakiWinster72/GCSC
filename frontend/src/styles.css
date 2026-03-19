@@ -1825,6 +1825,15 @@ body {
   flex-wrap: wrap;
 }
 
+.address-inline {
+  width: 100%;
+}
+
+.address-detail {
+  margin-top: 8px;
+  width: 100%;
+}
+
 .info-inline-date {
   align-items: center;
   justify-content: space-between;
