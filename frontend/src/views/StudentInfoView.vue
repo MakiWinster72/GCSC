@@ -146,7 +146,22 @@
         </section>
 
         <section class="info-card student-results-card">
-          <div class="info-section-title">筛选结果</div>
+          <div class="student-results-header">
+            <div class="info-section-title">筛选结果</div>
+            <div class="student-results-actions">
+              <button class="ghost-button" type="button" @click="selectCurrentPage">
+                选择本页
+              </button>
+              <button
+                class="ghost-button"
+                type="button"
+                :disabled="selectAllLoading"
+                @click="selectAllFiltered"
+              >
+                {{ selectAllLoading ? "选择中..." : "选择全部" }}
+              </button>
+            </div>
+          </div>
           <div v-if="pagedStudents.length" class="student-list">
             <div v-for="item in pagedStudents" :key="item.id" class="student-row">
               <input v-model="selectedIds" type="checkbox" :value="item.id" />
@@ -529,6 +544,7 @@ const viewOpen = ref(false);
 const viewClosing = ref(false);
 const viewItem = ref(null);
 const viewLoading = ref(false);
+const selectAllLoading = ref(false);
 
 const classYearOptions = Array.from({ length: 11 }, (_, index) => 2020 + index);
 const majorOptions = [
@@ -616,7 +632,6 @@ watch(
 );
 
 watch(currentPage, () => {
-  selectedIds.value = [];
   fetchStudents();
 });
 
@@ -629,29 +644,9 @@ function resetResults() {
 async function fetchStudents() {
   loading.value = true;
   try {
-    const params = {
-      page: currentPage.value,
-      size: pageSize,
-    };
-    if (filters.classYear) {
-      params.classYear = filters.classYear;
-    }
-    if (filters.major) {
-      params.major = filters.major;
-    }
-    if (filters.classNo) {
-      params.classNo = Number(filters.classNo);
-    }
-    if (filters.isHkMoTw) {
-      params.hkMoTw = true;
-    }
-    if (filters.isSpecial) {
-      params.specialStudent = true;
-    }
-    if (filters.keyword && filters.keyword.trim()) {
-      params.keyword = filters.keyword.trim();
-    }
-    const { data } = await searchStudentProfiles(params);
+    const { data } = await searchStudentProfiles(
+      buildSearchParams(currentPage.value, pageSize),
+    );
     students.value = (data?.items || []).map((item) => ({
       id: item.id,
       name: item.fullName || "未命名",
@@ -776,6 +771,69 @@ function incrementClass() {
     return;
   }
   filters.classNo = String(current + 1);
+}
+
+function buildSearchParams(page, size) {
+  const params = {
+    page,
+    size,
+  };
+  if (filters.classYear) {
+    params.classYear = filters.classYear;
+  }
+  if (filters.major) {
+    params.major = filters.major;
+  }
+  if (filters.classNo) {
+    params.classNo = Number(filters.classNo);
+  }
+  if (filters.isHkMoTw) {
+    params.hkMoTw = true;
+  }
+  if (filters.isSpecial) {
+    params.specialStudent = true;
+  }
+  if (filters.keyword && filters.keyword.trim()) {
+    params.keyword = filters.keyword.trim();
+  }
+  return params;
+}
+
+function selectCurrentPage() {
+  selectedIds.value = pagedStudents.value.map((item) => item.id);
+}
+
+async function selectAllFiltered() {
+  if (selectAllLoading.value) {
+    return;
+  }
+  selectAllLoading.value = true;
+  try {
+    const total = totalItems.value || 0;
+    if (!total) {
+      selectedIds.value = [];
+      return;
+    }
+    const size = Math.min(total, 500);
+    const { data } = await searchStudentProfiles(buildSearchParams(1, size));
+    const ids = (data?.items || []).map((item) => item.id);
+    const pages = data?.totalPages || 1;
+    if (pages > 1) {
+      const restPages = [];
+      for (let page = 2; page <= pages; page += 1) {
+        restPages.push(
+          searchStudentProfiles(buildSearchParams(page, size)).then(
+            ({ data: pageData }) => pageData?.items || [],
+          ),
+        );
+      }
+      const moreItems = (await Promise.all(restPages)).flat();
+      ids.push(...moreItems.map((item) => item.id));
+    }
+    selectedIds.value = Array.from(new Set(ids));
+  } finally {
+    selectAllLoading.value = false;
+  }
 }
 
 async function handleExport() {
@@ -1157,6 +1215,21 @@ function loadUser() {
   gap: 16px;
   position: relative;
   z-index: 1;
+}
+
+.student-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.student-results-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .student-list {
