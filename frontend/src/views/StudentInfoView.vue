@@ -184,7 +184,14 @@
                 @change="applyPageInput"
               />
             </div>
-            <button class="action-button" type="button">导出</button>
+            <button
+              class="action-button"
+              type="button"
+              :disabled="exportDisabled"
+              @click="handleExport"
+            >
+              {{ exportLabel }}
+            </button>
           </div>
         </section>
       </section>
@@ -498,6 +505,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from "vue";
+import * as XLSX from "xlsx";
 import { useRouter } from "vue-router";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfileById, searchStudentProfiles } from "../api/profile";
@@ -509,6 +517,7 @@ const profile = reactive(loadUser());
 const activeMenu = ref("student-info");
 const menuItems = computed(() => filterMenuItemsByRole(profile.role));
 const selectedIds = ref([]);
+const exporting = ref(false);
 const currentPage = ref(1);
 const pageInput = ref(null);
 const students = ref([]);
@@ -557,6 +566,17 @@ const hasActiveFilters = computed(() => {
 });
 
 const pagedStudents = computed(() => students.value);
+const selectedStudents = computed(() => {
+  const idSet = new Set(selectedIds.value.map((id) => String(id)));
+  return students.value.filter((item) => idSet.has(String(item.id)));
+});
+const exportDisabled = computed(
+  () => exporting.value || selectedIds.value.length === 0,
+);
+const exportLabel = computed(() => {
+  const count = selectedIds.value.length;
+  return count ? `导出(${count})` : "导出";
+});
 const educationRows = computed(() => {
   const items = viewItem.value?.educationExperiences;
   if (!Array.isArray(items)) {
@@ -589,12 +609,14 @@ watch(
   () => {
     currentPage.value = 1;
     pageInput.value = null;
+    selectedIds.value = [];
     fetchStudents();
   },
   { deep: true },
 );
 
 watch(currentPage, () => {
+  selectedIds.value = [];
   fetchStudents();
 });
 
@@ -754,6 +776,230 @@ function incrementClass() {
     return;
   }
   filters.classNo = String(current + 1);
+}
+
+async function handleExport() {
+  if (exporting.value) {
+    return;
+  }
+  if (!selectedIds.value.length) {
+    window.alert("请先选择学生再导出。");
+    return;
+  }
+  exporting.value = true;
+  try {
+    const ids = [...selectedIds.value];
+    const results = await Promise.all(
+      ids.map((id) =>
+        getStudentProfileById(id)
+          .then(({ data }) => data || null)
+          .catch(() => null),
+      ),
+    );
+    const rows = results.filter(Boolean);
+    if (!rows.length) {
+      window.alert("没有获取到学生详情，请稍后再试。");
+      return;
+    }
+    const table = buildStudentTable(rows);
+    const worksheet = XLSX.utils.aoa_to_sheet(table);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "学生");
+    XLSX.writeFile(workbook, `students_export_${formatTimestamp()}.xlsx`, {
+      compression: true,
+    });
+  } catch (error) {
+    const fallbackRows = selectedStudents.value;
+    const csvContent = buildStudentCsv(fallbackRows);
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `students_export_${formatTimestamp()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    exporting.value = false;
+  }
+}
+
+function buildStudentTable(rows) {
+  const header = [
+    "姓名",
+    "学号",
+    "年级",
+    "学院",
+    "专业",
+    "班级",
+    "班级名称",
+    "入学时间",
+    "学生类别",
+    "班主任",
+    "辅导员",
+    "民族",
+    "政治面貌",
+    "手机号码",
+    "身份证号",
+    "籍贯",
+    "住址",
+    "港澳台",
+    "特殊学生",
+    "是否在外居住",
+    "外居住地址",
+    "住宿校区",
+    "住宿楼栋",
+    "住宿房间",
+    "是否入团",
+    "提交入团申请书时间",
+    "入团时间",
+    "团号",
+    "是否申请入党",
+    "提交入党申请书时间",
+    "确定积极分子时间",
+    "上党课时间",
+    "确定发展对象时间",
+    "接收为预备党员时间",
+    "转为正式党员时间",
+    "教育经历",
+    "父亲姓名",
+    "父亲电话",
+    "父亲工作单位",
+    "父亲职务",
+    "母亲姓名",
+    "母亲电话",
+    "母亲工作单位",
+    "母亲职务",
+    "紧急联系人电话",
+    "紧急联系人关系",
+  ];
+  const body = rows.map((item) => [
+    item.fullName || item.name || "",
+    item.studentNo || "",
+    item.classYear || item.gradeYear || "",
+    item.college || "",
+    item.classMajor || item.major || "",
+    item.classNo || "",
+    buildClassName(item) || "",
+    item.enrollmentDate || "",
+    item.studentCategory || "",
+    item.classTeacher || "",
+    item.counselor || "",
+    item.ethnicity || "",
+    item.politicalStatus || "",
+    item.phone || "",
+    item.idNo || "",
+    item.nativePlace || "",
+    item.address || "",
+    formatYesNo(item.hkMoTw),
+    formatYesNo(item.specialStudent),
+    formatYesNo(item.offCampusLiving),
+    item.offCampusAddress || "",
+    item.dormCampus || "",
+    item.dormBuilding || "",
+    item.dormRoom || "",
+    formatYesNo(item.leagueJoined),
+    item.leagueApplicationDate || "",
+    formatDateOrStatus(item.leagueJoinDate, item.leagueDeveloping, "正在发展"),
+    item.leagueNo || "",
+    formatYesNo(item.partyApplied),
+    item.applicationDate || "",
+    formatDateOrStatus(item.activistDate, item.activistDeveloping, "正在发展"),
+    formatDateOrStatus(item.partyTrainingDate, item.partyTrainingPending, "暂未报名"),
+    formatDateOrStatus(
+      item.developmentTargetDate,
+      item.developmentTargetDeveloping,
+      "正在发展",
+    ),
+    formatDateOrStatus(
+      item.probationaryMemberDate,
+      item.probationaryDeveloping,
+      "正在发展",
+    ),
+    formatDateOrStatus(item.fullMemberDate, item.fullMemberDeveloping, "正在发展"),
+    formatEducationText(item.educationExperiences),
+    item.fatherName || "",
+    item.fatherPhone || "",
+    item.fatherWorkUnit || "",
+    item.fatherTitle || "",
+    item.motherName || "",
+    item.motherPhone || "",
+    item.motherWorkUnit || "",
+    item.motherTitle || "",
+    item.emergencyPhone || "",
+    item.emergencyRelation || "",
+  ]);
+  return [header, ...body];
+}
+
+function buildStudentCsv(rows) {
+  const header = ["姓名", "年级", "学院", "专业", "班级", "学号"];
+  const lines = [header.map(escapeCsvCell).join(",")];
+  rows.forEach((item) => {
+    const values = [
+      item.name || "",
+      item.gradeYear || "",
+      item.college || "",
+      item.major || "",
+      item.classNo || "",
+      item.studentNo || "",
+    ];
+    lines.push(values.map(escapeCsvCell).join(","));
+  });
+  return `\ufeff${lines.join("\n")}`;
+}
+
+function escapeCsvCell(value) {
+  const text = value == null ? "" : String(value);
+  if (/[",\n]/.test(text)) {
+    return `"${text.replace(/"/g, "\"\"")}"`;
+  }
+  return text;
+}
+
+function formatYesNo(value) {
+  if (value === true) {
+    return "是";
+  }
+  if (value === false) {
+    return "否";
+  }
+  return "";
+}
+
+function formatEducationText(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return "";
+  }
+  return items
+    .filter(Boolean)
+    .map((item) => {
+      const start = item.startDate || "";
+      const end = item.isCurrent ? "至今" : item.endDate || "";
+      const period = [start, end].filter(Boolean).join("~");
+      const parts = [
+        period,
+        item.schoolName || "",
+        item.educationLevel || "",
+        item.witness || "",
+      ].filter(Boolean);
+      return parts.join(" / ");
+    })
+    .filter(Boolean)
+    .join(" | ");
+}
+
+function formatTimestamp() {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  const yyyy = now.getFullYear();
+  const mm = pad(now.getMonth() + 1);
+  const dd = pad(now.getDate());
+  const hh = pad(now.getHours());
+  const min = pad(now.getMinutes());
+  const ss = pad(now.getSeconds());
+  return `${yyyy}${mm}${dd}_${hh}${min}${ss}`;
 }
 
 const roleLabelMap = {
