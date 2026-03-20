@@ -746,6 +746,7 @@
         </div>
 
         <div class="info-card">
+          <!-- TODO: 高度设置为两行 -->
           <div class="info-section-title">教育经历</div>
           <div class="info-hint">从小学开始填</div>
           <div ref="educationTableWrap" class="education-table-wrap">
@@ -1210,7 +1211,6 @@ const achievementEntries = [
   { key: "works", label: "创作、表演的代表性作品" },
 ];
 
-
 const activeAchievementIndex = computed(() => {
   const index = achievementEntries.findIndex(
     (entry) => entry.key === activeAchievement.value,
@@ -1244,11 +1244,15 @@ const addressProvinceOptions = computed(() =>
   regionData.map((item) => ({ value: item.value, label: item.label })),
 );
 const addressCityOptions = computed(() => {
-  const province = regionData.find((item) => item.value === info.addressProvince);
+  const province = regionData.find(
+    (item) => item.value === info.addressProvince,
+  );
   return province?.children || [];
 });
 const addressCountyOptions = computed(() => {
-  const province = regionData.find((item) => item.value === info.addressProvince);
+  const province = regionData.find(
+    (item) => item.value === info.addressProvince,
+  );
   const city = province?.children?.find(
     (entry) => entry.value === info.addressCity,
   );
@@ -1663,7 +1667,8 @@ async function confirmEdit() {
 }
 
 function buildPdfStudentSnapshot() {
-  const studentName = info.name || profile.displayName || profile.username || "";
+  const studentName =
+    info.name || profile.displayName || profile.username || "";
   const studentNo = info.studentNo || profile.studentNo || "";
   const className = buildClassName(
     info.classYear,
@@ -1773,9 +1778,11 @@ function buildDormRoom(floor, roomNo, fallback) {
 }
 
 function buildAddress(province, city, county, detail, fallback) {
-  const parts = [codeToText[province], codeToText[city], codeToText[county]].filter(
-    Boolean,
-  );
+  const parts = [
+    codeToText[province],
+    codeToText[city],
+    codeToText[county],
+  ].filter(Boolean);
   const safeDetail = String(detail || "").trim();
   const combined = [...parts, safeDetail].filter(Boolean).join("");
   if (combined) {
@@ -1804,7 +1811,9 @@ function parseAddressToRegion(rawAddress) {
     };
   }
   let remaining = address.slice(province.label.length);
-  let city = province.children?.find((item) => remaining.startsWith(item.label));
+  let city = province.children?.find((item) =>
+    remaining.startsWith(item.label),
+  );
   let county = null;
 
   if (city) {
@@ -2031,9 +2040,7 @@ watch(
       return;
     }
     if (
-      !addressCityOptions.value.some(
-        (item) => item.value === info.addressCity,
-      )
+      !addressCityOptions.value.some((item) => item.value === info.addressCity)
     ) {
       info.addressCity = "";
     }
