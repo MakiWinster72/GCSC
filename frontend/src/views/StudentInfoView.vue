@@ -2134,13 +2134,13 @@ async function handleExportPdfResume() {
       }
     };
 
-    const addSectionTitle = (title) => {
-      const topGap = 20;
-      const bottomGap = 0;
+    const addSectionTitle = (title, options = {}) => {
+      const topGap = 50;
+      const bottomGap = 20;
       ensureSpace(topGap + bottomGap + 10);
       currentY += topGap;
       doc.setFont(PDF_FONT_BLACK, "normal");
-      doc.setFontSize(13);
+      doc.setFontSize(options.size || 13);
       doc.text(title, marginX, currentY);
       currentY += bottomGap;
       doc.setFont(PDF_FONT_NAME, "normal");
@@ -2160,15 +2160,16 @@ async function handleExportPdfResume() {
         }
         rowPairs.push(flat);
       }
-      const head = [
-        Array.from({ length: columns }).flatMap(() => ["字段", "内容"]),
-      ];
       autoTable(doc, {
-        head,
         body: rowPairs,
         startY: currentY + 6,
         styles: { fontSize: 9, cellPadding: 4, font: PDF_FONT_NAME },
-        headStyles: { fillColor: [205, 255, 249] },
+        columnStyles: Object.fromEntries(
+          Array.from({ length: columns }).map((_, index) => [
+            index * 2,
+            { font: PDF_FONT_BLACK },
+          ]),
+        ),
         theme: "grid",
       });
       currentY = doc.lastAutoTable.finalY + 14;
@@ -2288,7 +2289,6 @@ async function handleExportPdfResume() {
     addSectionTitle("教育经历");
     if (Array.isArray(student.educationExperiences) && student.educationExperiences.length) {
       autoTable(doc, {
-        head: [["时间段", "学校名称", "学历", "证明人"]],
         body: student.educationExperiences.map((edu) => {
           const start = edu.startDate || "";
           const end = edu.isCurrent ? "至今" : edu.endDate || "";
@@ -2301,7 +2301,6 @@ async function handleExportPdfResume() {
         }),
         startY: currentY + 6,
         styles: { fontSize: 9, cellPadding: 4, font: PDF_FONT_NAME },
-        headStyles: { fillColor: [205, 255, 249] },
         theme: "grid",
       });
       currentY = doc.lastAutoTable.finalY + 14;
@@ -2312,7 +2311,7 @@ async function handleExportPdfResume() {
     }
 
     // 个人成就
-    addSectionTitle("个人成就");
+    addSectionTitle("个人成就", { size: 16 });
     if (!achievements.length) {
       doc.setFontSize(10);
       doc.text("暂无个人成就", marginX, currentY + 12);
@@ -2329,7 +2328,7 @@ async function handleExportPdfResume() {
         if (!records.length) {
           continue;
         }
-        addSectionTitle(category.label);
+        addSectionTitle(category.label, { size: 13 });
         for (const record of records) {
           const fields = ACHIEVEMENT_FIELDS[category.key] || [];
           const rowValues = fields.map((field) => [
