@@ -64,6 +64,22 @@
               type="text"
               placeholder="搜索姓名 / 班别 / 学院 / 学号"
             />
+            <button
+              class="student-grid-toggle"
+              type="button"
+              @click="toggleGridView"
+              :title="gridViewOpen ? '切换列表视图' : '切换表格视图'"
+            >
+              <span class="grid-toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path
+                    d="M7 7h10v3h2V5H5v5h2V7zm10 10H7v-3H5v5h14v-5h-2v3zM9 10l-3 2 3 2v-4zm6 4 3-2-3-2v4z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+              {{ gridViewOpen ? "切换列表" : "切换表格" }}
+            </button>
           </div>
           <div class="student-filter-grid">
             <div class="student-filter-row">
@@ -148,7 +164,7 @@
         <section class="info-card student-results-card">
           <div class="student-results-header">
             <div class="info-section-title">筛选结果</div>
-            <div class="student-results-actions">
+            <div v-if="!gridViewOpen" class="student-results-actions">
               <button
                 class="ghost-button"
                 type="button"
@@ -166,7 +182,26 @@
               </button>
             </div>
           </div>
-          <div v-if="pagedStudents.length" class="student-list">
+          <div v-if="gridViewOpen" class="student-grid-wrap">
+            <div class="student-grid-toolbar">
+              <span class="student-grid-title">表格视图</span>
+              <span v-if="gridLoading" class="student-grid-status">加载中...</span>
+              <span v-else class="student-grid-status"
+                >共 {{ gridRows.length }} 条</span
+              >
+            </div>
+            <AgGridVue
+              class="ag-theme-quartz student-grid"
+              :row-data="gridRows"
+              :column-defs="gridColumnDefs"
+              :default-col-def="gridDefaultColDef"
+              :animate-rows="true"
+              :pagination="true"
+              :pagination-page-size="100"
+              :suppress-cell-focus="true"
+            />
+          </div>
+          <div v-else-if="pagedStudents.length" class="student-list">
             <div
               v-for="item in pagedStudents"
               :key="item.id"
@@ -191,7 +226,7 @@
           </div>
           <div v-else class="empty-tip">没有匹配的学生。</div>
 
-          <div class="student-pagination">
+          <div v-if="!gridViewOpen" class="student-pagination">
             <div class="student-pages">
               <button
                 v-for="page in totalPages"
@@ -858,6 +893,9 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { AgGridVue } from "ag-grid-vue3";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 import harmonyFontUrl from "../assets/fonts/HarmonyOS_Sans_SC_Regular.ttf?url";
 import harmonyFontBlackUrl from "../assets/fonts/HarmonyOS_Sans_SC_Black.ttf?url";
 import { useRouter } from "vue-router";
@@ -891,6 +929,10 @@ const exportDialogOpen = ref(false);
 const exportDialogClosing = ref(false);
 const exportPreviewOpen = ref(false);
 const exportPreviewClosing = ref(false);
+const gridViewOpen = ref(false);
+const gridLoading = ref(false);
+const gridRows = ref([]);
+let gridRequestId = 0;
 const previewActiveSheet = ref("main");
 const previewLoading = ref(false);
 const previewDetailRows = ref([]);
@@ -912,6 +954,25 @@ const majorOptions = [
   "大数据管理与应用（佛山校区全学段）",
   "大数据管理与应用（数字治理）",
 ];
+
+const gridColumnDefs = [
+  { field: "name", headerName: "姓名", minWidth: 120 },
+  { field: "studentNo", headerName: "学号", minWidth: 140 },
+  { field: "className", headerName: "班级", minWidth: 160 },
+  { field: "gradeYear", headerName: "年级", minWidth: 100 },
+  { field: "college", headerName: "学院", minWidth: 180 },
+  { field: "major", headerName: "专业", minWidth: 160 },
+  { field: "hkMoTw", headerName: "港澳台", minWidth: 100 },
+  { field: "specialStudent", headerName: "特殊学生", minWidth: 120 },
+];
+
+const gridDefaultColDef = {
+  sortable: true,
+  filter: true,
+  resizable: true,
+  minWidth: 90,
+  flex: 1,
+};
 
 const filters = reactive({
   classYear: "",
@@ -1138,17 +1199,26 @@ watch(
     currentPage.value = 1;
     pageInput.value = null;
     selectedIds.value = [];
+    if (gridViewOpen.value) {
+      fetchGridStudents();
+      return;
+    }
     fetchStudents();
   },
   { deep: true },
 );
 
 watch(currentPage, () => {
-  fetchStudents();
+  if (!gridViewOpen.value) {
+    fetchStudents();
+  }
 });
 
 watch(pageSize, () => {
   pageInput.value = null;
+  if (gridViewOpen.value) {
+    return;
+  }
   if (currentPage.value === 1) {
     fetchStudents();
     return;
@@ -1171,6 +1241,7 @@ async function fetchStudents() {
     students.value = (data?.items || []).map((item) => ({
       id: item.id,
       name: item.fullName || "未命名",
+      className: buildClassName(item),
       gradeYear: item.classYear || "",
       college: item.college || "",
       major: item.classMajor || "",
@@ -1185,6 +1256,54 @@ async function fetchStudents() {
     resetResults();
   } finally {
     loading.value = false;
+  }
+}
+
+async function fetchGridStudents() {
+  gridLoading.value = true;
+  const requestId = ++gridRequestId;
+  try {
+    const size = 200;
+    const { data } = await searchStudentProfiles(buildSearchParams(1, size));
+    if (requestId !== gridRequestId) {
+      return;
+    }
+    const items = [...(data?.items || [])];
+    const pages = data?.totalPages || 1;
+    for (let page = 2; page <= pages; page += 1) {
+      const { data: pageData } = await searchStudentProfiles(
+        buildSearchParams(page, size),
+      );
+      if (requestId !== gridRequestId) {
+        return;
+      }
+      items.push(...(pageData?.items || []));
+    }
+    gridRows.value = items.map((item) => ({
+      id: item.id,
+      name: item.fullName || "未命名",
+      className: buildClassName(item),
+      gradeYear: item.classYear ? `${item.classYear}级` : "",
+      college: item.college || "",
+      major: item.classMajor || "",
+      classNo: item.classNo || "",
+      studentNo: item.studentNo || "",
+      hkMoTw: item.hkMoTw ? "是" : "否",
+      specialStudent: item.specialStudent ? "是" : "否",
+    }));
+  } catch {
+    gridRows.value = [];
+  } finally {
+    if (requestId === gridRequestId) {
+      gridLoading.value = false;
+    }
+  }
+}
+
+function toggleGridView() {
+  gridViewOpen.value = !gridViewOpen.value;
+  if (gridViewOpen.value) {
+    fetchGridStudents();
   }
 }
 
@@ -2461,6 +2580,69 @@ function loadUser() {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.student-grid-toggle {
+  border: none;
+  background: rgba(3, 107, 114, 0.08);
+  color: #036b72;
+  padding: 0 12px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.student-grid-toggle:hover {
+  background: rgba(3, 107, 114, 0.16);
+}
+
+.student-grid-toggle:active {
+  transform: scale(0.98);
+}
+
+.grid-toggle-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+}
+
+.grid-toggle-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.student-grid-wrap {
+  margin-top: 14px;
+}
+
+.student-grid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #4f5d63;
+  font-size: 13px;
+}
+
+.student-grid-title {
+  font-weight: 600;
+  color: #203035;
+}
+
+.student-grid-status {
+  color: #5b6b71;
+}
+
+.student-grid {
+  width: 100%;
+  height: 520px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .student-search {
