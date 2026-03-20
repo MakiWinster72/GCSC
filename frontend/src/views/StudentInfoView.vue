@@ -2136,8 +2136,13 @@ async function handleExportPdfResume() {
 
     const addSectionTitle = (title, options = {}) => {
       const topGap = 30;
-      const bottomGap = 8;
-      ensureSpace(topGap + bottomGap + 10);
+      const bottomGap = 10;
+      const minContentHeight = options.minContentHeight ?? 60;
+      if (currentY + topGap + bottomGap + minContentHeight > maxY) {
+        doc.addPage();
+        doc.setFont(PDF_FONT_NAME, "normal");
+        currentY = 40;
+      }
       currentY += topGap;
       doc.setFont(PDF_FONT_BLACK, "normal");
       doc.setFontSize(options.size || 13);
@@ -2275,77 +2280,139 @@ async function handleExportPdfResume() {
       ["紧急联系人关系", student.emergencyRelation || ""],
     ]);
 
-    // 团组织与入党信息
-    addSectionTitle("团组织与入党信息");
-    const partyRows = [];
+    // 团组织与入党信息（流程图）
+    const drawNode = (label, x, y, w, h, muted) => {
+      doc.setDrawColor(3, 107, 114);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(x, y, w, h, 8, 8, "FD");
+      doc.setFont(PDF_FONT_NAME, "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(muted ? 160 : 20);
+      doc.text(label, x + 10, y + h / 2 + 3);
+      doc.setTextColor(20);
+    };
+    const drawArrow = (fromX, fromY, toX, toY, markPending) => {
+      doc.setDrawColor(3, 107, 114);
+      doc.line(fromX, fromY, toX, toY);
+      doc.triangle(toX - 4, toY - 2, toX, toY, toX - 4, toY + 2, "F");
+      if (markPending) {
+        const midY = (fromY + toY) / 2;
+        doc.setFont(PDF_FONT_BLACK, "normal");
+        doc.setFontSize(10);
+        doc.text("×", toX + 6, midY + 3);
+      }
+    };
+    const nodeHeight = 26;
+    const nodeGap = 14;
+    const nodes = [];
     const leagueJoined = student.leagueJoined === true;
     const partyApplied = student.partyApplied === true;
     if (!leagueJoined) {
-      partyRows.push(["入团情况", "未申请入团"]);
+      nodes.push("入团情况：未申请入团");
     } else {
-      partyRows.push(
-        ["是否入团", "是"],
-        ["提交入团申请书时间", student.leagueApplicationDate || ""],
-        [
-          "入团时间",
+      nodes.push("已申请入团");
+      nodes.push(
+        `提交入团申请书时间：${student.leagueApplicationDate || "—"}`,
+      );
+      nodes.push(
+        `入团时间：${
           formatDateOrEmpty(
             student.leagueJoinDate,
             student.leagueDeveloping,
             "正在发展",
-          ),
-        ],
-        ["团号", student.leagueNo || ""],
+          ) || "—"
+        }`,
       );
+      nodes.push(`团号：${student.leagueNo || "—"}`);
     }
     if (!partyApplied) {
-      partyRows.push(["入党情况", "未申请入党"]);
+      nodes.push("入党情况：未申请入党");
     } else {
-      partyRows.push(
-        ["是否申请入党", "是"],
-        ["提交入党申请书时间", student.applicationDate || ""],
-        [
-          "确定积极分子时间",
+      nodes.push("已申请入党");
+      nodes.push(`提交入党申请书时间：${student.applicationDate || "—"}`);
+      nodes.push(
+        `确定积极分子时间：${
           formatDateOrEmpty(
             student.activistDate,
             student.activistDeveloping,
             "正在发展",
-          ),
-        ],
-        [
-          "上党课时间",
+          ) || "—"
+        }`,
+      );
+      nodes.push(
+        `上党课时间：${
           formatDateOrEmpty(
             student.partyTrainingDate,
             student.partyTrainingPending,
             "暂未报名",
-          ),
-        ],
-        [
-          "确定发展对象时间",
+          ) || "—"
+        }`,
+      );
+      nodes.push(
+        `确定发展对象时间：${
           formatDateOrEmpty(
             student.developmentTargetDate,
             student.developmentTargetDeveloping,
             "正在发展",
-          ),
-        ],
-        [
-          "接收为预备党员时间",
+          ) || "—"
+        }`,
+      );
+      nodes.push(
+        `接收为预备党员时间：${
           formatDateOrEmpty(
             student.probationaryMemberDate,
             student.probationaryDeveloping,
             "正在发展",
-          ),
-        ],
-        [
-          "转为正式党员时间",
+          ) || "—"
+        }`,
+      );
+      nodes.push(
+        `转为正式党员时间：${
           formatDateOrEmpty(
             student.fullMemberDate,
             student.fullMemberDeveloping,
             "正在发展",
-          ),
-        ],
+          ) || "—"
+        }`,
       );
     }
-    addKeyValueTable(partyRows);
+    const pendingFlags = nodes.map((label) =>
+      label.includes("正在发展") || label.includes("暂未报名"),
+    );
+    const pendingIndex = pendingFlags.findIndex((flag) => flag);
+    const maxTextWidth = nodes.reduce((max, label) => {
+      const width = doc.getTextWidth(label);
+      return Math.max(max, width);
+    }, 0);
+    const flowWidth = Math.min(
+      doc.internal.pageSize.getWidth() - marginX * 2,
+      Math.max(240, maxTextWidth + 28),
+    );
+    const flowX =
+      marginX + (doc.internal.pageSize.getWidth() - marginX * 2 - flowWidth) / 2;
+    const flowHeight =
+      nodes.length * nodeHeight + Math.max(0, nodes.length - 1) * nodeGap;
+    addSectionTitle("团组织与入党信息", {
+      minContentHeight: flowHeight + 10,
+    });
+    ensureSpace(flowHeight + 10);
+    let nodeY = currentY + 6;
+    nodes.forEach((label, index) => {
+      const muted = pendingIndex >= 0 && index > pendingIndex;
+      drawNode(label, flowX, nodeY, flowWidth, nodeHeight, muted);
+      if (index < nodes.length - 1) {
+        const markPending = pendingFlags[index + 1];
+        drawArrow(
+          flowX + flowWidth / 2,
+          nodeY + nodeHeight,
+          flowX + flowWidth / 2,
+          nodeY + nodeHeight + nodeGap - 4,
+          markPending,
+        );
+      }
+      nodeY += nodeHeight + nodeGap;
+    });
+    currentY = nodeY + 6;
 
     // 教育经历
     addSectionTitle("教育经历");
