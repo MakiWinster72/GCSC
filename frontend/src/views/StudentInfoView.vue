@@ -81,7 +81,7 @@
               {{ gridViewOpen ? "切换列表" : "切换表格" }}
             </button>
           </div>
-          <div class="student-filter-grid">
+          <div v-if="!gridViewOpen" class="student-filter-grid">
             <div class="student-filter-row">
               <div class="student-filter-field">
                 <span class="info-label">年级</span>
@@ -159,12 +159,36 @@
               </label>
             </div>
           </div>
+          <div v-if="gridViewOpen" class="student-grid-tabs">
+            <button
+              class="student-grid-tab student-grid-tab-add"
+              type="button"
+              @click="openGridFieldDialog"
+              title="选择字段"
+            >
+              +
+            </button>
+            <button
+              v-for="sheet in gridSheets"
+              :key="sheet.id"
+              class="student-grid-tab"
+              :class="{ active: sheet.id === gridActiveSheet }"
+              type="button"
+              @click="gridActiveSheet = sheet.id"
+            >
+              {{ sheet.label }}
+            </button>
+            <span v-if="gridLoading" class="student-grid-status">加载中...</span>
+            <span v-else class="student-grid-status"
+              >共 {{ gridActiveSheetData.rowData.length }} 条</span
+            >
+          </div>
         </section>
 
-        <section class="info-card student-results-card">
-          <div class="student-results-header">
+      <section class="info-card student-results-card">
+          <div v-if="!gridViewOpen" class="student-results-header">
             <div class="info-section-title">筛选结果</div>
-            <div v-if="!gridViewOpen" class="student-results-actions">
+            <div class="student-results-actions">
               <button
                 class="ghost-button"
                 type="button"
@@ -183,58 +207,6 @@
             </div>
           </div>
           <div v-if="gridViewOpen" class="student-grid-wrap">
-            <div class="student-grid-toolbar">
-              <span class="student-grid-title">表格视图</span>
-              <div class="student-grid-actions">
-                <button
-                  class="student-grid-toggle student-grid-field-toggle"
-                  type="button"
-                  @click="gridFieldPanelOpen = !gridFieldPanelOpen"
-                >
-                  {{ gridFieldPanelOpen ? "收起字段" : "选择字段" }}
-                </button>
-                <span v-if="gridLoading" class="student-grid-status">加载中...</span>
-                <span v-else class="student-grid-status"
-                  >共 {{ gridActiveSheetData.rowData.length }} 条</span
-                >
-              </div>
-            </div>
-            <div v-if="gridFieldPanelOpen" class="student-grid-field-panel">
-              <div
-                v-for="group in exportGroups"
-                :key="group.id"
-                class="student-grid-field-group"
-              >
-                <label class="student-grid-field-title">
-                  {{ group.label }}
-                  <input
-                    type="checkbox"
-                    :checked="isGroupChecked(group)"
-                    @change="toggleGroupSelection(group, $event.target.checked)"
-                  />
-                </label>
-                <label
-                  v-for="field in group.fields"
-                  :key="field.key"
-                  class="student-grid-field-item"
-                >
-                  <input type="checkbox" v-model="exportSelections[field.key]" />
-                  <span>{{ field.label }}</span>
-                </label>
-              </div>
-            </div>
-            <div v-if="gridSheets.length" class="student-grid-tabs">
-              <button
-                v-for="sheet in gridSheets"
-                :key="sheet.id"
-                class="student-grid-tab"
-                :class="{ active: sheet.id === gridActiveSheet }"
-                type="button"
-                @click="gridActiveSheet = sheet.id"
-              >
-                {{ sheet.label }}
-              </button>
-            </div>
             <AgGridVue
               class="ag-theme-quartz student-grid"
               :row-data="gridActiveSheetData.rowData"
@@ -313,6 +285,79 @@
             <button class="action-button" type="button">导出</button>
           </div>
         </section>
+      </section>
+
+      <transition name="export-dialog-backdrop">
+        <div
+          v-if="gridFieldDialogOpen"
+          class="grid-field-dialog-backdrop"
+          @click="closeGridFieldDialog"
+        ></div>
+      </transition>
+      <section
+        class="grid-field-dialog"
+        :class="{ open: gridFieldDialogOpen, closing: gridFieldDialogClosing }"
+      >
+        <header class="export-dialog-header">
+          <div class="export-dialog-title">
+            选择显示字段
+            <label class="export-all-toggle">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                @change="toggleAllSelections($event.target.checked)"
+              />
+              <span>全选</span>
+            </label>
+          </div>
+          <button class="ghost-button" type="button" @click="closeGridFieldDialog">
+            关闭
+          </button>
+        </header>
+        <div class="export-dialog-body">
+          <div
+            v-for="group in exportGroups"
+            :key="group.id"
+            class="export-group"
+          >
+            <label class="export-group-title">
+              <span>{{ group.label }}</span>
+              <input
+                type="checkbox"
+                :checked="isGroupChecked(group)"
+                @change="toggleGroupSelection(group, $event.target.checked)"
+              />
+            </label>
+            <div class="export-group-options">
+              <template v-if="group.id === 'family'">
+                <div
+                  v-for="(row, index) in familyRows"
+                  :key="`grid-family-row-${index}`"
+                  class="export-option-row"
+                >
+                  <label
+                    v-for="field in row"
+                    :key="field.key"
+                    class="export-option"
+                  >
+                    <input v-model="exportSelections[field.key]" type="checkbox" />
+                    <span>{{ field.label }}</span>
+                  </label>
+                </div>
+              </template>
+              <template v-else>
+                <label
+                  v-for="field in group.fields"
+                  :key="field.key"
+                  class="export-option"
+                >
+                  <input v-model="exportSelections[field.key]" type="checkbox" />
+                  <span>{{ field.label }}</span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </div>
       </section>
 
       <transition name="publisher-backdrop">
@@ -980,7 +1025,8 @@ const gridViewOpen = ref(false);
 const gridLoading = ref(false);
 const gridDetailRows = ref([]);
 const gridAchievementData = ref([]);
-const gridFieldPanelOpen = ref(false);
+const gridFieldDialogOpen = ref(false);
+const gridFieldDialogClosing = ref(false);
 const gridActiveSheet = ref("main");
 let gridRequestId = 0;
 const previewActiveSheet = ref("main");
@@ -1396,6 +1442,19 @@ function toggleGridView() {
   if (gridViewOpen.value) {
     fetchGridStudents();
   }
+}
+
+function openGridFieldDialog() {
+  gridFieldDialogOpen.value = true;
+  gridFieldDialogClosing.value = false;
+}
+
+function closeGridFieldDialog() {
+  gridFieldDialogOpen.value = false;
+  gridFieldDialogClosing.value = true;
+  setTimeout(() => {
+    gridFieldDialogClosing.value = false;
+  }, 260);
 }
 
 watch(
@@ -2846,16 +2905,6 @@ function loadUser() {
   color: #5b6b71;
 }
 
-.student-grid-field-panel {
-  border: 1px solid rgba(3, 107, 114, 0.15);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  padding: 12px;
-  display: grid;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
 .student-grid-field-group {
   display: grid;
   gap: 6px;
@@ -2882,6 +2931,11 @@ function loadUser() {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
+  align-items: center;
+}
+
+.student-filter-card .student-grid-tabs {
+  margin-top: 12px;
 }
 
 .student-grid-tab {
@@ -2898,6 +2952,64 @@ function loadUser() {
   background: rgba(3, 107, 114, 0.12);
   border-color: rgba(3, 107, 114, 0.35);
   font-weight: 600;
+}
+
+.grid-field-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(8px);
+  z-index: 70;
+}
+
+.grid-field-dialog {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  width: min(860px, calc(100vw - 32px));
+  max-height: 84vh;
+  transform: translate(-50%, 120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    140deg,
+    rgba(205, 255, 249, 0.92),
+    rgba(197, 217, 226, 0.78)
+  );
+  box-shadow: 0 28px 70px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  z-index: 80;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.75s ease,
+    filter 0.75s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  scrollbar-width: none;
+  padding: 12px 14px 16px;
+}
+
+.grid-field-dialog.open {
+  transform: translate(-50%, 0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+  pointer-events: auto;
+}
+
+.grid-field-dialog.closing {
+  transform: translate(-50%, 120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+}
+
+.grid-field-dialog::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .student-grid {
