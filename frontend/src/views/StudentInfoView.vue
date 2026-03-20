@@ -183,18 +183,13 @@
             </div>
           </div>
           <div v-if="gridViewOpen" class="student-grid-wrap">
-            <div class="student-grid-toolbar">
-              <span class="student-grid-title">表格视图</span>
-              <span v-if="gridLoading" class="student-grid-status">加载中...</span>
-              <span v-else class="student-grid-status"
-                >共 {{ gridRows.length }} 条</span
-              >
-            </div>
             <AgGridVue
               class="ag-theme-quartz student-grid"
               :row-data="gridRows"
               :column-defs="gridColumnDefs"
               :default-col-def="gridDefaultColDef"
+              :locale-text="gridLocaleText"
+              :locale-text-func="gridLocaleTextFunc"
               :animate-rows="true"
               :pagination="true"
               :pagination-page-size="100"
@@ -972,6 +967,66 @@ const gridDefaultColDef = {
   resizable: true,
   minWidth: 90,
   flex: 1,
+};
+
+const gridLocaleText = {
+  // 过滤器与菜单
+  page: "页",
+  more: "更多",
+  to: "至",
+  of: "共",
+  next: "下一页",
+  last: "末页",
+  first: "首页",
+  previous: "上一页",
+  loadingOoo: "加载中...",
+  selectAll: "全选",
+  searchOoo: "搜索...",
+  blank: "空值",
+  notBlank: "非空",
+  filterOoo: "筛选...",
+  applyFilter: "应用筛选",
+  equals: "等于",
+  notEqual: "不等于",
+  contains: "包含",
+  notContains: "不包含",
+  startsWith: "以...开头",
+  endsWith: "以...结尾",
+  lessThan: "小于",
+  greaterThan: "大于",
+  lessThanOrEqual: "小于等于",
+  greaterThanOrEqual: "大于等于",
+  inRange: "范围",
+  setFilter: "集合筛选",
+  columns: "列",
+  filters: "筛选",
+  reset: "重置",
+  group: "分组",
+  rowGroupColumnsEmptyMessage: "拖拽列到这里进行分组",
+  pivotColumnsEmptyMessage: "拖拽列到这里进行透视",
+  noRowsToShow: "暂无数据",
+  // TODO: 翻译“Page Size”
+  // 聚合
+  sum: "求和",
+  min: "最小值",
+  max: "最大值",
+  none: "无",
+  count: "计数",
+  avg: "平均值",
+  // 其他
+  copy: "复制",
+  copyWithHeaders: "复制（含表头）",
+  paste: "粘贴",
+  export: "导出",
+  csvExport: "导出 CSV",
+  excelExport: "导出 Excel",
+};
+
+const gridLocaleTextFunc = (key, defaultValue) => {
+  if (key in gridLocaleText) {
+    return gridLocaleText[key];
+  }
+  return defaultValue;
 };
 
 const filters = reactive({
@@ -2159,7 +2214,11 @@ function buildExportTables(rows, selectedKeys, achievementData) {
     selectedKeys.has(item.selectKey),
   );
   if (activeAchievementCategories.length) {
-    const overview = buildAchievementOverview(rows, selectedKeys, achievementData);
+    const overview = buildAchievementOverview(
+      rows,
+      selectedKeys,
+      achievementData,
+    );
     tables.push({ title: "成就总览", table: overview });
     activeAchievementCategories.forEach((category) => {
       const detailTable = buildAchievementDetailTable(
@@ -2211,7 +2270,11 @@ async function handleExportPdf() {
       window.alert("没有可导出的内容。");
       return;
     }
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
     await ensurePdfFonts(doc);
     tables.forEach((item, index) => {
       if (index > 0) {
@@ -2421,9 +2484,7 @@ async function loadPdfFontBase64(url, cacheKey) {
   let binary = "";
   const chunkSize = 0x8000;
   for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode(
-      ...bytes.subarray(index, index + chunkSize),
-    );
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
   }
   const base64 = btoa(binary);
   if (cacheKey === "regular") {
@@ -2436,10 +2497,7 @@ async function loadPdfFontBase64(url, cacheKey) {
 
 async function ensurePdfFonts(doc) {
   const base64 = await loadPdfFontBase64(harmonyFontUrl, "regular");
-  const blackBase64 = await loadPdfFontBase64(
-    harmonyFontBlackUrl,
-    "black",
-  );
+  const blackBase64 = await loadPdfFontBase64(harmonyFontBlackUrl, "black");
   doc.addFileToVFS("HarmonyOS_Sans_SC_Regular.ttf", base64);
   doc.addFont("HarmonyOS_Sans_SC_Regular.ttf", PDF_FONT_NAME, "normal");
   doc.addFileToVFS("HarmonyOS_Sans_SC_Black.ttf", blackBase64);
@@ -2594,7 +2652,9 @@ function loadUser() {
   gap: 6px;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .student-grid-toggle:hover {
