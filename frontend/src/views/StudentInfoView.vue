@@ -2091,7 +2091,7 @@ async function handleExportPdf() {
         body: item.table.slice(1),
         startY: 48,
         styles: { fontSize: 9, cellPadding: 4, font: PDF_FONT_NAME },
-        headStyles: { fillColor: [205, 255, 249] },
+        headStyles: { fillColor: [31, 79, 87], textColor: 255 },
       });
     });
     doc.save(`students_export_${formatTimestamp()}.pdf`);
@@ -2135,8 +2135,8 @@ async function handleExportPdfResume() {
     };
 
     const addSectionTitle = (title, options = {}) => {
-      const topGap = 50;
-      const bottomGap = 20;
+      const topGap = 30;
+      const bottomGap = 8;
       ensureSpace(topGap + bottomGap + 10);
       currentY += topGap;
       doc.setFont(PDF_FONT_BLACK, "normal");
@@ -2289,11 +2289,13 @@ async function handleExportPdfResume() {
     addSectionTitle("教育经历");
     if (Array.isArray(student.educationExperiences) && student.educationExperiences.length) {
       autoTable(doc, {
+        head: [["起始时间", "结束时间", "学校名", "学位", "证明人"]],
         body: student.educationExperiences.map((edu) => {
           const start = edu.startDate || "";
           const end = edu.isCurrent ? "至今" : edu.endDate || "";
           return [
-            [start, end].filter(Boolean).join("~"),
+            start,
+            end,
             edu.schoolName || "",
             edu.educationLevel || "",
             edu.witness || "",
@@ -2301,6 +2303,7 @@ async function handleExportPdfResume() {
         }),
         startY: currentY + 6,
         styles: { fontSize: 9, cellPadding: 4, font: PDF_FONT_NAME },
+        headStyles: { font: PDF_FONT_BLACK, fillColor: [31, 79, 87], textColor: 255 },
         theme: "grid",
       });
       currentY = doc.lastAutoTable.finalY + 14;
@@ -2311,12 +2314,11 @@ async function handleExportPdfResume() {
     }
 
     // 个人成就
-    addSectionTitle("个人成就", { size: 16 });
-    if (!achievements.length) {
-      doc.setFontSize(10);
-      doc.text("暂无个人成就", marginX, currentY + 12);
-      currentY += 20;
-    } else {
+    if (achievements.length) {
+      doc.addPage();
+      doc.setFont(PDF_FONT_NAME, "normal");
+      currentY = 40;
+      addSectionTitle("个人成就", { size: 16 });
       const grouped = achievements.reduce((acc, record) => {
         const category = record.category || "other";
         acc[category] = acc[category] || [];
