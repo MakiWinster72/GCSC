@@ -383,7 +383,7 @@
                 v-model="info.addressDetail"
                 class="info-input address-detail"
                 type="text"
-                placeholder="请输入详细地址"
+                placeholder="请输入详细地址，精确到门牌号"
                 :disabled="!isEditing"
               />
             </label>
@@ -466,7 +466,7 @@
                 v-model="info.offCampusDetail"
                 class="info-input address-detail"
                 type="text"
-                placeholder="请输入详细地址"
+                placeholder="请输入详细地址，精确到门牌号"
                 :disabled="!isEditing"
               />
             </label>
