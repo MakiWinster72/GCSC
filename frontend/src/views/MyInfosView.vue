@@ -35,7 +35,9 @@
         </div>
         <div class="profile-row">学号：{{ profile.studentNo || "未填写" }}</div>
         <div class="profile-row">班级：{{ profile.className || "未填写" }}</div>
-        <div class="profile-row">学院：{{ profile.college || "未填写" }}</div>
+        <div class="profile-row">
+          学生类别：{{ info.studentCategory || "未填写" }}
+        </div>
       </section>
 
       <section class="menu-card">
@@ -175,13 +177,21 @@
               </select>
             </label>
             <label class="field-card">
-              <span class="info-label">学院</span>
-              <input
-                v-model="info.college"
+              <span class="info-label">学生类别</span>
+              <select
+                v-model="info.studentCategory"
                 class="info-input"
-                type="text"
-                disabled
-              />
+                :disabled="!isEditing"
+              >
+                <option disabled value="">选择学生类别</option>
+                <option
+                  v-for="item in studentCategoryOptions"
+                  :key="item"
+                  :value="item"
+                >
+                  {{ item }}
+                </option>
+              </select>
             </label>
             <label class="field-card field-full">
               <span class="info-label">班级</span>
@@ -189,7 +199,12 @@
                 <select
                   v-model="info.classMajor"
                   class="info-input"
-                  :disabled="!isEditing || !classMajorOptions.length"
+                  :disabled="
+                    !isEditing ||
+                    !info.college ||
+                    !info.studentCategory ||
+                    !classMajorOptions.length
+                  "
                 >
                   <option disabled value="">选择专业</option>
                   <option
@@ -223,23 +238,6 @@
                 :max="today"
                 :disabled="!isEditing"
               />
-            </label>
-            <label class="field-card">
-              <span class="info-label">学生类别</span>
-              <select
-                v-model="info.studentCategory"
-                class="info-input"
-                :disabled="!isEditing"
-              >
-                <option disabled value="">选择学生类别</option>
-                <option
-                  v-for="item in studentCategoryOptions"
-                  :key="item"
-                  :value="item"
-                >
-                  {{ item }}
-                </option>
-              </select>
             </label>
             <label class="field-card">
               <span class="info-label">班主任</span>
@@ -1096,8 +1094,8 @@ const info = reactive({
 });
 
 const classYearOptions = Array.from({ length: 19 }, (_, index) => 2022 + index);
-const majorOptionsByCollege = {
-  大数据与人工智能学院: [
+const majorOptionsByCategory = {
+  本科生: [
     "计算机科学与技术",
     "计算机科学与技术（实验区）",
     "软件工程",
@@ -1105,8 +1103,15 @@ const majorOptionsByCollege = {
     "大数据管理与应用（佛山校区全学段）",
     "大数据管理与应用（数字治理）",
   ],
+  研究生: [
+    "管理科学与工程",
+    "技术经济及管理",
+    "智能科学与技术",
+    "计算机技术",
+    "图书情报",
+  ],
 };
-const studentCategoryOptions = ["本科", "研究生"];
+const studentCategoryOptions = ["本科生", "研究生"];
 const politicalStatusOptions = ["群众", "共青团员", "中共预备党员", "中共党员"];
 const dormCampusOptions = ["佛山校区", "广州校区"];
 const dormBuildingOptions = computed(() => {
@@ -1238,7 +1243,7 @@ const roleLabel = computed(() => {
 });
 
 const classMajorOptions = computed(() => {
-  return majorOptionsByCollege[info.college] || [];
+  return majorOptionsByCategory[info.studentCategory] || [];
 });
 const addressProvinceOptions = computed(() =>
   regionData.map((item) => ({ value: item.value, label: item.label })),
@@ -2003,13 +2008,13 @@ watch(
 );
 
 watch(
-  () => info.college,
-  (college) => {
-    if (!majorOptionsByCollege[college]) {
+  () => info.studentCategory,
+  (category) => {
+    if (!majorOptionsByCategory[category]) {
       info.classMajor = "";
       return;
     }
-    if (!majorOptionsByCollege[college].includes(info.classMajor)) {
+    if (!majorOptionsByCategory[category].includes(info.classMajor)) {
       info.classMajor = "";
     }
   },
