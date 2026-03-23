@@ -184,8 +184,12 @@ public class StudentProfile {
 
     @Column(name = "mother_title", length = 64)
     private String motherTitle;
+
     @OneToMany(mappedBy = "profile", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<EducationExperience> educationExperiences = new ArrayList<>();
+
+    @OneToMany(mappedBy = "profile", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<CadreExperience> cadreExperiences = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -628,5 +632,13 @@ public class StudentProfile {
 
     public void setEducationExperiences(List<EducationExperience> educationExperiences) {
         this.educationExperiences = educationExperiences;
+    }
+
+    public List<CadreExperience> getCadreExperiences() {
+        return cadreExperiences;
+    }
+
+    public void setCadreExperiences(List<CadreExperience> cadreExperiences) {
+        this.cadreExperiences = cadreExperiences;
     }
 }

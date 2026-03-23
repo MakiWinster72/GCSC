@@ -59,6 +59,7 @@ public class StudentProfileRequest {
     private String motherWorkUnit;
     private String motherTitle;
     private List<EducationExperienceItem> educationExperiences;
+    private List<CadreExperienceItem> cadreExperiences;
 
     public String getFullName() {
         return fullName;
@@ -497,5 +498,13 @@ public class StudentProfileRequest {
 
     public void setEducationExperiences(List<EducationExperienceItem> educationExperiences) {
         this.educationExperiences = educationExperiences;
+    }
+
+    public List<CadreExperienceItem> getCadreExperiences() {
+        return cadreExperiences;
+    }
+
+    public void setCadreExperiences(List<CadreExperienceItem> cadreExperiences) {
+        this.cadreExperiences = cadreExperiences;
     }
 }

@@ -62,6 +62,7 @@ public class StudentProfileResponse {
     private String motherWorkUnit;
     private String motherTitle;
     private List<EducationExperienceItem> educationExperiences;
+    private List<CadreExperienceItem> cadreExperiences;
 
     public StudentProfileResponse(
         Long id,
@@ -121,7 +122,8 @@ public class StudentProfileResponse {
         String motherPhone,
         String motherWorkUnit,
         String motherTitle,
-        List<EducationExperienceItem> educationExperiences
+        List<EducationExperienceItem> educationExperiences,
+        List<CadreExperienceItem> cadreExperiences
     ) {
         this.id = id;
         this.username = username;
@@ -181,6 +183,7 @@ public class StudentProfileResponse {
         this.motherWorkUnit = motherWorkUnit;
         this.motherTitle = motherTitle;
         this.educationExperiences = educationExperiences;
+        this.cadreExperiences = cadreExperiences;
     }
 
     public Long getId() {
@@ -413,5 +416,9 @@ public class StudentProfileResponse {
 
     public List<EducationExperienceItem> getEducationExperiences() {
         return educationExperiences;
+    }
+
+    public List<CadreExperienceItem> getCadreExperiences() {
+        return cadreExperiences;
     }
 }
