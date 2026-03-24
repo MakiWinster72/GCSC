@@ -9,43 +9,25 @@ export async function renderDocx(url) {
     const blob = await response.blob();
 
     const container = document.createElement("div");
-    container.className = "docx-container";
-    container.style.cssText = `
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background: #fff;
-      border-radius: 8px;
-      padding: 24px;
-      box-sizing: border-box;
-    `;
+    container.className = "docx-wrapper";
 
     await docxLib.renderAsync(blob, container, undefined, {
       className: "docx-wrapper",
-      inWrapper: true,
+      inWrapper: false,
       ignoreWidth: false,
       ignoreHeight: false,
       ignoreFonts: false,
-      breakPages: true,
+      breakPages: false,
       ignoreLastRenderedPageBreak: true,
       experimental: false,
       trimXmlDeclaration: true,
       useBase64URL: true,
       useMathMLPolyfill: false,
       renderChanges: false,
-      renderHeaders: true,
-      renderFooters: true,
-      renderFootnotes: true,
-      renderEndnotes: true,
-    });
-
-    // language tag handling
-    const langTags = container.querySelectorAll('[lang]');
-    langTags.forEach(tag => {
-      const lang = tag.getAttribute('lang');
-      if (lang) {
-        tag.style.direction = /[\u0600-\u06FF]/.test(tag.textContent) ? 'rtl' : 'ltr';
-      }
+      renderHeaders: false,
+      renderFooters: false,
+      renderFootnotes: false,
+      renderEndnotes: false,
     });
 
     return container.innerHTML;

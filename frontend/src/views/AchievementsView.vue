@@ -1015,7 +1015,7 @@
                         </svg>
                         点击工作表标签可切换Sheet | 因渲染限制，预览与实际可能存在差异
                       </div>
-                      <div v-html="previewContent" class="viewer-content" :class="{ 'viewer-content-full': previewType === 'pdf' }"></div>
+                      <div v-html="previewContent" class="viewer-content" :class="{ 'viewer-content-full': previewType === 'pdf' || previewType === 'document' }"></div>
                     </div>
                   </div>
                   <img
