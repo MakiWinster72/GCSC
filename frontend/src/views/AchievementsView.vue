@@ -263,20 +263,19 @@
             <div class="achievement-card-title achievement-paper-title">
               {{ item.title || "-" }}
             </div>
-            <div class="achievement-card-text">
-              {{ formatWorksCategory(item.fields) }}
+            <div class="achievement-card-meta">
+              <span class="achievement-card-meta-item">{{ formatWorksCategory(item.fields) }}</span>
+              <span class="achievement-card-meta-dot">·</span>
+              <span class="achievement-card-meta-item">{{ formatWorksDate(item.fields) }}</span>
             </div>
-            <div class="achievement-card-text">
+            <div class="achievement-card-text" v-if="item.fields.publishOccasion">
               {{ formatWorksOccasion(item.fields) }}
             </div>
-            <div class="achievement-card-text">
-              {{ formatWorksDate(item.fields) }}
+            <div class="achievement-card-text" v-if="item.fields.studentName">
+              {{ item.fields.studentName }}
             </div>
             <div class="achievement-works-tag" aria-hidden="true">
               {{ formatWorksTag(item.fields) }}
-            </div>
-            <div class="achievement-card-organizer">
-              {{ formatWorksOrganizer(item.fields) }}
             </div>
           </div>
           <div v-else class="achievement-card-body">
@@ -406,145 +405,275 @@
           </div>
 
           <div class="achievement-detail-body">
-            <div v-if="viewItem.category === 'contest'">
-              <div class="achievement-card-title-row">
-                <div class="achievement-card-title">
-                  {{ viewItem.title || "-" }}
-                </div>
-                <span
-                  v-if="formatContestAwardPill(viewItem.fields)"
-                  class="achievement-award-pill"
-                >
+            <!-- contest -->
+            <template v-if="viewItem.category === 'contest'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span v-if="formatContestAwardPill(viewItem.fields)" class="detail-award-pill">
                   {{ formatContestAwardPill(viewItem.fields) }}
                 </span>
               </div>
-              <div class="achievement-card-date-italic">
-                {{ formatContestDate(viewItem.fields) }}
+              <div class="detail-date">{{ formatContestDate(viewItem.fields) }}</div>
+              <div class="detail-group">
+                <div class="detail-group-label">基本信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">学号</span>
+                  <span class="detail-value">{{ viewItem.fields.studentNo || "-" }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">姓名</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatContestStudentNo(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">参赛信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">竞赛名称</span>
+                  <span class="detail-value">{{ viewItem.fields.contestName || "-" }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">竞赛类别</span>
+                  <span class="detail-value">{{ [viewItem.fields.contestCategory, viewItem.fields.contestType].filter(Boolean).join(' · ') || "-" }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">获奖类别</span>
+                  <span class="detail-value">{{ [viewItem.fields.awardCategory, viewItem.fields.awardLevel].filter(Boolean).join(' · ') || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatContestCategoryLine(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">团队信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">团队成员</span>
+                  <span class="detail-value">{{ [viewItem.fields.studentName, viewItem.fields.teamMembers].filter(Boolean).join('、') || "-" }}</span>
+                </div>
+                <div class="detail-row" v-if="viewItem.fields.instructors">
+                  <span class="detail-label">指导老师</span>
+                  <span class="detail-value">{{ viewItem.fields.instructors }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatContestMembers(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">获奖信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">获奖人数</span>
+                  <span class="detail-value">{{ viewItem.fields.awardCount || "-" }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">备注</span>
+                  <span class="detail-value">{{ viewItem.fields.remark || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatContestAwardLine(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-row">
+                  <span class="detail-label">主办单位</span>
+                  <span class="detail-value">{{ viewItem.fields.organizer || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-organizer">
-                {{ formatContestOrganizer(viewItem.fields) }}
+            </template>
+
+            <!-- paper -->
+            <template v-else-if="viewItem.category === 'paper'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span class="detail-category-tag">学术论文</span>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'paper'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+              <div class="detail-group">
+                <div class="detail-group-label">期刊信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">发表期刊</span>
+                  <span class="detail-value">{{ viewItem.fields.journalName || "-" }}</span>
+                </div>
+                <div class="detail-row" v-if="viewItem.fields.indexed">
+                  <span class="detail-label">收录情况</span>
+                  <span class="detail-value">{{ viewItem.fields.indexed }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPaperJournal(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">作者信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">作者</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName || "-" }}<template v-if="viewItem.fields.authorOrder">（{{ viewItem.fields.authorOrder }}）</template></span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPaperAuthors(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-row">
+                  <span class="detail-label">发表时间</span>
+                  <span class="detail-value">{{ viewItem.fields.publishDate || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPaperDate(viewItem.fields) }}
+            </template>
+
+            <!-- journal -->
+            <template v-else-if="viewItem.category === 'journal'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span class="detail-category-tag">期刊作品</span>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'journal'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+              <div class="detail-group">
+                <div class="detail-group-label">刊物信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">刊物名称</span>
+                  <span class="detail-value">{{ viewItem.fields.publicationName || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatJournalPublication(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">作者信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">作者</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatJournalAuthor(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-row">
+                  <span class="detail-label">发表时间</span>
+                  <span class="detail-value">{{ viewItem.fields.publishDate || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatJournalDate(viewItem.fields) }}
+            </template>
+
+            <!-- patent -->
+            <template v-else-if="viewItem.category === 'patent'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span class="detail-category-tag">{{ viewItem.fields.patentType || "专利" }}</span>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'patent'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+              <div class="detail-group">
+                <div class="detail-group-label">专利信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">授权号</span>
+                  <span class="detail-value">{{ viewItem.fields.grantNo || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPatentGrantNo(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">发明人信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">发明人</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName || "-" }}<template v-if="viewItem.fields.firstInventor">（{{ viewItem.fields.firstInventor }}）</template></span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPatentInventor(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-row">
+                  <span class="detail-label">获批时间</span>
+                  <span class="detail-value">{{ viewItem.fields.grantDate || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatPatentDate(viewItem.fields) }}
+            </template>
+
+            <!-- certificate -->
+            <template v-else-if="viewItem.category === 'certificate'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span class="detail-category-tag">职业资格证书</span>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'certificate'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+              <div class="detail-group">
+                <div class="detail-group-label">证书信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">证书类别</span>
+                  <span class="detail-value">{{ viewItem.fields.certificateType || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatCertificateType(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-group-label">持证人</div>
+                <div class="detail-row">
+                  <span class="detail-label">姓名</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatCertificateOwner(viewItem.fields) }}
+              <div class="detail-group">
+                <div class="detail-row">
+                  <span class="detail-label">获得时间</span>
+                  <span class="detail-value">{{ viewItem.fields.obtainDate || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatCertificateDate(viewItem.fields) }}
+            </template>
+
+            <!-- research -->
+            <template v-else-if="viewItem.category === 'research'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <span class="detail-category-tag">科研项目</span>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'research'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+              <div class="detail-group">
+                <div class="detail-group-label">项目信息</div>
+                <div class="detail-row">
+                  <span class="detail-label">项目负责人</span>
+                  <span class="detail-value">{{ viewItem.fields.projectLeader || "-" }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">教师工号</span>
+                  <span class="detail-value">{{ viewItem.fields.teacherNo || "-" }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatResearchLeader(viewItem.fields) }}
+            </template>
+
+            <!-- works -->
+            <template v-else-if="viewItem.category === 'works'">
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
+                <div class="detail-badges">
+                  <span class="detail-category-tag">{{ viewItem.fields.workCategory || "创作作品" }}</span>
+                  <span v-if="viewItem.fields.workType" class="detail-type-badge">{{ viewItem.fields.workType }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatResearchTeacher(viewItem.fields) }}
+              <div class="detail-date">{{ viewItem.fields.publishDate || "-" }}</div>
+
+              <div class="detail-info-strip">
+                <div class="detail-strip-item" v-if="viewItem.fields.impactScope">
+                  <span class="strip-icon">◎</span>
+                  <span>{{ viewItem.fields.impactScope }}</span>
+                </div>
+                <div class="detail-strip-item" v-if="viewItem.fields.publishOccasion">
+                  <span class="strip-icon">◈</span>
+                  <span>{{ viewItem.fields.publishOccasion }}</span>
+                </div>
               </div>
-            </div>
-            <div v-else-if="viewItem.category === 'works'">
-              <div class="achievement-card-title achievement-paper-title">
-                {{ viewItem.title || "-" }}
+
+              <div class="detail-group" v-if="viewItem.fields.studentName || viewItem.fields.studentNo">
+                <div class="detail-group-label">创作者</div>
+                <div class="detail-row" v-if="viewItem.fields.studentName">
+                  <span class="detail-label">姓名</span>
+                  <span class="detail-value">{{ viewItem.fields.studentName }}</span>
+                </div>
+                <div class="detail-row" v-if="viewItem.fields.studentNo">
+                  <span class="detail-label">学号</span>
+                  <span class="detail-value">{{ viewItem.fields.studentNo }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatWorksCategory(viewItem.fields) }}
+
+              <div class="detail-group" v-if="viewItem.fields.organizer">
+                <div class="detail-group-label">主办单位</div>
+                <div class="detail-row">
+                  <span class="detail-value">{{ viewItem.fields.organizer }}</span>
+                </div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatWorksOccasion(viewItem.fields) }}
+
+              <div class="detail-note" v-if="viewItem.fields.note">
+                <div class="detail-note-label">说明</div>
+                <div class="detail-note-text">{{ viewItem.fields.note }}</div>
               </div>
-              <div class="achievement-card-text">
-                {{ formatWorksDate(viewItem.fields) }}
+            </template>
+
+            <!-- fallback -->
+            <template v-else>
+              <div class="detail-header">
+                <div class="detail-title">{{ viewItem.title || "-" }}</div>
               </div>
-              <div class="achievement-card-organizer">
-                {{ formatWorksOrganizer(viewItem.fields) }}
-              </div>
-            </div>
-            <div v-else>
-              <div class="achievement-card-title">
-                {{ viewItem.title || "-" }}
-              </div>
-              <div v-if="viewItem.dateLabel" class="achievement-card-dates">
-                <span
-                  >{{ viewItem.dateLabel }}：{{
-                    viewItem.dateValue || "-"
-                  }}</span
-                >
+              <div v-if="viewItem.dateLabel" class="detail-date">
+                {{ viewItem.dateLabel }}：{{ viewItem.dateValue || "-" }}
               </div>
               <div
                 v-for="line in viewItem.fieldLines"
                 :key="line"
-                class="achievement-card-text"
+                class="detail-row"
               >
-                {{ line }}
+                <span class="detail-value">{{ line }}</span>
               </div>
-            </div>
+            </template>
+
             <div
               v-if="viewItem.attachments && viewItem.attachments.length"
-              class="achievement-attachments"
+              class="detail-attachments"
             >
-              <div class="attachment-title">附件</div>
+              <div class="detail-attachments-title">附件</div>
               <div class="attachment-list">
                 <div
                   v-for="(file, index) in viewItem.attachments"
@@ -564,7 +693,8 @@
                 </div>
               </div>
             </div>
-            <div class="achievement-card-actions">
+
+            <div class="detail-actions">
               <button class="post-action" type="button" @click="editFromView">
                 编辑
               </button>
