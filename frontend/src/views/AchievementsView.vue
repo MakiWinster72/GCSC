@@ -701,7 +701,7 @@
               <button
                 class="post-action danger"
                 type="button"
-                @click="openDelete"
+                @click.stop="openDelete"
               >
                 删除
               </button>
@@ -929,32 +929,32 @@
         </div>
       </section>
 
-      <transition name="dialog-fade">
-        <div
-          v-if="deleteDialogOpen"
-          class="dialog-backdrop"
-          @click="closeDelete"
-        ></div>
-      </transition>
-      <transition name="dialog-pop">
-        <section v-if="deleteDialogOpen" class="dialog-card" @click.stop>
-          <header class="dialog-header">确认删除</header>
-          <div class="dialog-body">删除后无法恢复，确定要删除这条动态吗？</div>
-          <div class="dialog-actions">
-            <button class="ghost-button" type="button" @click="closeDelete">
-              取消
-            </button>
-            <button
-              class="action-button"
-              type="button"
-              :disabled="deleteBusy"
-              @click="confirmDelete"
-            >
-              确定删除
-            </button>
-          </div>
-        </section>
-      </transition>
+      <div
+        v-if="deleteDialogOpen"
+        class="dialog-backdrop"
+        @click="closeDelete"
+      ></div>
+      <section
+        v-if="deleteDialogOpen"
+        class="dialog-card"
+        @click.stop
+      >
+        <header class="dialog-header">确认删除</header>
+        <div class="dialog-body">删除后无法恢复，确定要删除这条动态吗？</div>
+        <div class="dialog-actions">
+          <button class="ghost-button" type="button" @click="closeDelete">
+            取消
+          </button>
+          <button
+            class="action-button"
+            type="button"
+            :disabled="deleteBusy"
+            @click="confirmDelete"
+          >
+            确定删除
+          </button>
+        </div>
+      </section>
 
       <input
         ref="imageInput"
@@ -1001,6 +1001,7 @@ const viewOpen = ref(false);
 const viewLoading = ref(false);
 const viewItem = ref(null);
 const viewClosing = ref(false);
+const viewExitUp = ref(false);
 const editId = ref(null);
 const deleteDialogOpen = ref(false);
 const deleteBusy = ref(false);
@@ -2141,11 +2142,14 @@ function editFromView() {
 }
 
 function openDelete() {
+  if (deleteDialogOpen.value) {
+    return;
+  }
   deleteDialogOpen.value = true;
 }
 
 function closeDelete() {
-  if (deleteBusy.value) {
+  if (deleteBusy.value || !deleteDialogOpen.value) {
     return;
   }
   deleteDialogOpen.value = false;
@@ -2179,12 +2183,12 @@ async function confirmDelete() {
     achievements.value = achievements.value.filter(
       (item) => item.id !== viewItem.value.id,
     );
-    closeDelete();
     closeView();
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || "删除失败";
   } finally {
     deleteBusy.value = false;
+    closeDelete();
   }
 }
 
