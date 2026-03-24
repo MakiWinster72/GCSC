@@ -295,41 +295,56 @@
                 </option>
               </select>
             </label>
-            <label class="field-card">
-              <span class="info-label">手机号码</span>
-              <input
-                v-model="info.phone"
-                class="info-input"
-                type="tel"
-                placeholder="请输入手机号"
-                maxlength="11"
-                inputmode="numeric"
-                @input="handleDigitsInput('phone', 11, $event)"
-                :disabled="!isEditing"
-              />
+            <label class="field-card field-full">
+              <span class="info-label">手机号码 / 备用联系方式</span>
+              <div class="class-inline">
+                <input
+                  v-model="info.phone"
+                  class="info-input"
+                  type="tel"
+                  placeholder="手机号"
+                  maxlength="11"
+                  inputmode="numeric"
+                  @input="handleDigitsInput('phone', 11, $event)"
+                  :disabled="!isEditing"
+                />
+                <span class="class-text">/</span>
+                <input
+                  v-model="info.backupContact"
+                  class="info-input"
+                  type="text"
+                  placeholder="微信/QQ/邮箱"
+                  :disabled="!isEditing"
+                />
+              </div>
             </label>
-            <label class="field-card">
-              <span class="info-label">备用联系方式（微信/QQ/邮箱）</span>
-              <input
-                v-model="info.backupContact"
-                class="info-input"
-                type="text"
-                placeholder="请输入备用联系方式"
-                :disabled="!isEditing"
-              />
-            </label>
-            <label class="field-card">
-              <span class="info-label">身份证件号</span>
-              <input
-                v-model="info.idNo"
-                class="info-input"
-                type="text"
-                placeholder="请输入身份证件号"
-                maxlength="18"
-                inputmode="text"
-                @input="handleIdNoInput"
-                :disabled="!isEditing"
-              />
+            <label class="field-card field-full">
+              <span class="info-label">证件类型 / 证件号码</span>
+              <div class="class-inline id-type-inline">
+                <select
+                  v-model="info.idType"
+                  class="info-input"
+                  :disabled="!isEditing"
+                >
+                  <option
+                    v-for="item in idTypeOptions"
+                    :key="item"
+                    :value="item"
+                  >
+                    {{ item }}
+                  </option>
+                </select>
+                <input
+                  v-model="info.idNo"
+                  class="info-input"
+                  type="text"
+                  placeholder="证件号码"
+                  :maxlength="idNoMaxLength"
+                  inputmode="text"
+                  @input="handleIdNoInput"
+                  :disabled="!isEditing"
+                />
+              </div>
             </label>
             <label class="field-card">
               <span class="info-label">出生年月</span>
@@ -1194,6 +1209,7 @@ const info = reactive({
   offCampusCity: "",
   offCampusCounty: "",
   offCampusDetail: "",
+  idType: "居民身份证",
   idNo: "",
   birthDate: "",
   nativePlace: "",
@@ -1247,7 +1263,38 @@ const majorOptionsByCategory = {
 };
 const studentCategoryOptions = ["本科生", "研究生"];
 const politicalStatusOptions = ["群众", "共青团员", "中共预备党员", "中共党员"];
+const idTypeOptions = [
+  "居民身份证",
+  "台湾居民来往大陆通行证",
+  "港澳居民来往内地通行证",
+  "普通护照",
+  "台湾居民居住证",
+  "港澳居民居住证",
+  "外国人永久居留身份证",
+  "外国护照",
+];
 const dormCampusOptions = ["佛山校区", "广州校区"];
+const idNoMaxLength = computed(() => {
+  switch (info.idType) {
+    case "居民身份证":
+      return 18;
+    case "台湾居民来往大陆通行证":
+    case "港澳居民来往内地通行证":
+      return 9;
+    case "普通护照":
+      return 9;
+    case "台湾居民居住证":
+    case "港澳居民居住证":
+      return 10;
+    case "外国人永久居留身份证":
+      return 15;
+    case "外国护照":
+      return 20;
+    default:
+      return 32;
+  }
+});
+
 const dormBuildingOptions = computed(() => {
   if (info.dormCampus === "佛山校区") {
     return [
@@ -1755,13 +1802,39 @@ function handleDigitsInput(field, maxLength, event) {
 
 function handleIdNoInput(event) {
   const raw = (event.target.value || "").toUpperCase();
-  const cleaned = raw.replace(/[^0-9X]/g, "");
-  const digits = cleaned.replace(/X/g, "").slice(0, 18);
-  if (raw.endsWith("X")) {
-    info.idNo = `${digits.slice(0, 17)}X`.slice(0, 18);
+  const maxLen = idNoMaxLength.value;
+  // 居民身份证: digits + optional X at end
+  if (info.idType === "居民身份证") {
+    const cleaned = raw.replace(/[^0-9X]/g, "");
+    const digits = cleaned.replace(/X/g, "").slice(0, 17);
+    if (raw.endsWith("X")) {
+      info.idNo = `${digits}X`.slice(0, maxLen);
+      return;
+    }
+    info.idNo = digits;
     return;
   }
-  info.idNo = digits;
+  // 通行证类: 8 digits + 1 letter
+  if (
+    info.idType === "台湾居民来往大陆通行证" ||
+    info.idType === "港澳居民来往内地通行证"
+  ) {
+    const cleaned = raw.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+    const digits = cleaned.replace(/[A-Z]/g, "").slice(0, 8);
+    const letter = cleaned.slice(8, 9).replace(/[^A-Z]/g, "");
+    info.idNo = `${digits}${letter}`.slice(0, maxLen);
+    return;
+  }
+  // 护照类: alphanumeric
+  if (
+    info.idType === "普通护照" ||
+    info.idType === "外国护照"
+  ) {
+    info.idNo = raw.replace(/[^0-9A-Za-z]/g, "").toUpperCase().slice(0, maxLen);
+    return;
+  }
+  // 居住证类: digits only
+  info.idNo = raw.replace(/\D/g, "").slice(0, maxLen);
 }
 
 function triggerAvatarUpload() {
@@ -1858,6 +1931,7 @@ async function confirmEdit() {
     phone: info.phone,
     backupContact: info.backupContact,
     address,
+    idType: info.idType,
     idNo: info.idNo,
     birthDate: info.birthDate || null,
     nativePlace: info.nativePlace,
@@ -1998,6 +2072,7 @@ function buildPdfStudentSnapshot() {
     politicalStatus: info.politicalStatus,
     phone: info.phone,
     backupContact: info.backupContact,
+    idType: info.idType,
     idNo: info.idNo,
     birthDate: info.birthDate,
     nativePlace: info.nativePlace,
@@ -2188,6 +2263,7 @@ function applyProfileResponse(data) {
   info.addressCity = parsedAddress.city;
   info.addressCounty = parsedAddress.county;
   info.addressDetail = parsedAddress.detail;
+  info.idType = data.idType || "居民身份证";
   info.idNo = data.idNo || "";
   info.birthDate = data.birthDate || "";
   info.nativePlace = data.nativePlace || "";

@@ -26,6 +26,7 @@ public class StudentProfileRequest {
     private String phone;
     private String backupContact;
     private String address;
+    private String idType;
     private String idNo;
     private LocalDate birthDate;
     private String nativePlace;
@@ -236,6 +237,14 @@ public class StudentProfileRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
     }
 
     public String getIdNo() {

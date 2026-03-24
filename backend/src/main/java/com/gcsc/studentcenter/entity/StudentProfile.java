@@ -90,7 +90,10 @@ public class StudentProfile {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "id_no", length = 32)
+    @Column(name = "id_type", length = 64)
+    private String idType;
+
+    @Column(name = "id_no", length = 64)
     private String idNo;
 
     @Column(name = "birth_date")
@@ -372,6 +375,14 @@ public class StudentProfile {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
     }
 
     public String getIdNo() {

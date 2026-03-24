@@ -2675,6 +2675,23 @@ body {
   width: 100%;
 }
 
+.id-type-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.id-type-inline select {
+  flex: 1;
+  min-width: 0;
+}
+
+.id-type-inline input {
+  flex: 2;
+  min-width: 0;
+}
+
 .class-text {
   color: #5c6f77;
   font-size: 13px;

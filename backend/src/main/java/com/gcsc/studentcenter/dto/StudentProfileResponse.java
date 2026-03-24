@@ -22,6 +22,7 @@ public class StudentProfileResponse {
     private String phone;
     private String backupContact;
     private String address;
+    private String idType;
     private String idNo;
     private LocalDate birthDate;
     private String nativePlace;
@@ -84,6 +85,7 @@ public class StudentProfileResponse {
         String phone,
         String backupContact,
         String address,
+        String idType,
         String idNo,
         LocalDate birthDate,
         String nativePlace,
@@ -145,6 +147,7 @@ public class StudentProfileResponse {
         this.phone = phone;
         this.backupContact = backupContact;
         this.address = address;
+        this.idType = idType;
         this.idNo = idNo;
         this.birthDate = birthDate;
         this.nativePlace = nativePlace;
@@ -263,6 +266,10 @@ public class StudentProfileResponse {
 
     public String getIdNo() {
         return idNo;
+    }
+
+    public String getIdType() {
+        return idType;
     }
 
     public LocalDate getBirthDate() {
