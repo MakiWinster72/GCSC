@@ -518,6 +518,8 @@ public class AchievementService {
         contest.setInstructors(valueOf(fields, "instructors"));
         contest.setRemark(valueOf(fields, "remark"));
         contest.setImageUrl(imageUrl);
+        contest.setImageUrls(valueOf(fields, "_imageUrls"));
+        contest.setAttachments(valueOf(fields, "_attachments"));
         contest.setCreatedAt(LocalDateTime.now());
         return achievementContestRepository.save(contest);
     }
@@ -541,6 +543,8 @@ public class AchievementService {
         contest.setInstructors(valueOf(fields, "instructors"));
         contest.setRemark(valueOf(fields, "remark"));
         contest.setImageUrl(imageUrl);
+        contest.setImageUrls(valueOf(fields, "_imageUrls"));
+        contest.setAttachments(valueOf(fields, "_attachments"));
         return achievementContestRepository.save(contest);
     }
 
@@ -559,6 +563,8 @@ public class AchievementService {
         paper.setAuthorOrder(valueOf(fields, "authorOrder"));
         paper.setIndexed(valueOf(fields, "indexed"));
         paper.setImageUrl(imageUrl);
+        paper.setImageUrls(valueOf(fields, "_imageUrls"));
+        paper.setAttachments(valueOf(fields, "_attachments"));
         paper.setCreatedAt(LocalDateTime.now());
         return achievementPaperRepository.save(paper);
     }
@@ -576,6 +582,8 @@ public class AchievementService {
         paper.setAuthorOrder(valueOf(fields, "authorOrder"));
         paper.setIndexed(valueOf(fields, "indexed"));
         paper.setImageUrl(imageUrl);
+        paper.setImageUrls(valueOf(fields, "_imageUrls"));
+        paper.setAttachments(valueOf(fields, "_attachments"));
         return achievementPaperRepository.save(paper);
     }
 
@@ -592,6 +600,8 @@ public class AchievementService {
         journal.setPublicationName(valueOf(fields, "publicationName"));
         journal.setPublishDate(parseDate(valueOf(fields, "publishDate")));
         journal.setImageUrl(imageUrl);
+        journal.setImageUrls(valueOf(fields, "_imageUrls"));
+        journal.setAttachments(valueOf(fields, "_attachments"));
         journal.setCreatedAt(LocalDateTime.now());
         return achievementJournalRepository.save(journal);
     }
@@ -607,6 +617,8 @@ public class AchievementService {
         journal.setPublicationName(valueOf(fields, "publicationName"));
         journal.setPublishDate(parseDate(valueOf(fields, "publishDate")));
         journal.setImageUrl(imageUrl);
+        journal.setImageUrls(valueOf(fields, "_imageUrls"));
+        journal.setAttachments(valueOf(fields, "_attachments"));
         return achievementJournalRepository.save(journal);
     }
 
@@ -625,6 +637,8 @@ public class AchievementService {
         patent.setGrantDate(parseDate(valueOf(fields, "grantDate")));
         patent.setFirstInventor(valueOf(fields, "firstInventor"));
         patent.setImageUrl(imageUrl);
+        patent.setImageUrls(valueOf(fields, "_imageUrls"));
+        patent.setAttachments(valueOf(fields, "_attachments"));
         patent.setCreatedAt(LocalDateTime.now());
         return achievementPatentRepository.save(patent);
     }
@@ -642,6 +656,8 @@ public class AchievementService {
         patent.setGrantDate(parseDate(valueOf(fields, "grantDate")));
         patent.setFirstInventor(valueOf(fields, "firstInventor"));
         patent.setImageUrl(imageUrl);
+        patent.setImageUrls(valueOf(fields, "_imageUrls"));
+        patent.setAttachments(valueOf(fields, "_attachments"));
         return achievementPatentRepository.save(patent);
     }
 
@@ -658,6 +674,8 @@ public class AchievementService {
         certificate.setCertificateName(certificateName);
         certificate.setObtainDate(parseDate(valueOf(fields, "obtainDate")));
         certificate.setImageUrl(imageUrl);
+        certificate.setImageUrls(valueOf(fields, "_imageUrls"));
+        certificate.setAttachments(valueOf(fields, "_attachments"));
         certificate.setCreatedAt(LocalDateTime.now());
         return achievementCertificateRepository.save(certificate);
     }
@@ -673,6 +691,8 @@ public class AchievementService {
         certificate.setCertificateType(valueOf(fields, "certificateType"));
         certificate.setObtainDate(parseDate(valueOf(fields, "obtainDate")));
         certificate.setImageUrl(imageUrl);
+        certificate.setImageUrls(valueOf(fields, "_imageUrls"));
+        certificate.setAttachments(valueOf(fields, "_attachments"));
         return achievementCertificateRepository.save(certificate);
     }
 
@@ -689,6 +709,8 @@ public class AchievementService {
         research.setTeacherNo(valueOf(fields, "teacherNo"));
         research.setProjectLeader(valueOf(fields, "projectLeader"));
         research.setImageUrl(imageUrl);
+        research.setImageUrls(valueOf(fields, "_imageUrls"));
+        research.setAttachments(valueOf(fields, "_attachments"));
         research.setCreatedAt(LocalDateTime.now());
         return achievementResearchRepository.save(research);
     }
@@ -704,6 +726,8 @@ public class AchievementService {
         research.setTeacherNo(valueOf(fields, "teacherNo"));
         research.setProjectLeader(valueOf(fields, "projectLeader"));
         research.setImageUrl(imageUrl);
+        research.setImageUrls(valueOf(fields, "_imageUrls"));
+        research.setAttachments(valueOf(fields, "_attachments"));
         return achievementResearchRepository.save(research);
     }
 
@@ -725,6 +749,8 @@ public class AchievementService {
         works.setImpactScope(valueOf(fields, "impactScope"));
         works.setNote(valueOf(fields, "note"));
         works.setImageUrl(imageUrl);
+        works.setImageUrls(valueOf(fields, "_imageUrls"));
+        works.setAttachments(valueOf(fields, "_attachments"));
         works.setCreatedAt(LocalDateTime.now());
         return achievementWorksRepository.save(works);
     }
@@ -745,6 +771,8 @@ public class AchievementService {
         works.setImpactScope(valueOf(fields, "impactScope"));
         works.setNote(valueOf(fields, "note"));
         works.setImageUrl(imageUrl);
+        works.setImageUrls(valueOf(fields, "_imageUrls"));
+        works.setAttachments(valueOf(fields, "_attachments"));
         return achievementWorksRepository.save(works);
     }
 
@@ -763,6 +791,12 @@ public class AchievementService {
         fields.put("teamMembers", contest.getTeamMembers());
         fields.put("instructors", contest.getInstructors());
         fields.put("remark", contest.getRemark());
+        if (contest.getImageUrls() != null) {
+            fields.put("_imageUrls", contest.getImageUrls());
+        }
+        if (contest.getAttachments() != null) {
+            fields.put("_attachments", contest.getAttachments());
+        }
         return new AchievementRecordResponse(
             contest.getId(),
             "contest",
@@ -781,6 +815,12 @@ public class AchievementService {
         fields.put("publishDate", formatDate(paper.getPublishDate()));
         fields.put("authorOrder", paper.getAuthorOrder());
         fields.put("indexed", paper.getIndexed());
+        if (paper.getImageUrls() != null) {
+            fields.put("_imageUrls", paper.getImageUrls());
+        }
+        if (paper.getAttachments() != null) {
+            fields.put("_attachments", paper.getAttachments());
+        }
         return new AchievementRecordResponse(
             paper.getId(),
             "paper",
@@ -797,6 +837,12 @@ public class AchievementService {
         fields.put("workTitle", journal.getWorkTitle());
         fields.put("publicationName", journal.getPublicationName());
         fields.put("publishDate", formatDate(journal.getPublishDate()));
+        if (journal.getImageUrls() != null) {
+            fields.put("_imageUrls", journal.getImageUrls());
+        }
+        if (journal.getAttachments() != null) {
+            fields.put("_attachments", journal.getAttachments());
+        }
         return new AchievementRecordResponse(
             journal.getId(),
             "journal",
@@ -815,6 +861,12 @@ public class AchievementService {
         fields.put("grantNo", patent.getGrantNo());
         fields.put("grantDate", formatDate(patent.getGrantDate()));
         fields.put("firstInventor", patent.getFirstInventor());
+        if (patent.getImageUrls() != null) {
+            fields.put("_imageUrls", patent.getImageUrls());
+        }
+        if (patent.getAttachments() != null) {
+            fields.put("_attachments", patent.getAttachments());
+        }
         return new AchievementRecordResponse(
             patent.getId(),
             "patent",
@@ -831,6 +883,12 @@ public class AchievementService {
         fields.put("certificateType", certificate.getCertificateType());
         fields.put("certificateName", certificate.getCertificateName());
         fields.put("obtainDate", formatDate(certificate.getObtainDate()));
+        if (certificate.getImageUrls() != null) {
+            fields.put("_imageUrls", certificate.getImageUrls());
+        }
+        if (certificate.getAttachments() != null) {
+            fields.put("_attachments", certificate.getAttachments());
+        }
         return new AchievementRecordResponse(
             certificate.getId(),
             "certificate",
@@ -847,6 +905,12 @@ public class AchievementService {
         fields.put("projectName", research.getProjectName());
         fields.put("teacherNo", research.getTeacherNo());
         fields.put("projectLeader", research.getProjectLeader());
+        if (research.getImageUrls() != null) {
+            fields.put("_imageUrls", research.getImageUrls());
+        }
+        if (research.getAttachments() != null) {
+            fields.put("_attachments", research.getAttachments());
+        }
         return new AchievementRecordResponse(
             research.getId(),
             "research",
@@ -868,6 +932,12 @@ public class AchievementService {
         fields.put("organizer", works.getOrganizer());
         fields.put("impactScope", works.getImpactScope());
         fields.put("note", works.getNote());
+        if (works.getImageUrls() != null) {
+            fields.put("_imageUrls", works.getImageUrls());
+        }
+        if (works.getAttachments() != null) {
+            fields.put("_attachments", works.getAttachments());
+        }
         return new AchievementRecordResponse(
             works.getId(),
             "works",
