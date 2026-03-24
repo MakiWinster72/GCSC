@@ -1771,22 +1771,100 @@ body {
   align-items: stretch;
 }
 
-.achievement-detail-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+.achievement-view-body.no-media {
+  grid-template-columns: 1fr;
+}
+
+.achievement-view-media {
   border-radius: 16px;
+  overflow: hidden;
   background: #ffffff;
-  display: grid;
-  place-items: center;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+}
+
+.achievement-view-media:empty {
+  display: none;
+}
+
+.achievement-view-media {
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
 }
 
-.achievement-detail-image img {
+/* 2-image vertical stack */
+.achievement-view-media-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.media-2-cell {
+  flex: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(3, 107, 114, 0.04);
+  min-height: 180px;
+}
+
+.media-2-cell img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-single-img {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
   object-fit: contain;
-  background: #ffffff;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+  display: block;
+}
+
+/* 3-image grid: top-left, top-right, bottom full-width */
+.achievement-view-media-3 {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.media-3-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 200px 200px;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+.media-3-cell {
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(3, 107, 114, 0.04);
+}
+
+.media-3-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+}
+
+.media-3-top-left {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.media-3-top-right {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.media-3-bottom {
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
 
 .achievement-detail-gallery {
@@ -3242,6 +3320,15 @@ body {
 
   .achievement-view-body {
     grid-template-columns: 1fr;
+  }
+
+  .media-3-grid {
+    grid-template-rows: 140px 140px;
+    min-height: 220px;
+  }
+
+  .media-2-cell {
+    min-height: 140px;
   }
 
   .achievement-sheet {

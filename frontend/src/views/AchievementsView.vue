@@ -355,26 +355,56 @@
           </button>
         </header>
         <div v-if="viewLoading" class="empty-tip">加载中...</div>
-        <div v-else-if="viewItem" class="achievement-view-body">
-          <div class="achievement-detail-image">
-            <img v-if="viewActiveImage" :src="viewActiveImage" alt="成就图片" />
-            <div v-else class="achievement-card-placeholder">未上传图片</div>
-          </div>
-          <div
-            v-if="viewItem.imageUrls && viewItem.imageUrls.length > 1"
-            class="achievement-detail-gallery"
+        <div
+          v-else-if="viewItem"
+          class="achievement-view-body"
+          :class="{ 'no-media': !viewItem.imageUrls?.length }"
           >
-            <button
-              v-for="(image, index) in viewItem.imageUrls"
-              :key="`${image}-${index}`"
-              class="detail-thumb"
-              :class="{ active: viewImageIndex === index }"
-              type="button"
-              @click="selectViewImage(index)"
-            >
-              <img :src="image" alt="成就图片缩略图" />
-            </button>
+          <div
+            v-if="!viewItem.imageUrls?.length"
+            class="achievement-view-media"
+          ></div>
+
+          <div
+            v-else-if="viewItem.imageUrls.length === 1"
+            class="achievement-view-media"
+          >
+            <img
+              class="media-single-img"
+              :src="viewItem.imageUrls[0]"
+              alt="成就图片"
+            />
           </div>
+
+          <div
+            v-else-if="viewItem.imageUrls.length === 2"
+            class="achievement-view-media achievement-view-media-2"
+          >
+            <div class="media-2-cell">
+              <img :src="viewItem.imageUrls[0]" alt="成就图片" />
+            </div>
+            <div class="media-2-cell">
+              <img :src="viewItem.imageUrls[1]" alt="成就图片" />
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="achievement-view-media achievement-view-media-3"
+          >
+            <div class="media-3-grid">
+              <div class="media-3-cell media-3-top-left">
+                <img :src="viewItem.imageUrls[0]" alt="成就图片" />
+              </div>
+              <div class="media-3-cell media-3-top-right">
+                <img :src="viewItem.imageUrls[1]" alt="成就图片" />
+              </div>
+              <div class="media-3-cell media-3-bottom">
+                <img :src="viewItem.imageUrls[2]" alt="成就图片" />
+              </div>
+            </div>
+          </div>
+
           <div class="achievement-detail-body">
             <div v-if="viewItem.category === 'contest'">
               <div class="achievement-card-title-row">
@@ -841,7 +871,6 @@ const viewOpen = ref(false);
 const viewLoading = ref(false);
 const viewItem = ref(null);
 const viewClosing = ref(false);
-const viewImageIndex = ref(0);
 const editId = ref(null);
 const deleteDialogOpen = ref(false);
 const deleteBusy = ref(false);
@@ -1808,7 +1837,6 @@ function normalizeAchievement(item) {
 
 function openDetail(item) {
   viewItem.value = item;
-  viewImageIndex.value = 0;
   viewOpen.value = true;
   viewClosing.value = false;
 }
@@ -1859,9 +1887,6 @@ function closeDelete() {
   deleteDialogOpen.value = false;
 }
 
-function selectViewImage(index) {
-  viewImageIndex.value = index;
-}
 
 function selectEditorImage(index) {
   if (index < 0 || index >= form.imageUrls.length) {
@@ -1992,12 +2017,6 @@ const attachmentPreviews = computed(() =>
     url: resolveMediaUrl(file.url),
   })),
 );
-const viewActiveImage = computed(() => {
-  if (!viewItem.value?.imageUrls?.length) {
-    return "";
-  }
-  return viewItem.value.imageUrls[viewImageIndex.value] || "";
-});
 
 function setUploadLimits({ mediaMaxMB, attachmentMaxMB }) {
   // Hook: adjust upload size display limits from outside if needed.
