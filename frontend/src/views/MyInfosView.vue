@@ -1131,28 +1131,7 @@
           </div>
         </div>
       </section>
-      <div class="mobile-capsule">
-        <div class="capsule-left">
-          <div
-            class="capsule-action"
-            role="button"
-            tabindex="0"
-            @click="openSidebar"
-          >
-            <span class="capsule-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div class="capsule-right"></div>
-      </div>
+      <MobileCapsule @open-sidebar="openSidebar" />
     </main>
   </div>
 </template>
@@ -1161,6 +1140,7 @@
 import { reactive, computed, ref, onMounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import ExportPdfButton from "../components/ExportPdfButton.vue";
+import MobileCapsule from "../components/MobileCapsule.vue";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { regionData, codeToText } from "element-china-area-data";
 import { getStudentProfile, saveStudentProfile } from "../api/profile";

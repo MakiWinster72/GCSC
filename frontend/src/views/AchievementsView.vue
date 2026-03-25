@@ -302,27 +302,8 @@
       >
         <span aria-hidden="true">+</span>
       </button>
-      <div class="mobile-capsule">
-        <div class="capsule-left">
-          <div
-            class="capsule-action"
-            role="button"
-            tabindex="0"
-            @click="openSidebar"
-          >
-            <span class="capsule-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div class="capsule-right">
+      <MobileCapsule @open-sidebar="openSidebar">
+        <template #right>
           <div
             class="capsule-action capsule-primary"
             role="button"
@@ -332,8 +313,8 @@
           >
             +
           </div>
-        </div>
-      </div>
+        </template>
+      </MobileCapsule>
 
       <transition name="publisher-backdrop">
         <div
@@ -1113,6 +1094,7 @@ import { renderDocx } from "../utils/docxRenderer";
 import { renderSheet } from "../utils/sheetRenderer";
 import { renderPdf } from "../utils/pdfRenderer";
 import { API_BASE } from "../api/request";
+import MobileCapsule from "../components/MobileCapsule.vue";
 
 const router = useRouter();
 const route = useRoute();

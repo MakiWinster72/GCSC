@@ -1060,28 +1060,7 @@
         </div>
       </section>
 
-      <div class="mobile-capsule">
-        <div class="capsule-left">
-          <div
-            class="capsule-action"
-            role="button"
-            tabindex="0"
-            @click="openSidebar"
-          >
-            <span class="capsule-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div class="capsule-right"></div>
-      </div>
+      <MobileCapsule @open-sidebar="openSidebar" />
     </main>
   </div>
 </template>
@@ -1101,6 +1080,7 @@ import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfileById, searchStudentProfiles } from "../api/profile";
 import { listAchievements } from "../api/achievement";
 import ExportPdfButton from "../components/ExportPdfButton.vue";
+import MobileCapsule from "../components/MobileCapsule.vue";
 
 const router = useRouter();
 const API_BASE = "http://localhost:8080";
