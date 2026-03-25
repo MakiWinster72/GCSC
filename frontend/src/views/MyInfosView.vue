@@ -35,9 +35,7 @@
         </div>
         <div class="profile-row">学号：{{ profile.studentNo || "未填写" }}</div>
         <div class="profile-row">班级：{{ profile.className || "未填写" }}</div>
-        <div class="profile-row">
-          学生类别：{{ info.studentCategory || "未填写" }}
-        </div>
+        <div class="profile-row">学院：{{ profile.college || "未填写" }}</div>
       </section>
 
       <section class="menu-card">
@@ -60,18 +58,25 @@
               <span>{{ item.label }}</span>
               <span class="menu-drawer-caret" aria-hidden="true"></span>
             </button>
-            <div v-show="achievementsOpen" class="menu-drawer-panel">
-              <button
-                v-for="entry in achievementEntries"
-                :key="entry.key"
-                class="menu-drawer-item"
-                :class="{ active: activeAchievement === entry.key }"
-                type="button"
-                @click="handleAchievementEntry(entry.key)"
-              >
-                {{ entry.label }}
-              </button>
-            </div>
+            <transition name="menu-drawer-panel">
+              <div v-show="achievementsOpen" class="menu-drawer-panel">
+                <div
+                  class="menu-drawer-indicator"
+                  :style="drawerIndicatorStyle"
+                  aria-hidden="true"
+                ></div>
+                <button
+                  v-for="entry in achievementEntries"
+                  :key="entry.key"
+                  class="menu-drawer-item"
+                  :class="{ active: activeAchievement === entry.key }"
+                  type="button"
+                  @click="handleAchievementEntry(entry.key)"
+                >
+                  {{ entry.label }}
+                </button>
+              </div>
+            </transition>
           </div>
           <button
             v-else

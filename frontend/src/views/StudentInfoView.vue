@@ -1,6 +1,13 @@
 <template>
   <div class="dashboard-layout">
-    <aside class="dashboard-left">
+    <transition name="publisher-backdrop">
+      <div
+        v-if="sidebarOpen"
+        class="mobile-sidebar-backdrop"
+        @click="closeSidebar"
+      ></div>
+    </transition>
+    <aside class="dashboard-left" :class="{ open: sidebarOpen }">
       <section class="profile-card">
         <div class="profile-row profile-main">
           <div class="profile-avatar">
@@ -32,20 +39,59 @@
       </section>
 
       <section class="menu-card">
-        <button
-          v-for="item in menuItems"
-          :key="item.key"
-          class="menu-item"
-          :class="{
-            active: activeMenu === item.key,
-            disabled: !isMenuEnabled(item.key),
-          }"
-          type="button"
-          :disabled="!isMenuEnabled(item.key)"
-          @click="handleMenuClick(item.key)"
-        >
-          {{ item.label }}
-        </button>
+        <template v-for="item in menuItems" :key="item.key">
+          <div
+            v-if="item.key === 'achievements'"
+            class="menu-drawer"
+            :class="{ open: achievementsOpen }"
+          >
+            <button
+              class="menu-item menu-drawer-trigger"
+              :class="{
+                active: activeMenu === item.key,
+                disabled: !isMenuEnabled(item.key),
+              }"
+              type="button"
+              :disabled="!isMenuEnabled(item.key)"
+              @click="toggleAchievements"
+            >
+              <span>{{ item.label }}</span>
+              <span class="menu-drawer-caret" aria-hidden="true"></span>
+            </button>
+            <transition name="menu-drawer-panel">
+              <div v-show="achievementsOpen" class="menu-drawer-panel">
+                <div
+                  class="menu-drawer-indicator"
+                  :style="drawerIndicatorStyle"
+                  aria-hidden="true"
+                ></div>
+                <button
+                  v-for="entry in achievementEntries"
+                  :key="entry.key"
+                  class="menu-drawer-item"
+                  :class="{ active: activeCategory === entry.key }"
+                  type="button"
+                  @click="handleAchievementEntry(entry.key)"
+                >
+                  {{ entry.label }}
+                </button>
+              </div>
+            </transition>
+          </div>
+          <button
+            v-else
+            class="menu-item"
+            :class="{
+              active: activeMenu === item.key,
+              disabled: !isMenuEnabled(item.key),
+            }"
+            type="button"
+            :disabled="!isMenuEnabled(item.key)"
+            @click="handleMenuClick(item.key)"
+          >
+            {{ item.label }}
+          </button>
+        </template>
       </section>
     </aside>
 
@@ -1013,6 +1059,29 @@
           </div>
         </div>
       </section>
+
+      <div class="mobile-capsule">
+        <div class="capsule-left">
+          <div
+            class="capsule-action"
+            role="button"
+            tabindex="0"
+            @click="openSidebar"
+          >
+            <span class="capsule-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </span>
+          </div>
+        </div>
+        <div class="capsule-right"></div>
+      </div>
     </main>
   </div>
 </template>
@@ -1079,6 +1148,8 @@ let pdfFontBase64 = null;
 let pdfFontBlackBase64 = null;
 const achievementsOpen = ref(false);
 const achievementsClosing = ref(false);
+const sidebarOpen = ref(false);
+const activeCategory = ref("all");
 
 const classYearOptions = Array.from({ length: 11 }, (_, index) => 2020 + index);
 const majorOptions = [
@@ -2025,6 +2096,11 @@ const ACHIEVEMENT_CATEGORIES = [
   { key: "works", label: "创作、表演的代表性作品", selectKey: "ach_works" },
 ];
 
+const achievementEntries = computed(() => [
+  { key: "all", label: "全部" },
+  ...ACHIEVEMENT_CATEGORIES,
+]);
+
 const ACHIEVEMENT_FIELDS = {
   certificate: [
     { key: "studentName", label: "学生姓名" },
@@ -2887,6 +2963,17 @@ const avatarText = computed(() => {
   return name.slice(0, 1).toUpperCase();
 });
 
+const activeCategoryIndex = computed(() => {
+  const index = achievementEntries.value.findIndex(
+    (entry) => entry.key === activeCategory.value,
+  );
+  return index === -1 ? 0 : index;
+});
+
+const drawerIndicatorStyle = computed(() => ({
+  transform: `translateY(calc(${activeCategoryIndex.value} * (var(--drawer-item-height) + var(--drawer-item-gap))))`,
+}));
+
 function handleMenuClick(key) {
   if (!isMenuEnabled(key)) {
     return;
@@ -2904,6 +2991,39 @@ function handleMenuClick(key) {
     return;
   }
   router.push("/myinfos");
+}
+
+function toggleAchievements() {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  achievementsOpen.value = !achievementsOpen.value;
+  activeMenu.value = "achievements";
+  if (achievementsOpen.value) {
+    handleAchievementEntry("all");
+  }
+}
+
+function handleAchievementEntry(key) {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  const safeKey = achievementEntries.value.some((entry) => entry.key === key)
+    ? key
+    : "all";
+  activeCategory.value = safeKey;
+  achievementsOpen.value = true;
+  activeMenu.value = "achievements";
+  sidebarOpen.value = false;
+  router.push({ path: "/achievements", query: { category: safeKey } });
+}
+
+function openSidebar() {
+  sidebarOpen.value = true;
+}
+
+function closeSidebar() {
+  sidebarOpen.value = false;
 }
 
 function resolveMediaUrl(url) {
