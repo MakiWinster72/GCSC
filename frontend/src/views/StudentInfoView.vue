@@ -1108,8 +1108,8 @@ const students = ref([]);
 const totalPages = ref(1);
 const totalItems = ref(0);
 const loading = ref(false);
-const pageSizeOptions = [10, 20, 30, 50];
-const pageSize = ref(20);
+const pageSizeOptions = [5, 10, 20, 30, 50];
+const pageSize = ref(5);
 const viewOpen = ref(false);
 const viewClosing = ref(false);
 const viewItem = ref(null);
@@ -1762,7 +1762,7 @@ function decrementClass() {
     return;
   }
   if (current <= 1) {
-    filters.classNo = "";
+    filters.classNo = "10";
     return;
   }
   filters.classNo = String(current - 1);
@@ -1775,7 +1775,7 @@ function incrementClass() {
     return;
   }
   if (current >= 10) {
-    filters.classNo = "";
+    filters.classNo = "1";
     return;
   }
   filters.classNo = String(current + 1);
@@ -3349,6 +3349,13 @@ function loadUser() {
 
 .stepper-input {
   text-align: center;
+  -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .student-filter-inline {
