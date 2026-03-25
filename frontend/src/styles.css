@@ -4299,3 +4299,70 @@ body {
   opacity: 0;
   transform: translateX(60px) scale(0.96);
 }
+
+/* ── 移动端：AgGrid 分页面板 ── */
+@media (max-width: 640px) {
+  .student-grid-wrap .ag-paging-panel {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    height: auto !important;
+    min-height: 44px;
+    justify-content: flex-start;
+  }
+
+  .student-grid-wrap .ag-paging-page-size {
+    order: 1;
+    flex-shrink: 0;
+  }
+
+  .student-grid-wrap .ag-paging-row-summary-panel {
+    order: 2;
+    flex-shrink: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .student-grid-wrap .ag-paging-page-summary-panel {
+    order: 3;
+    flex-shrink: 0;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .student-grid-wrap .ag-paging-description {
+    font-size: 11px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .student-grid-wrap .ag-paging-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .student-grid-wrap .ag-paging-number {
+    font-size: 11px !important;
+    min-width: 16px;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .student-grid-wrap .ag-picker-field {
+    font-size: 11px;
+  }
+
+  .student-grid-wrap .ag-paging-row-summary-panel-number {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+}

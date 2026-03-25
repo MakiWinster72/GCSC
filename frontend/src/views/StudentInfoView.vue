@@ -4025,6 +4025,104 @@ function loadUser() {
     gap: 12px;
   }
 
+  /* ── 表格视图（切换表格后）────────────── */
+  .student-filter-card {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .student-filter-header {
+    gap: 8px;
+  }
+
+  .student-grid-toggle {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .student-grid-tabs {
+    gap: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .student-grid-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .student-grid-tab {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .student-grid-tab.student-grid-tab-add {
+    padding: 5px 10px;
+  }
+
+  .student-results-card {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .student-results-header {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .student-results-header .info-section-title {
+    flex-shrink: 0;
+  }
+
+  .student-results-actions {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .student-results-actions .ghost-button {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 50px;
+  }
+
+  .student-grid-wrap {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .student-grid {
+    height: 380px;
+    border-radius: 0;
+  }
+
+  .student-grid-fullscreen {
+    right: 12px;
+    bottom: 12px;
+    left: auto;
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
+  .student-grid-wrap.fullscreen {
+    padding: 12px;
+    z-index: 200;
+  }
+
+  .student-grid-wrap.fullscreen .student-grid {
+    height: calc(100vh - 80px);
+    border-radius: 12px;
+  }
+
   .student-detail-view {
     bottom: 0;
     left: 0;
