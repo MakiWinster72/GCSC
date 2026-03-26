@@ -734,7 +734,7 @@
           </button>
         </header>
         <div class="achievement-grid">
-          <div class="achievement-media-panel">
+          <div v-if="form.category" class="achievement-media-panel">
             <div class="media-header">
               <div>
                 <div class="media-title">图片(可选)</div>
@@ -860,7 +860,7 @@
                 ></textarea>
               </div>
             </div>
-            <div class="achievement-attachments-panel">
+            <div v-if="form.category" class="achievement-attachments-panel">
               <div class="media-header">
                 <div>
                   <div class="media-title">附件(可选)</div>
