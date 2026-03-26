@@ -2615,8 +2615,47 @@ body {
 }
 
 .education-table.education-table-cadres {
-  --edu-cols: minmax(240px, 1.6fr) minmax(160px, 1.4fr) minmax(120px, 1fr)
-    minmax(160px, 1.2fr);
+  --edu-cols: minmax(320px, 2.2fr) minmax(140px, 1fr) minmax(80px, 0.6fr);
+}
+
+.education-table-cadres tbody tr {
+  grid-template-columns: var(--edu-cols);
+  grid-template-rows: auto auto auto;
+  align-items: start;
+}
+
+.education-table-cadres .cell-row1 {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 10px 12px;
+}
+
+.education-table-cadres .cell-row2 {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 10px 12px;
+}
+
+.education-table-cadres .cell-row3 {
+  grid-column: 3;
+  grid-row: 1;
+  padding: 10px 12px;
+}
+
+.education-table-cadres .cell-desc {
+  grid-column: 1 / 4;
+  grid-row: 2 / 4;
+  padding: 10px 12px;
+}
+
+.education-table-cadres .cell-desc .info-input {
+  min-height: 100%;
+  height: auto;
+}
+
+.education-table-cadres .cell-desc textarea.info-input {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .education-table thead {
@@ -2632,7 +2671,8 @@ body {
 .education-table tbody tr {
   display: grid;
   grid-template-columns: var(--edu-cols);
-  align-items: center;
+  align-items: start;
+  grid-auto-rows: minmax(50px, auto);
 }
 
 .education-table thead th {
@@ -2700,10 +2740,29 @@ body {
 .education-period {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0;
+}
+
+.education-period-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.education-period .info-choice {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.education-period-row .info-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
 }
 
 .education-sep {
+  flex: 0 0 auto;
+  padding: 0 6px;
   color: #6a7d85;
   font-size: 12px;
   white-space: nowrap;
@@ -3372,6 +3431,49 @@ body {
   transform: translate(-50%, -50%) scale(1);
 }
 
+.hint-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(3, 107, 114, 0.45);
+  background: rgba(3, 107, 114, 0.08);
+  color: #3a7a82;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  vertical-align: middle;
+  transition: background 0.2s, border-color 0.2s;
+  line-height: 1;
+}
+
+.hint-button:hover {
+  background: rgba(3, 107, 114, 0.18);
+  border-color: rgba(3, 107, 114, 0.6);
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #2a4b52;
+}
+
+.hint-label {
+  font-weight: 600;
+  color: #123f45;
+}
+
+.hint-sep {
+  color: #8ba5ab;
+  margin: 0 8px;
+}
+
 .media-dialog-header {
   display: flex;
   align-items: center;
@@ -3836,6 +3938,91 @@ body {
 
   .education-controls-wrap {
     min-width: 100%;
+  }
+
+  /* cadres table mobile — revert row-span layout to card stack */
+  .education-table-cadres tbody tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    border: 1px solid rgba(3, 107, 114, 0.12);
+    overflow: hidden;
+  }
+
+  .education-table-cadres tbody tr > td.cell-row1,
+  .education-table-cadres tbody tr > td.cell-row2,
+  .education-table-cadres tbody tr > td.cell-row3,
+  .education-table-cadres tbody tr > td.cell-desc {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(3, 107, 114, 0.08);
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .education-table-cadres tbody tr > td.cell-row1::before,
+  .education-table-cadres tbody tr > td.cell-row2::before,
+  .education-table-cadres tbody tr > td.cell-row3::before,
+  .education-table-cadres tbody tr > td.cell-desc::before {
+    content: attr(data-label);
+    font-size: 13px;
+    color: #5b717a;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .education-table-cadres tbody tr > td.cell-row1 {
+    border-top: none;
+  }
+
+  .education-table-cadres tbody tr > td.cell-desc {
+    border-bottom: none;
+  }
+
+  .education-table-cadres tbody tr > td.cell-desc .info-input {
+    height: auto;
+    width: 100%;
+  }
+
+  .education-table-cadres tbody tr > td.cell-desc textarea.info-input {
+    min-height: 80px;
+    flex: none;
+  }
+
+  .education-table-cadres .education-period {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .education-table-cadres .education-period-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .education-table-cadres .education-period .info-input {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .education-table-cadres .education-period .education-sep {
+    flex: 0 0 auto;
+    padding: 0 6px;
+    font-size: 12px;
+    color: #6a7d85;
+    white-space: nowrap;
+  }
+
+  .education-table-cadres .education-period .info-choice {
+    flex: 0 0 auto;
+    align-self: flex-start;
   }
 
   .info-inline-date {

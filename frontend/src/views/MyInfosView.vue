@@ -907,15 +907,11 @@
                   <th>时间段</th>
                   <th>部门/班级</th>
                   <th>职位</th>
-                  <th>描述</th>
                 </tr>
               </thead>
               <transition-group name="education-row" tag="tbody">
-                <tr
-                  v-for="(item, index) in cadreItems"
-                  :key="`cadre-${index}`"
-                >
-                  <td data-label="时间段">
+                <tr v-for="(item, index) in cadreItems" :key="`cadre-${index}`">
+                  <td class="cell-row1" data-label="时间段">
                     <div class="education-period">
                       <div class="education-period-row">
                         <input
@@ -937,22 +933,22 @@
                             isCadreRowDisabled(index) || item.isCurrent
                           "
                         />
+                        <label class="info-choice info-choice-muted">
+                          <input
+                            v-model="item.isCurrent"
+                            type="checkbox"
+                            :disabled="
+                              isCadreRowDisabled(index) ||
+                              isCadreCurrentDisabled(item)
+                            "
+                            @change="handleCadreCurrentChange(item, index)"
+                          />
+                          至今
+                        </label>
                       </div>
-                      <label class="info-choice info-choice-muted">
-                        <input
-                          v-model="item.isCurrent"
-                          type="checkbox"
-                          :disabled="
-                            isCadreRowDisabled(index) ||
-                            isCadreCurrentDisabled(item)
-                          "
-                          @change="handleCadreCurrentChange(item, index)"
-                        />
-                        至今
-                      </label>
                     </div>
                   </td>
-                  <td data-label="部门/班级">
+                  <td class="cell-row2" data-label="部门/班级">
                     <input
                       v-model="item.department"
                       class="info-input"
@@ -961,7 +957,7 @@
                       :disabled="isCadreRowDisabled(index)"
                     />
                   </td>
-                  <td data-label="职位">
+                  <td class="cell-row3" data-label="职位">
                     <input
                       v-model="item.position"
                       class="info-input"
@@ -970,7 +966,7 @@
                       :disabled="isCadreRowDisabled(index)"
                     />
                   </td>
-                  <td data-label="描述">
+                  <td class="cell-desc" data-label="描述">
                     <textarea
                       v-model="item.description"
                       class="info-input"
@@ -1009,7 +1005,55 @@
 
         <div class="info-card">
           <!-- TODO: 单亲/离异等待现场演示求助 -->
-          <div class="info-section-title">家庭信息</div>
+          <div class="info-section-title">
+            家庭信息
+            <button
+              class="hint-button"
+              type="button"
+              aria-label="填写说明"
+              @click="workUnitHintOpen = true"
+            >
+              ?
+            </button>
+          </div>
+          <transition name="dialog-fade">
+            <div
+              v-if="workUnitHintOpen"
+              class="dialog-backdrop"
+              @click="workUnitHintOpen = false"
+            ></div>
+          </transition>
+          <transition name="dialog-pop">
+            <section v-if="workUnitHintOpen" class="dialog-card" @click.stop>
+              <header class="dialog-header">填写说明</header>
+              <div class="dialog-body">
+                <div class="hint-item">
+                  <span class="hint-label">工作单位：</span>无
+                  <span class="hint-sep">|</span>
+                  <span class="hint-label">职务：</span>待业
+                </div>
+                <div class="hint-item">
+                  <span class="hint-label">工作单位：</span>无固定单位
+                  <span class="hint-sep">|</span>
+                  <span class="hint-label">职务：</span>散工
+                </div>
+                <div class="hint-item">
+                  <span class="hint-label">工作单位：</span>个体户
+                  <span class="hint-sep">|</span>
+                  <span class="hint-label">职务：</span>店主
+                </div>
+              </div>
+              <div class="dialog-actions">
+                <button
+                  class="ghost-button"
+                  type="button"
+                  @click="workUnitHintOpen = false"
+                >
+                  知道了
+                </button>
+              </div>
+            </section>
+          </transition>
           <div class="info-form-grid family-grid">
             <div class="family-section-title">父亲（监护人）</div>
             <label class="field-card">
@@ -1044,9 +1088,6 @@
                 placeholder="请输入父亲工作单位"
                 :disabled="!isEditing"
               />
-              <div class="info-hint">
-                填写公司名字即可，若开小店则填写个体户，若无固定单位则填写散工，无业则写在家
-              </div>
             </label>
             <label class="field-card">
               <span class="info-label">职务</span>
@@ -1057,7 +1098,6 @@
                 placeholder="请输入父亲职务"
                 :disabled="!isEditing"
               />
-              <div class="info-hint">无业则填写“务农”</div>
             </label>
             <div class="family-section-title">母亲（监护人2）</div>
             <label class="field-card">
@@ -1163,6 +1203,7 @@ const sidebarOpen = ref(false);
 const achievementsOpen = ref(false);
 const educationTableWrap = ref(null);
 const cadreTableWrap = ref(null);
+const workUnitHintOpen = ref(false);
 const today = getTodayString();
 
 const info = reactive({
@@ -1815,11 +1856,11 @@ function handleIdNoInput(event) {
     return;
   }
   // 护照类: alphanumeric
-  if (
-    info.idType === "普通护照" ||
-    info.idType === "外国护照"
-  ) {
-    info.idNo = raw.replace(/[^0-9A-Za-z]/g, "").toUpperCase().slice(0, maxLen);
+  if (info.idType === "普通护照" || info.idType === "外国护照") {
+    info.idNo = raw
+      .replace(/[^0-9A-Za-z]/g, "")
+      .toUpperCase()
+      .slice(0, maxLen);
     return;
   }
   // 居住证类: digits only
