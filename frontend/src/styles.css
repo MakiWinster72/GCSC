@@ -2740,7 +2740,8 @@ body {
 .education-period {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .education-period-row {
