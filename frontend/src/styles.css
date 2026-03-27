@@ -135,16 +135,17 @@ body {
   height: 46px;
   padding: 0 14px;
   outline: none;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
   transition:
     border-color 220ms ease,
-    transform 220ms ease,
     background-color 220ms ease;
 }
 
 .form-input:focus {
   border-color: rgba(3, 107, 114, 0.9);
   background: rgba(205, 255, 249, 0.95);
-  transform: translateY(-1px);
 }
 
 .form-input::placeholder {
