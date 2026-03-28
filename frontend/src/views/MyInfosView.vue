@@ -905,7 +905,7 @@
               <thead>
                 <tr>
                   <th>时间段</th>
-                  <th>部门/班级</th>
+                  <th>社团部门/班级</th>
                   <th>职位</th>
                 </tr>
               </thead>
@@ -1030,7 +1030,7 @@
                 <div class="hint-item">
                   <span class="hint-label">工作单位：</span>无
                   <span class="hint-sep">|</span>
-                  <span class="hint-label">职务：</span>待业
+                  <span class="hint-label">职务：</span>待业/务农
                 </div>
                 <div class="hint-item">
                   <span class="hint-label">工作单位：</span>无固定单位
