@@ -424,6 +424,14 @@
             </div>
             <div class="info-actions info-actions-double">
               <button
+                v-if="profile.role === 'ADMIN'"
+                class="ghost-button"
+                type="button"
+                @click="editStudentInfo"
+              >
+                编辑信息
+              </button>
+              <button
                 class="action-button"
                 type="button"
                 @click="openAchievements"
@@ -1595,6 +1603,11 @@ function closeView() {
     viewLoading.value = false;
     viewClosing.value = false;
   }, 260);
+}
+
+function editStudentInfo() {
+  // TODO: 实现编辑学生信息功能
+  console.log("editStudentInfo", viewItem.value?.username);
 }
 
 function openAchievements() {
@@ -3715,7 +3728,7 @@ function loadUser() {
 }
 
 .info-actions-double {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .student-achievements-view {
