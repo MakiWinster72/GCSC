@@ -13,8 +13,10 @@ import com.gcsc.studentcenter.dto.StudentProfileRequest;
 import com.gcsc.studentcenter.dto.StudentProfileResponse;
 import com.gcsc.studentcenter.dto.StudentSearchItemResponse;
 import com.gcsc.studentcenter.dto.StudentSearchResponse;
+import com.gcsc.studentcenter.dto.CadreExperienceItem;
 import com.gcsc.studentcenter.dto.EducationExperienceItem;
 import com.gcsc.studentcenter.entity.AppUser;
+import com.gcsc.studentcenter.entity.CadreExperience;
 import com.gcsc.studentcenter.entity.EducationExperience;
 import com.gcsc.studentcenter.entity.StudentProfile;
 import com.gcsc.studentcenter.repository.AppUserRepository;
@@ -82,8 +84,11 @@ public class StudentProfileService {
         profile.setClassTeacher(normalize(request.getClassTeacher()));
         profile.setCounselor(normalize(request.getCounselor()));
         profile.setPhone(normalize(request.getPhone()));
+        profile.setBackupContact(normalize(request.getBackupContact()));
         profile.setAddress(normalize(request.getAddress()));
+        profile.setIdType(normalize(request.getIdType()));
         profile.setIdNo(normalize(request.getIdNo()));
+        profile.setBirthDate(request.getBirthDate());
         profile.setNativePlace(normalize(request.getNativePlace()));
         profile.setLeagueNo(normalize(request.getLeagueNo()));
         profile.setLeagueApplicationDate(request.getLeagueApplicationDate());
@@ -116,6 +121,7 @@ public class StudentProfileService {
         profile.setMotherWorkUnit(normalize(request.getMotherWorkUnit()));
         profile.setMotherTitle(normalize(request.getMotherTitle()));
         syncEducationExperiences(profile, request.getEducationExperiences());
+        syncCadreExperiences(profile, request.getCadreExperiences());
 
         user.setAvatarUrl(normalize(request.getAvatarUrl()));
         syncUserSummary(user, profile);
@@ -186,8 +192,11 @@ public class StudentProfileService {
             profile != null ? profile.getEthnicity() : null,
             profile != null ? profile.getPoliticalStatus() : null,
             profile != null ? profile.getPhone() : null,
+            profile != null ? profile.getBackupContact() : null,
             profile != null ? profile.getAddress() : null,
+            profile != null ? profile.getIdType() : null,
             profile != null ? profile.getIdNo() : null,
+            profile != null ? profile.getBirthDate() : null,
             profile != null ? profile.getNativePlace() : null,
             profile != null ? profile.getDormCampus() : null,
             profile != null ? profile.getDormBuilding() : null,
@@ -226,7 +235,8 @@ public class StudentProfileService {
             profile != null ? profile.getMotherPhone() : null,
             profile != null ? profile.getMotherWorkUnit() : null,
             profile != null ? profile.getMotherTitle() : null,
-            toEducationItems(profile != null ? profile.getEducationExperiences() : null)
+            toEducationItems(profile != null ? profile.getEducationExperiences() : null),
+            toCadreItems(profile != null ? profile.getCadreExperiences() : null)
         );
     }
 
@@ -264,6 +274,46 @@ public class StudentProfileService {
             item.setSchoolName(experience.getSchoolName());
             item.setEducationLevel(experience.getEducationLevel());
             item.setWitness(experience.getWitness());
+            item.setIsCurrent(experience.getIsCurrent());
+            items.add(item);
+        }
+        return items;
+    }
+
+    private void syncCadreExperiences(
+        StudentProfile profile,
+        List<CadreExperienceItem> cadreExperiences
+    ) {
+        List<CadreExperience> target = profile.getCadreExperiences();
+        target.clear();
+        if (cadreExperiences == null) {
+            return;
+        }
+        for (CadreExperienceItem item : cadreExperiences) {
+            CadreExperience experience = new CadreExperience();
+            experience.setProfile(profile);
+            experience.setStartDate(item.getStartDate());
+            experience.setEndDate(Boolean.TRUE.equals(item.getIsCurrent()) ? null : item.getEndDate());
+            experience.setDepartment(normalize(item.getDepartment()));
+            experience.setPosition(normalize(item.getPosition()));
+            experience.setDescription(normalize(item.getDescription()));
+            experience.setIsCurrent(item.getIsCurrent());
+            target.add(experience);
+        }
+    }
+
+    private List<CadreExperienceItem> toCadreItems(List<CadreExperience> experiences) {
+        if (experiences == null) {
+            return null;
+        }
+        List<CadreExperienceItem> items = new ArrayList<>();
+        for (CadreExperience experience : experiences) {
+            CadreExperienceItem item = new CadreExperienceItem();
+            item.setStartDate(experience.getStartDate());
+            item.setEndDate(experience.getEndDate());
+            item.setDepartment(experience.getDepartment());
+            item.setPosition(experience.getPosition());
+            item.setDescription(experience.getDescription());
             item.setIsCurrent(experience.getIsCurrent());
             items.add(item);
         }

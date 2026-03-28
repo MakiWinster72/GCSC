@@ -1,6 +1,13 @@
 <template>
   <div class="dashboard-layout">
-    <aside class="dashboard-left">
+    <transition name="publisher-backdrop">
+      <div
+        v-if="sidebarOpen"
+        class="mobile-sidebar-backdrop"
+        @click="closeSidebar"
+      ></div>
+    </transition>
+    <aside class="dashboard-left" :class="{ open: sidebarOpen }">
       <section class="profile-card">
         <div class="profile-row profile-main">
           <div class="profile-avatar">
@@ -32,20 +39,59 @@
       </section>
 
       <section class="menu-card">
-        <button
-          v-for="item in menuItems"
-          :key="item.key"
-          class="menu-item"
-          :class="{
-            active: activeMenu === item.key,
-            disabled: !isMenuEnabled(item.key),
-          }"
-          type="button"
-          :disabled="!isMenuEnabled(item.key)"
-          @click="handleMenuClick(item.key)"
-        >
-          {{ item.label }}
-        </button>
+        <template v-for="item in menuItems" :key="item.key">
+          <div
+            v-if="item.key === 'achievements'"
+            class="menu-drawer"
+            :class="{ open: achievementsOpen }"
+          >
+            <button
+              class="menu-item menu-drawer-trigger"
+              :class="{
+                active: activeMenu === item.key,
+                disabled: !isMenuEnabled(item.key),
+              }"
+              type="button"
+              :disabled="!isMenuEnabled(item.key)"
+              @click="toggleAchievements"
+            >
+              <span>{{ item.label }}</span>
+              <span class="menu-drawer-caret" aria-hidden="true"></span>
+            </button>
+            <transition name="menu-drawer-panel">
+              <div v-show="achievementsOpen" class="menu-drawer-panel">
+                <div
+                  class="menu-drawer-indicator"
+                  :style="drawerIndicatorStyle"
+                  aria-hidden="true"
+                ></div>
+                <button
+                  v-for="entry in achievementEntries"
+                  :key="entry.key"
+                  class="menu-drawer-item"
+                  :class="{ active: activeCategory === entry.key }"
+                  type="button"
+                  @click="handleAchievementEntry(entry.key)"
+                >
+                  {{ entry.label }}
+                </button>
+              </div>
+            </transition>
+          </div>
+          <button
+            v-else
+            class="menu-item"
+            :class="{
+              active: activeMenu === item.key,
+              disabled: !isMenuEnabled(item.key),
+            }"
+            type="button"
+            :disabled="!isMenuEnabled(item.key)"
+            @click="handleMenuClick(item.key)"
+          >
+            {{ item.label }}
+          </button>
+        </template>
       </section>
     </aside>
 
@@ -130,8 +176,6 @@
                     v-model="filters.classNo"
                     class="info-input stepper-input"
                     type="number"
-                    min="1"
-                    max="10"
                     step="1"
                     placeholder="全部"
                     @input="normalizeClassNo"
@@ -178,14 +222,16 @@
             >
               {{ sheet.label }}
             </button>
-            <span v-if="gridLoading" class="student-grid-status">加载中...</span>
+            <span v-if="gridLoading" class="student-grid-status"
+              >加载中...</span
+            >
             <span v-else class="student-grid-status"
               >共 {{ gridActiveSheetData.rowData.length }} 条</span
             >
           </div>
         </section>
 
-      <section class="info-card student-results-card">
+        <section class="info-card student-results-card">
           <div v-if="!gridViewOpen" class="student-results-header">
             <div class="info-section-title">筛选结果</div>
             <div class="student-results-actions">
@@ -224,13 +270,6 @@
               :pagination-page-size="100"
               :suppress-cell-focus="true"
             />
-            <button
-              class="student-grid-fullscreen"
-              type="button"
-              @click="toggleGridFullscreen"
-            >
-              {{ gridFullscreen ? "退出全屏" : "全屏" }}
-            </button>
           </div>
           <div v-else-if="pagedStudents.length" class="student-list">
             <div
@@ -329,7 +368,11 @@
               <span>全选</span>
             </label>
           </div>
-          <button class="ghost-button" type="button" @click="closeGridFieldDialog">
+          <button
+            class="ghost-button"
+            type="button"
+            @click="closeGridFieldDialog"
+          >
             关闭
           </button>
         </header>
@@ -359,7 +402,10 @@
                     :key="field.key"
                     class="export-option"
                   >
-                    <input v-model="exportSelections[field.key]" type="checkbox" />
+                    <input
+                      v-model="exportSelections[field.key]"
+                      type="checkbox"
+                    />
                     <span>{{ field.label }}</span>
                   </label>
                 </div>
@@ -370,7 +416,10 @@
                   :key="field.key"
                   class="export-option"
                 >
-                  <input v-model="exportSelections[field.key]" type="checkbox" />
+                  <input
+                    v-model="exportSelections[field.key]"
+                    type="checkbox"
+                  />
                   <span>{{ field.label }}</span>
                 </label>
               </template>
@@ -525,6 +574,12 @@
                 <span class="info-label">手机号码</span>
                 <div class="info-input info-static">
                   {{ viewItem.phone || "-" }}
+                </div>
+              </div>
+              <div class="field-card">
+                <span class="info-label">备用联系方式（微信/QQ/邮箱）</span>
+                <div class="info-input info-static">
+                  {{ viewItem.backupContact || "-" }}
                 </div>
               </div>
               <div class="field-card">
@@ -1003,6 +1058,27 @@
           </div>
         </div>
       </section>
+
+      <MobileCapsule @open-sidebar="openSidebar">
+        <template #right>
+          <button
+            class="capsule-action"
+            type="button"
+            @click="toggleGridView"
+          >
+            {{ gridViewOpen ? "列表" : "表格" }}
+          </button>
+          <button
+            v-if="gridViewOpen"
+            class="capsule-action"
+            :class="{ 'capsule-active': gridFullscreen }"
+            type="button"
+            @click="toggleGridFullscreen"
+          >
+            {{ gridFullscreen ? "退出" : "全屏" }}
+          </button>
+        </template>
+      </MobileCapsule>
     </main>
   </div>
 </template>
@@ -1022,6 +1098,7 @@ import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
 import { getStudentProfileById, searchStudentProfiles } from "../api/profile";
 import { listAchievements } from "../api/achievement";
 import ExportPdfButton from "../components/ExportPdfButton.vue";
+import MobileCapsule from "../components/MobileCapsule.vue";
 
 const router = useRouter();
 const API_BASE = "http://localhost:8080";
@@ -1037,8 +1114,8 @@ const students = ref([]);
 const totalPages = ref(1);
 const totalItems = ref(0);
 const loading = ref(false);
-const pageSizeOptions = [10, 20, 30, 50];
-const pageSize = ref(20);
+const pageSizeOptions = [5, 10, 20, 30, 50];
+const pageSize = ref(5);
 const viewOpen = ref(false);
 const viewClosing = ref(false);
 const viewItem = ref(null);
@@ -1056,6 +1133,7 @@ const gridFieldDialogOpen = ref(false);
 const gridFieldDialogClosing = ref(false);
 const gridActiveSheet = ref("main");
 const gridFullscreen = ref(false);
+const gridWrapRef = ref(null);
 const gridHasFullDetail = ref(false);
 let gridRequestId = 0;
 const previewActiveSheet = ref("main");
@@ -1069,6 +1147,8 @@ let pdfFontBase64 = null;
 let pdfFontBlackBase64 = null;
 const achievementsOpen = ref(false);
 const achievementsClosing = ref(false);
+const sidebarOpen = ref(false);
+const activeCategory = ref("all");
 
 const classYearOptions = Array.from({ length: 11 }, (_, index) => 2020 + index);
 const majorOptions = [
@@ -1148,7 +1228,6 @@ const gridLocaleTextFunc = (key, defaultValue) => {
   return defaultValue;
 };
 
-
 const filters = reactive({
   classYear: "",
   major: "",
@@ -1185,6 +1264,7 @@ const exportGroups = [
       { key: "ethnicity", label: "民族" },
       { key: "politicalStatus", label: "政治面貌" },
       { key: "phone", label: "手机号码" },
+      { key: "backupContact", label: "备用联系方式（QQ/邮箱）" },
       { key: "idNo", label: "身份证号" },
       { key: "nativePlace", label: "籍贯" },
       { key: "address", label: "住址" },
@@ -1273,7 +1353,7 @@ function initExportSelections() {
   const selections = {};
   exportGroups.forEach((group) => {
     group.fields.forEach((field) => {
-      selections[field.key] = Boolean(field.defaultSelected);
+      selections[field.key] = true;
     });
   });
   return selections;
@@ -1802,6 +1882,7 @@ const MAIN_FIELD_ORDER = [
   "ethnicity",
   "politicalStatus",
   "phone",
+  "backupContact",
   "idNo",
   "nativePlace",
   "address",
@@ -1844,6 +1925,10 @@ const MAIN_FIELD_META = {
     getter: (item) => item.politicalStatus || "未填写",
   },
   phone: { label: "手机号码", getter: (item) => item.phone || "" },
+  backupContact: {
+    label: "备用联系方式（QQ/邮箱）",
+    getter: (item) => item.backupContact || "",
+  },
   idNo: { label: "身份证号", getter: (item) => item.idNo || "" },
   nativePlace: { label: "籍贯", getter: (item) => item.nativePlace || "" },
   address: { label: "住址", getter: (item) => item.address || "" },
@@ -2015,6 +2100,11 @@ const ACHIEVEMENT_CATEGORIES = [
   { key: "works", label: "创作、表演的代表性作品", selectKey: "ach_works" },
 ];
 
+const achievementEntries = computed(() => [
+  { key: "all", label: "全部" },
+  ...ACHIEVEMENT_CATEGORIES,
+]);
+
 const ACHIEVEMENT_FIELDS = {
   certificate: [
     { key: "studentName", label: "学生姓名" },
@@ -2116,7 +2206,7 @@ const gridSheets = computed(() => {
   if (shouldIncludeMainSheet(keys)) {
     const table = buildStudentTable(gridDetailRows.value, keys);
     if (table) {
-      sheets.push({ id: "main", label: "学生", table });
+      sheets.push({ id: "main", label: "全部", table });
     }
   }
   const educationTable = buildEducationTable(gridDetailRows.value, keys);
@@ -2204,7 +2294,7 @@ const previewSheets = computed(() => {
   if (shouldIncludeMainSheet(keys)) {
     const table = buildStudentTable(previewStudents.value, keys);
     if (table) {
-      sheets.push({ id: "main", label: "学生", table });
+      sheets.push({ id: "main", label: "全部", table });
     }
   }
   const educationTable = buildEducationTable(previewStudents.value, keys);
@@ -2515,7 +2605,7 @@ function buildExportTables(rows, selectedKeys, achievementData) {
   if (shouldIncludeMainSheet(selectedKeys)) {
     const table = buildStudentTable(rows, selectedKeys);
     if (table) {
-      tables.push({ title: "学生", table });
+      tables.push({ title: "全部", table });
     }
   }
   const educationTable = buildEducationTable(rows, selectedKeys);
@@ -2878,6 +2968,17 @@ const avatarText = computed(() => {
   return name.slice(0, 1).toUpperCase();
 });
 
+const activeCategoryIndex = computed(() => {
+  const index = achievementEntries.value.findIndex(
+    (entry) => entry.key === activeCategory.value,
+  );
+  return index === -1 ? 0 : index;
+});
+
+const drawerIndicatorStyle = computed(() => ({
+  transform: `translateY(calc(${activeCategoryIndex.value} * (var(--drawer-item-height) + var(--drawer-item-gap))))`,
+}));
+
 function handleMenuClick(key) {
   if (!isMenuEnabled(key)) {
     return;
@@ -2895,6 +2996,39 @@ function handleMenuClick(key) {
     return;
   }
   router.push("/myinfos");
+}
+
+function toggleAchievements() {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  achievementsOpen.value = !achievementsOpen.value;
+  activeMenu.value = "achievements";
+  if (achievementsOpen.value) {
+    handleAchievementEntry("all");
+  }
+}
+
+function handleAchievementEntry(key) {
+  if (!isMenuEnabled("achievements")) {
+    return;
+  }
+  const safeKey = achievementEntries.value.some((entry) => entry.key === key)
+    ? key
+    : "all";
+  activeCategory.value = safeKey;
+  achievementsOpen.value = true;
+  activeMenu.value = "achievements";
+  sidebarOpen.value = false;
+  router.push({ path: "/achievements", query: { category: safeKey } });
+}
+
+function openSidebar() {
+  sidebarOpen.value = true;
+}
+
+function closeSidebar() {
+  sidebarOpen.value = false;
 }
 
 function resolveMediaUrl(url) {
@@ -3142,6 +3276,7 @@ function loadUser() {
 .student-grid-wrap.fullscreen {
   position: fixed;
   inset: 0;
+  bottom: 100px;
   z-index: 120;
   background: #f7fafb;
   padding: 16px;
@@ -3150,14 +3285,12 @@ function loadUser() {
 }
 
 .student-grid-wrap.fullscreen .student-grid {
-  height: calc(100vh - 32px);
+  flex: 1;
   border-radius: 16px;
+  min-height: 0;
 }
 
 .student-grid-fullscreen {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
   border: none;
   background: rgba(3, 107, 114, 0.12);
   color: #036b72;
@@ -3165,10 +3298,17 @@ function loadUser() {
   border-radius: 999px;
   font-size: 12px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .student-grid-fullscreen:hover {
   background: rgba(3, 107, 114, 0.2);
+}
+
+.student-grid-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .student-search {
@@ -3221,6 +3361,13 @@ function loadUser() {
 
 .stepper-input {
   text-align: center;
+  -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .student-filter-inline {
@@ -3819,6 +3966,262 @@ function loadUser() {
 
   .student-achievements-view.closing {
     transform: translate(-50%, 120%) scale(0.98);
+  }
+}
+
+@media (max-width: 640px) {
+  .student-right-stack {
+    padding-bottom: 88px;
+    gap: 10px;
+  }
+
+  .student-filter-header {
+    gap: 8px;
+  }
+
+  .student-search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .student-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-results-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-results-actions {
+    width: 100%;
+  }
+
+  .student-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .student-pages {
+    justify-content: center;
+  }
+
+  .page-size {
+    justify-content: center;
+  }
+
+  .student-list {
+    gap: 8px;
+  }
+
+  .student-row {
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(3, 107, 114, 0.12);
+    transition:
+      background 0.2s ease,
+      transform 0.15s ease,
+      box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(3, 107, 114, 0.06);
+  }
+
+  .student-row:active {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(0.99);
+    box-shadow: 0 1px 4px rgba(3, 107, 114, 0.08);
+  }
+
+  .student-main {
+    gap: 6px;
+  }
+
+  .student-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #083d45;
+    line-height: 1.3;
+  }
+
+  .student-meta {
+    font-size: 12px;
+    color: #5c7178;
+    line-height: 1.4;
+    word-break: break-all;
+  }
+
+  .student-row .ghost-button {
+    align-self: center;
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 50px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .student-list {
+    gap: 12px;
+  }
+
+  /* ── 表格视图（切换表格后）────────────── */
+  .student-filter-card {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .student-filter-header {
+    gap: 8px;
+  }
+
+  .student-grid-toggle {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .student-grid-tabs {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* 隐藏 filter-header 里的切换按钮（已移至胶囊） */
+  .student-filter-header .student-grid-toggle {
+    display: none;
+  }
+
+  .student-grid-tab {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .student-grid-tab.student-grid-tab-add {
+    padding: 5px 10px;
+  }
+
+  .student-results-card {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .student-results-header {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .student-results-header .info-section-title {
+    flex-shrink: 0;
+  }
+
+  .student-results-actions {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .student-results-actions .ghost-button {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 50px;
+  }
+
+  .student-grid-wrap {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .student-grid {
+    height: 380px;
+    border-radius: 0;
+  }
+
+  .student-grid-fullscreen {
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
+  .student-grid-wrap.fullscreen {
+    padding: 12px;
+    z-index: 200;
+    bottom: 86px;
+  }
+
+  .student-grid-wrap.fullscreen .student-grid-toolbar {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .student-grid-wrap.fullscreen .student-grid {
+    border-radius: 12px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .student-detail-view {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+
+  .student-detail-view.open {
+    transform: translateY(0);
+  }
+
+  .student-detail-view.closing {
+    transform: translateY(100%);
+  }
+
+  .student-detail-view.split {
+    width: 100%;
+    max-height: 92vh;
+  }
+
+  .student-achievements-view {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 92vh;
+    max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+
+  .student-achievements-view.open {
+    transform: translateY(0);
+  }
+
+  .student-achievements-view.closing {
+    transform: translateY(100%);
+  }
+
+  .grid-field-dialog {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+
+  .grid-field-dialog.open {
+    transform: translateY(0);
+  }
+
+  .grid-field-dialog.closing {
+    transform: translateY(100%);
   }
 }
 </style>
