@@ -43,6 +43,15 @@ public class StudentProfileController {
         return ResponseEntity.ok(studentProfileService.saveProfile(authentication.getName(), request));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentProfileResponse> saveById(
+        Authentication authentication,
+        @PathVariable Long id,
+        @RequestBody StudentProfileRequest request
+    ) {
+        return ResponseEntity.ok(studentProfileService.saveProfileById(authentication.getName(), id, request));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<StudentSearchResponse> search(
         @RequestParam(defaultValue = "1") int page,

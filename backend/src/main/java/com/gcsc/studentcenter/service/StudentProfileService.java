@@ -19,6 +19,7 @@ import com.gcsc.studentcenter.entity.AppUser;
 import com.gcsc.studentcenter.entity.CadreExperience;
 import com.gcsc.studentcenter.entity.EducationExperience;
 import com.gcsc.studentcenter.entity.StudentProfile;
+import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
 import com.gcsc.studentcenter.repository.StudentProfileRepository;
 
@@ -64,6 +65,30 @@ public class StudentProfileService {
                 created.setUser(user);
                 return created;
             });
+
+        StudentProfile saved = saveProfileInternal(user, profile, request);
+        return toResponse(user, saved);
+    }
+
+    @Transactional
+    public StudentProfileResponse saveProfileById(String operatorUsername, Long id, StudentProfileRequest request) {
+        AppUser operator = appUserRepository.findByUsername(operatorUsername)
+            .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        if (operator.getRole() != UserRole.ADMIN) {
+            throw new IllegalArgumentException("无权限操作该学生档案");
+        }
+        StudentProfile profile = studentProfileRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("学生档案不存在"));
+        AppUser user = profile.getUser();
+        StudentProfile saved = saveProfileInternal(user, profile, request);
+        return toResponse(user, saved);
+    }
+
+    private StudentProfile saveProfileInternal(
+        AppUser user,
+        StudentProfile profile,
+        StudentProfileRequest request
+    ) {
 
         profile.setFullName(normalize(request.getFullName()));
         profile.setStudentNo(normalize(request.getStudentNo()));
@@ -126,8 +151,7 @@ public class StudentProfileService {
         user.setAvatarUrl(normalize(request.getAvatarUrl()));
         syncUserSummary(user, profile);
 
-        StudentProfile saved = studentProfileRepository.save(profile);
-        return toResponse(user, saved);
+        return studentProfileRepository.save(profile);
     }
 
     @Transactional(readOnly = true)
