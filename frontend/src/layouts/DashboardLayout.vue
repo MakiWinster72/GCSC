@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="dashboard-layout"
-    :class="{ 'dashboard-layout-embedded': isEmbedded }"
-  >
+  <div class="dashboard-shell" :class="{ 'dashboard-shell-embedded': isEmbedded }">
     <transition name="publisher-backdrop">
       <div
         v-if="sidebarOpen && !isEmbedded"
@@ -11,21 +8,31 @@
       ></div>
     </transition>
 
-    <DashboardSidebar
+    <ProfileCard
       v-if="!isEmbedded"
+      class="dashboard-topbar"
       :profile="profile"
-      :active-menu="activeMenu"
-      :active-achievement="activeAchievement"
-      :show-achievements-drawer="showAchievementsDrawer"
-      :achievements-open="achievementsOpen"
-      :sidebar-open="sidebarOpen"
-      @menu-click="handleMenuClick"
-      @achievement-entry-click="handleAchievementEntry"
-      @toggle-achievements="toggleAchievements"
+      :compact="true"
       @settings-click="goToSettings"
     />
 
-    <RouterView />
+    <div
+      class="dashboard-layout"
+      :class="{ 'dashboard-layout-embedded': isEmbedded }"
+    >
+      <DashboardSidebar
+        v-if="!isEmbedded"
+        :profile="profile"
+        :active-menu="activeMenu"
+        :active-achievement="activeAchievement"
+        :show-achievements-drawer="showAchievementsDrawer"
+        :sidebar-open="sidebarOpen"
+        @menu-click="handleMenuClick"
+        @achievement-entry-click="handleAchievementEntry"
+      />
+
+      <RouterView />
+    </div>
   </div>
 </template>
 
@@ -33,6 +40,7 @@
 import { computed, provide, reactive, ref, watch } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import DashboardSidebar from "../components/DashboardSidebar.vue";
+import ProfileCard from "../components/ProfileCard.vue";
 import {
   getActiveMenuFromRoute,
   getMenuLocation,
@@ -44,7 +52,6 @@ const router = useRouter();
 const route = useRoute();
 const profile = reactive(loadUser());
 const sidebarOpen = ref(false);
-const achievementsOpen = ref(route.name === "achievements");
 
 const activeMenu = computed(() => getActiveMenuFromRoute(route));
 const activeAchievement = computed(() => {
@@ -74,8 +81,7 @@ provide(dashboardShellKey, {
 
 watch(
   () => route.name,
-  (name) => {
-    achievementsOpen.value = name === "achievements";
+  () => {
     if (isEmbedded.value) {
       sidebarOpen.value = false;
       return;
@@ -98,34 +104,15 @@ function closeSidebar() {
 
 function handleMenuClick(key) {
   closeSidebar();
-  if (key === "achievements") {
-    if (route.name === "achievements") {
-      achievementsOpen.value = !achievementsOpen.value;
-      return;
-    }
-    achievementsOpen.value = true;
-  } else {
-    achievementsOpen.value = false;
-  }
   navigateWithViewTransition(router, getMenuLocation(key));
 }
 
 function handleAchievementEntry(key) {
   closeSidebar();
-  achievementsOpen.value = true;
   navigateWithViewTransition(router, {
     path: "/achievements",
     query: { category: key || "all" },
   });
-}
-
-function toggleAchievements() {
-  if (route.name === "achievements") {
-    achievementsOpen.value = !achievementsOpen.value;
-    return;
-  }
-  achievementsOpen.value = true;
-  navigateWithViewTransition(router, getMenuLocation("achievements"));
 }
 
 function goToSettings() {

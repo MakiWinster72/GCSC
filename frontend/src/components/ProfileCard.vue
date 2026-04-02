@@ -1,5 +1,5 @@
 <template>
-  <section class="profile-card">
+  <section class="profile-card" :class="{ compact }">
     <div class="profile-row profile-main">
       <div class="profile-avatar">
         <img
@@ -24,9 +24,16 @@
         <img src="/assets/icons/settings.svg" alt="设置" />
       </button>
     </div>
-    <div class="profile-row">学号：{{ profile.studentNo || "未填写" }}</div>
-    <div class="profile-row">班级：{{ profile.className || "未填写" }}</div>
-    <div class="profile-row">{{ profileExtraLabel }}：{{ profileExtraValue || "未填写" }}</div>
+    <div v-if="compact" class="profile-meta-line">
+      <span class="profile-meta-chip">学号：{{ profile.studentNo || "未填写" }}</span>
+      <span class="profile-meta-chip">班级：{{ profile.className || "未填写" }}</span>
+      <span class="profile-meta-chip">{{ profileExtraLabel }}：{{ profileExtraValue || "未填写" }}</span>
+    </div>
+    <template v-else>
+      <div class="profile-row">学号：{{ profile.studentNo || "未填写" }}</div>
+      <div class="profile-row">班级：{{ profile.className || "未填写" }}</div>
+      <div class="profile-row">{{ profileExtraLabel }}：{{ profileExtraValue || "未填写" }}</div>
+    </template>
   </section>
 </template>
 
@@ -42,6 +49,10 @@ const props = defineProps({
   profileExtraLabel: {
     type: String,
     default: "学院",
+  },
+  compact: {
+    type: Boolean,
+    default: false,
   },
 });
 
