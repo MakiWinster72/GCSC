@@ -682,9 +682,18 @@ onMounted(() => {
   cursor: default;
 }
 
+@media (max-width: 1300px) {
+  .admin-panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-preview-panel {
+    order: 2;
+  }
+}
+
 @media (max-width: 960px) {
   .admin-stat-grid,
-  .admin-panel-grid,
   .admin-form-list.two-cols,
   .admin-ext-grid {
     grid-template-columns: 1fr;
