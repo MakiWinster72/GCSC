@@ -1907,6 +1907,14 @@ async function saveAchievement() {
       [ATTACHMENTS_FIELD]: JSON.stringify(form.attachments || []),
     },
   };
+  const existingItem = editId.value
+    ? achievements.value.find((item) => item.id === editId.value) || null
+    : null;
+  const changes = buildAchievementChanges({
+    category,
+    payload,
+    existingItem,
+  });
   try {
     if (editId.value) {
       const { data } = await updateAchievement(category, editId.value, payload);
@@ -1926,6 +1934,7 @@ async function saveAchievement() {
           title: titleValue,
           payloadSnapshot: payload,
           recordId: data.id,
+          changes,
         });
       }
     } else {
@@ -1942,6 +1951,7 @@ async function saveAchievement() {
           title: titleValue,
           payloadSnapshot: payload,
           recordId: data.id,
+          changes,
         });
       }
     }
@@ -1951,6 +1961,88 @@ async function saveAchievement() {
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || "保存失败，请重新登录";
   }
+}
+
+function buildAchievementChanges({ category, payload, existingItem }) {
+  const config = categoryFieldMap[category] || null;
+  if (!config) {
+    return [];
+  }
+  const nextFields = payload?.fields || {};
+  const previousFields = existingItem?.fields || {};
+  const changes = [];
+
+  config.fields.forEach((field) => {
+    const before = stringifyChangeValue(previousFields[field.key]);
+    const after = stringifyChangeValue(nextFields[field.key]);
+    if (!existingItem && after === "-") {
+      return;
+    }
+    if (existingItem && before === after) {
+      return;
+    }
+    changes.push({
+      section: "成就信息",
+      label: field.label,
+      before,
+      after,
+    });
+  });
+
+  const previousImages = stringifyChangeValue(existingItem?.imageUrls || []);
+  const nextImages = stringifyChangeValue(resolveImageUrlsFromPayload(payload));
+  if ((!existingItem && nextImages !== "-") || (existingItem && previousImages !== nextImages)) {
+    changes.push({
+      section: "多媒体",
+      label: "图片",
+      before: previousImages,
+      after: nextImages,
+    });
+  }
+
+  const previousAttachments = stringifyChangeValue(
+    (existingItem?.attachments || []).map((item) => item.name || item.url || ""),
+  );
+  const nextAttachments = stringifyChangeValue(
+    (payload?.fields?.[ATTACHMENTS_FIELD]
+      ? JSON.parse(payload.fields[ATTACHMENTS_FIELD])
+      : []
+    ).map((item) => item.name || item.url || ""),
+  );
+  if (
+    (!existingItem && nextAttachments !== "-") ||
+    (existingItem && previousAttachments !== nextAttachments)
+  ) {
+    changes.push({
+      section: "多媒体",
+      label: "附件",
+      before: previousAttachments,
+      after: nextAttachments,
+    });
+  }
+
+  return changes;
+}
+
+function resolveImageUrlsFromPayload(payload) {
+  const raw = payload?.fields?.[IMAGE_URLS_FIELD];
+  if (!raw) {
+    return payload?.imageUrl ? [payload.imageUrl] : [];
+  }
+  try {
+    return Array.isArray(JSON.parse(raw)) ? JSON.parse(raw) : [];
+  } catch {
+    return payload?.imageUrl ? [payload.imageUrl] : [];
+  }
+}
+
+function stringifyChangeValue(value) {
+  if (Array.isArray(value)) {
+    const filtered = value.filter(Boolean).map((item) => String(item).trim()).filter(Boolean);
+    return filtered.length ? filtered.join("、") : "-";
+  }
+  const text = String(value ?? "").trim();
+  return text || "-";
 }
 
 function triggerImage() {

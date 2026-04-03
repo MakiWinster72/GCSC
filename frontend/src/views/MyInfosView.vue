@@ -1243,6 +1243,54 @@ const idTypeOptions = [
   "外国护照",
 ];
 const dormCampusOptions = ["佛山校区", "广州校区"];
+const PROFILE_CHANGE_FIELDS = [
+  { key: "fullName", label: "姓名", section: "学籍信息" },
+  { key: "avatarUrl", label: "头像", section: "基础信息" },
+  { key: "studentNo", label: "学号", section: "学籍信息" },
+  { key: "classYear", label: "年级", section: "学籍信息" },
+  { key: "classMajor", label: "专业", section: "学籍信息" },
+  { key: "classNo", label: "班级", section: "学籍信息" },
+  { key: "className", label: "班级名称", section: "学籍信息" },
+  { key: "enrollmentDate", label: "入学时间", section: "学籍信息" },
+  { key: "studentCategory", label: "学生类别", section: "学籍信息" },
+  { key: "ethnicity", label: "民族", section: "联系方式" },
+  { key: "politicalStatus", label: "政治面貌", section: "联系方式" },
+  { key: "phone", label: "手机号码", section: "联系方式" },
+  { key: "backupContact", label: "备用联系方式", section: "联系方式" },
+  { key: "address", label: "家庭住址", section: "联系方式" },
+  { key: "idType", label: "证件类型", section: "联系方式" },
+  { key: "idNo", label: "证件号码", section: "联系方式" },
+  { key: "birthDate", label: "出生年月", section: "联系方式" },
+  { key: "nativePlace", label: "籍贯", section: "联系方式" },
+  { key: "dormCampus", label: "宿舍校区", section: "住宿信息" },
+  { key: "dormBuilding", label: "宿舍楼栋", section: "住宿信息" },
+  { key: "dormRoom", label: "宿舍房间", section: "住宿信息" },
+  { key: "offCampusLiving", label: "是否校外居住", section: "住宿信息" },
+  { key: "offCampusAddress", label: "校外住址", section: "住宿信息" },
+  { key: "classTeacher", label: "班主任", section: "学籍信息" },
+  { key: "counselor", label: "辅导员", section: "学籍信息" },
+  { key: "leagueJoined", label: "是否入团", section: "党团信息" },
+  { key: "leagueNo", label: "团员编号", section: "党团信息" },
+  { key: "leagueApplicationDate", label: "入团申请时间", section: "党团信息" },
+  { key: "leagueJoinDate", label: "入团时间", section: "党团信息" },
+  { key: "partyApplied", label: "是否申请入党", section: "党团信息" },
+  { key: "applicationDate", label: "入党申请时间", section: "党团信息" },
+  { key: "activistDate", label: "积极分子时间", section: "党团信息" },
+  { key: "partyTrainingDate", label: "党校培训时间", section: "党团信息" },
+  { key: "developmentTargetDate", label: "发展对象时间", section: "党团信息" },
+  { key: "probationaryMemberDate", label: "预备党员时间", section: "党团信息" },
+  { key: "fullMemberDate", label: "转正时间", section: "党团信息" },
+  { key: "emergencyPhone", label: "紧急联系人电话", section: "家庭信息" },
+  { key: "emergencyRelation", label: "与紧急联系人关系", section: "家庭信息" },
+  { key: "fatherName", label: "父亲姓名", section: "家庭信息" },
+  { key: "fatherPhone", label: "父亲电话", section: "家庭信息" },
+  { key: "fatherWorkUnit", label: "父亲工作单位", section: "家庭信息" },
+  { key: "fatherTitle", label: "父亲职务", section: "家庭信息" },
+  { key: "motherName", label: "母亲姓名", section: "家庭信息" },
+  { key: "motherPhone", label: "母亲电话", section: "家庭信息" },
+  { key: "motherWorkUnit", label: "母亲工作单位", section: "家庭信息" },
+  { key: "motherTitle", label: "母亲职务", section: "家庭信息" },
+];
 const idNoMaxLength = computed(() => {
   switch (info.idType) {
     case "居民身份证":
@@ -2015,6 +2063,7 @@ async function confirmEdit() {
     payload.fullMemberDate = null;
     payload.fullMemberDeveloping = false;
   }
+  const changes = buildProfileChanges(originalProfileData.value, payload);
   try {
     const { data } = await saveStudentProfile(payload);
     applyProfileResponse(data);
@@ -2022,6 +2071,7 @@ async function confirmEdit() {
       submitProfileReviewRequest({
         actor: profile,
         payloadSnapshot: payload,
+        changes,
       });
     }
     isEditing.value = false;
@@ -2210,6 +2260,73 @@ function buildCurrentProfileState() {
     educationExperiences: educationItems.map((item) => ({ ...item })),
     cadreExperiences: cadreItems.map((item) => ({ ...item })),
   };
+}
+
+function buildProfileChanges(previousState, nextState) {
+  const changes = PROFILE_CHANGE_FIELDS.reduce((list, field) => {
+    const before = stringifyProfileChangeValue(previousState?.[field.key]);
+    const after = stringifyProfileChangeValue(nextState?.[field.key]);
+    if (before === after) {
+      return list;
+    }
+    list.push({
+      section: field.section,
+      label: field.label,
+      before,
+      after,
+    });
+    return list;
+  }, []);
+
+  const previousEducation = stringifyProfileCollection(previousState?.educationExperiences);
+  const nextEducation = stringifyProfileCollection(nextState?.educationExperiences);
+  if (previousEducation !== nextEducation) {
+    changes.push({
+      section: "教育经历",
+      label: "教育经历",
+      before: previousEducation,
+      after: nextEducation,
+    });
+  }
+
+  const previousCadre = stringifyProfileCollection(previousState?.cadreExperiences);
+  const nextCadre = stringifyProfileCollection(nextState?.cadreExperiences);
+  if (previousCadre !== nextCadre) {
+    changes.push({
+      section: "学生干部经历",
+      label: "学生干部经历",
+      before: previousCadre,
+      after: nextCadre,
+    });
+  }
+
+  return changes;
+}
+
+function stringifyProfileCollection(items) {
+  const list = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!list.length) {
+    return "-";
+  }
+  return list
+    .map((item) =>
+      Object.values(item)
+        .filter((value) => value !== null && value !== undefined && value !== false && value !== "")
+        .join(" / "),
+    )
+    .filter(Boolean)
+    .join("；");
+}
+
+function stringifyProfileChangeValue(value) {
+  if (typeof value === "boolean") {
+    return value ? "是" : "否";
+  }
+  if (Array.isArray(value)) {
+    return stringifyProfileCollection(value);
+  }
+  const text = String(value ?? "").trim();
+  return text || "-";
 }
 
 function buildClassName(year, major, no, fallback) {

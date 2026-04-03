@@ -6,9 +6,11 @@
         :profile="profile"
         :active-menu="activeMenu"
         :active-achievement="activeAchievement"
+        :active-notification-key="activeNotificationKey"
         :show-achievements-drawer="showAchievementsDrawer"
         @menu-click="handleMenuClick"
         @achievement-entry-click="handleAchievementEntry"
+        @notification-entry-click="handleNotificationEntry"
         @settings-click="goToSettings"
       />
 
@@ -39,6 +41,13 @@ const activeAchievement = computed(() => {
   }
   const raw = route.query.category;
   return typeof raw === "string" && raw ? raw : "all";
+});
+const activeNotificationKey = computed(() => {
+  if (route.name !== "notifications") {
+    return "";
+  }
+  const raw = route.query.entry;
+  return typeof raw === "string" ? raw : "";
 });
 const showAchievementsDrawer = computed(() => route.name !== "settings");
 const isEmbedded = computed(() => {
@@ -82,6 +91,14 @@ function handleAchievementEntry(key) {
   navigateWithViewTransition(router, {
     path: "/achievements",
     query: { category: key || "all" },
+  });
+}
+
+function handleNotificationEntry(entryKey) {
+  closeSidebar();
+  navigateWithViewTransition(router, {
+    path: "/notifications",
+    query: entryKey ? { entry: entryKey } : {},
   });
 }
 

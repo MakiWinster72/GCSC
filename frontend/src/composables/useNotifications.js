@@ -157,6 +157,7 @@ function buildReviewEntry(request, user) {
     resourceType: request.resourceType,
     action: request.action,
     payloadSnapshot: request.payloadSnapshot || null,
+    changes: Array.isArray(request.changes) ? request.changes : [],
     timeText: formatRelativeTime(request.updatedAt || request.createdAt),
     createdAt: request.updatedAt || request.createdAt,
   };
@@ -211,6 +212,7 @@ function createReviewRequest({
   title,
   summary,
   payloadSnapshot = null,
+  changes = [],
   extra = {},
 }) {
   ensureLoaded();
@@ -233,6 +235,7 @@ function createReviewRequest({
     updatedAt: now,
     rejectionReason: "",
     payloadSnapshot,
+    changes,
     ...extra,
   };
   store.reviewRequests.unshift(request);
@@ -247,6 +250,7 @@ function submitAchievementReviewRequest({
   title,
   payloadSnapshot = null,
   recordId = null,
+  changes = [],
 }) {
   const categoryLabel = resolveAchievementCategoryLabel(category);
   return createReviewRequest({
@@ -256,6 +260,7 @@ function submitAchievementReviewRequest({
     title: action === "update" ? `成就修改待审核` : `成就新增待审核`,
     summary: `${toDisplayName(actor)}${action === "update" ? "修改" : "新增"}了「${title || categoryLabel}」`,
     payloadSnapshot,
+    changes,
     extra: {
       category,
       categoryLabel,
@@ -264,7 +269,11 @@ function submitAchievementReviewRequest({
   });
 }
 
-function submitProfileReviewRequest({ actor, payloadSnapshot = null }) {
+function submitProfileReviewRequest({
+  actor,
+  payloadSnapshot = null,
+  changes = [],
+}) {
   return createReviewRequest({
     actor,
     resourceType: "profile",
@@ -272,6 +281,7 @@ function submitProfileReviewRequest({ actor, payloadSnapshot = null }) {
     title: "个人信息修改待审核",
     summary: `${toDisplayName(actor)} 提交了个人信息修改申请`,
     payloadSnapshot,
+    changes,
   });
 }
 

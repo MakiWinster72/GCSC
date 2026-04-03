@@ -12,9 +12,11 @@
         :profile="profile"
         :active-menu="activeMenu"
         :active-achievement="activeAchievement"
+        :active-notification-key="activeNotificationKey"
         :show-achievements-drawer="showAchievementsDrawer"
         @menu-click="$emit('menu-click', $event)"
         @achievement-entry-click="$emit('achievement-entry-click', $event)"
+        @notification-entry-click="$emit('notification-entry-click', $event)"
       />
     </div>
   </aside>
@@ -37,11 +39,20 @@ defineProps({
     type: String,
     default: "all",
   },
+  activeNotificationKey: {
+    type: String,
+    default: "",
+  },
   showAchievementsDrawer: {
     type: Boolean,
     default: false,
   },
 });
 
-defineEmits(["menu-click", "achievement-entry-click", "settings-click"]);
+defineEmits([
+  "menu-click",
+  "achievement-entry-click",
+  "notification-entry-click",
+  "settings-click",
+]);
 </script>

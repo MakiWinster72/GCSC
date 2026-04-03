@@ -7,6 +7,7 @@ export const MENU_ITEMS = [
 ];
 
 export const MENU_ROUTE_MAP = {
+  notifications: { path: "/notifications" },
   achievements: { path: "/achievements", query: { category: "all" } },
   "my-info": { path: "/myinfos" },
   "student-info": { path: "/student-info" },
@@ -47,6 +48,9 @@ export function getMenuLocation(key) {
 
 export function getActiveMenuFromRoute(route) {
   const routeName = route?.name;
+  if (routeName === "notifications") {
+    return "notifications";
+  }
   if (routeName === "achievements") {
     return "achievements";
   }
