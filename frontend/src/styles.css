@@ -632,10 +632,15 @@ body {
   gap: 10px;
   min-height: 26px;
   margin-bottom: 0;
+  margin-top: 5px;
   overflow: hidden;
+  position: relative;
+  justify-content: center;
 }
 
 .menu-card-back {
+  position: absolute;
+  left: 0;
   min-height: 24px;
   padding: 0 9px;
   border: 1px solid rgba(3, 107, 114, 0.14);
@@ -659,6 +664,7 @@ body {
 .menu-card-title {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 24px;
   padding: 0 9px;
   border-radius: 999px;
