@@ -42,11 +42,6 @@ const statCards = computed(() => [
     value: `${form.attachmentMaxCount} 个 / ${form.attachmentMaxSizeMb}MB`,
     note: "数量与单个大小",
   },
-  {
-    label: "格式组",
-    value: `${enabledPreviewTypes.value.length} 组`,
-    note: "四类后缀规则",
-  },
 ]);
 
 const imageSubtitle = computed(
@@ -510,7 +505,7 @@ onMounted(() => {
 
 .admin-setting-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.9rem;
   margin-bottom: 0.95rem;
 }
