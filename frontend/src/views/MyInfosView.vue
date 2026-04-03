@@ -2308,14 +2308,59 @@ function stringifyProfileCollection(items) {
   if (!list.length) {
     return "-";
   }
+  const firstItem = list[0] || {};
+  if ("schoolName" in firstItem || "educationLevel" in firstItem || "witness" in firstItem) {
+    return list.map(formatEducationExperienceItem).filter(Boolean).join("\n");
+  }
+  if ("department" in firstItem || "position" in firstItem || "description" in firstItem) {
+    return list.map(formatCadreExperienceItem).filter(Boolean).join("\n");
+  }
   return list
     .map((item) =>
-      Object.values(item)
-        .filter((value) => value !== null && value !== undefined && value !== false && value !== "")
+      Object.entries(item)
+        .map(([, value]) => stringifyProfileChangeValue(value))
+        .filter((value) => value !== "-")
         .join(" / "),
     )
     .filter(Boolean)
-    .join("；");
+    .join("\n");
+}
+
+function formatEducationExperienceItem(item, index) {
+  const period = formatPeriodText(item?.startDate, item?.endDate, item?.isCurrent);
+  const schoolName = stringifyProfileChangeValue(item?.schoolName);
+  const educationLevel = stringifyProfileChangeValue(item?.educationLevel);
+  const witness = stringifyProfileChangeValue(item?.witness);
+  return [
+    `第${index + 1}条`,
+    `时间：${period}`,
+    `学校名称：${schoolName}`,
+    `学历：${educationLevel}`,
+    `证明人：${witness}`,
+  ].join("\n");
+}
+
+function formatCadreExperienceItem(item, index) {
+  const period = formatPeriodText(item?.startDate, item?.endDate, item?.isCurrent);
+  const department = stringifyProfileChangeValue(item?.department);
+  const position = stringifyProfileChangeValue(item?.position);
+  const description = stringifyProfileChangeValue(item?.description);
+  return [
+    `第${index + 1}条`,
+    `起止时间：${period}`,
+    `班级/社团部门：${department}`,
+    `职位：${position}`,
+    `职责说明：${description}`,
+  ].join("\n");
+}
+
+function formatPeriodText(startDate, endDate, isCurrent) {
+  const start = stringifyProfileChangeValue(startDate);
+  if (isCurrent) {
+    return `${start} 至今`;
+  }
+  const end = stringifyProfileChangeValue(endDate);
+  return `${start} - ${end}`;
 }
 
 function stringifyProfileChangeValue(value) {

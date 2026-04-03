@@ -131,6 +131,27 @@ function formatChangeValue(value) {
   return String(value);
 }
 
+function isStructuredChangeValue(value) {
+  const text = formatChangeValue(value);
+  return text.includes("第1条\n") || /^第\d+条$/m.test(text);
+}
+
+function parseStructuredChangeValue(value) {
+  const text = formatChangeValue(value);
+  if (!isStructuredChangeValue(text)) {
+    return [];
+  }
+  return text
+    .split(/\n(?=第\d+条\n?)/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+      const [title, ...details] = lines;
+      return { title, details };
+    });
+}
+
 function toggleRejectEditor() {
   rejectEditorOpen.value = !rejectEditorOpen.value;
   actionError.value = "";
@@ -255,13 +276,53 @@ function rejectSelectedRequest() {
             <div class="notification-change-values">
               <div class="notification-change-column">
                 <div class="notification-change-caption">修改前</div>
-                <div class="notification-change-value">
+                <template v-if="isStructuredChangeValue(change.before)">
+                  <div class="notification-change-entries">
+                    <article
+                      v-for="entry in parseStructuredChangeValue(change.before)"
+                      :key="entry.title"
+                      class="notification-change-entry"
+                    >
+                      <div class="notification-change-entry-title">{{ entry.title }}</div>
+                      <div class="notification-change-entry-lines">
+                        <div
+                          v-for="detail in entry.details"
+                          :key="detail"
+                          class="notification-change-entry-line"
+                        >
+                          {{ detail }}
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </template>
+                <div v-else class="notification-change-value">
                   {{ formatChangeValue(change.before) }}
                 </div>
               </div>
               <div class="notification-change-column">
                 <div class="notification-change-caption">修改后</div>
-                <div class="notification-change-value is-next">
+                <template v-if="isStructuredChangeValue(change.after)">
+                  <div class="notification-change-entries">
+                    <article
+                      v-for="entry in parseStructuredChangeValue(change.after)"
+                      :key="entry.title"
+                      class="notification-change-entry is-next"
+                    >
+                      <div class="notification-change-entry-title">{{ entry.title }}</div>
+                      <div class="notification-change-entry-lines">
+                        <div
+                          v-for="detail in entry.details"
+                          :key="detail"
+                          class="notification-change-entry-line"
+                        >
+                          {{ detail }}
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </template>
+                <div v-else class="notification-change-value is-next">
                   {{ formatChangeValue(change.after) }}
                 </div>
               </div>
@@ -556,11 +617,48 @@ function rejectSelectedRequest() {
   font-size: 13px;
   line-height: 1.6;
   word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .notification-change-value.is-next {
   color: #0f555d;
   font-weight: 600;
+}
+
+.notification-change-entries {
+  display: grid;
+  gap: 10px;
+}
+
+.notification-change-entry {
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(3, 107, 114, 0.08);
+}
+
+.notification-change-entry.is-next {
+  background: rgba(205, 255, 249, 0.4);
+  border-color: rgba(3, 107, 114, 0.12);
+}
+
+.notification-change-entry-title {
+  margin-bottom: 8px;
+  color: #103f46;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.notification-change-entry-lines {
+  display: grid;
+  gap: 6px;
+}
+
+.notification-change-entry-line {
+  color: #54727a;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
 }
 
 .notification-action {
