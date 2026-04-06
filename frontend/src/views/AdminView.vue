@@ -183,7 +183,6 @@ onMounted(() => {
           <div class="admin-form-list two-cols">
             <label class="admin-field">
               <span class="admin-field-label">最多上传图片数</span>
-              <span class="admin-field-hint">决定用户一次最多可添加多少张图片</span>
               <div class="admin-input-wrap">
                 <input
                   v-model.number="form.imageMaxCount"
@@ -198,7 +197,6 @@ onMounted(() => {
 
             <label class="admin-field">
               <span class="admin-field-label">单张图片最大大小</span>
-              <span class="admin-field-hint">超出限制时会直接提示并阻止上传</span>
               <div class="admin-input-wrap">
                 <input
                   v-model.number="form.imageMaxSizeMb"
@@ -223,7 +221,6 @@ onMounted(() => {
           <div class="admin-form-list two-cols">
             <label class="admin-field">
               <span class="admin-field-label">最多上传附件数</span>
-              <span class="admin-field-hint">决定附件区一次最多能保留多少个文件</span>
               <div class="admin-input-wrap">
                 <input
                   v-model.number="form.attachmentMaxCount"
@@ -238,7 +235,6 @@ onMounted(() => {
 
             <label class="admin-field">
               <span class="admin-field-label">单个附件最大大小</span>
-              <span class="admin-field-hint">所有附件共用这一项单文件大小限制</span>
               <div class="admin-input-wrap">
                 <input
                   v-model.number="form.attachmentMaxSizeMb"
@@ -254,7 +250,6 @@ onMounted(() => {
 
           <div class="admin-field">
             <span class="admin-field-label">支持的附件后缀</span>
-            <span class="admin-field-hint">按类型填写，多个后缀用英文逗号隔开；留空表示这一类暂不开放</span>
             <div class="admin-ext-grid">
               <label
                 v-for="item in ATTACHMENT_TYPE_OPTIONS"
