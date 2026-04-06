@@ -532,8 +532,8 @@ onMounted(() => {
     </template>
 
     <!-- Edit User Modal -->
-    <div :class="['modal-overlay', { open: editModal.visible }]" @click.self="closeEditModal">
-      <div class="modal-box">
+    <div :class="['sheet-overlay', { open: editModal.visible }]" @click.self="closeEditModal">
+      <div class="sheet-modal">
         <div class="modal-head">
           <h3 class="modal-title">编辑用户</h3>
           <button class="modal-close" @click="closeEditModal">×</button>
@@ -980,46 +980,6 @@ onMounted(() => {
 }
 
 /* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(52, 37, 22, 0.35);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.45s ease;
-}
-
-.modal-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.modal-box {
-  width: 90%;
-  max-width: 28rem;
-  background: var(--admin-panel);
-  border: 1px solid var(--admin-line);
-  border-radius: 26px;
-  overflow: hidden;
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%) translateY(120%) scale(0.98);
-  opacity: 0;
-  filter: blur(6px);
-  transition: transform 0.45s ease, opacity 0.45s ease, filter 0.75s ease;
-}
-
-.modal-overlay.open .modal-box {
-  transform: translateX(-50%) translateY(0) scale(1);
-  opacity: 1;
-  filter: blur(0px);
-}
-
 .modal-head {
   display: flex;
   align-items: center;

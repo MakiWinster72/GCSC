@@ -1342,6 +1342,48 @@ body {
   pointer-events: auto;
 }
 
+/* Generic sheet/modal overlay - 居中弹窗动画 */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(52, 37, 22, 0.35);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.sheet-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Generic sheet/modal box - 需配合 sheet-overlay 使用 */
+.sheet-modal {
+  width: 90%;
+  max-width: 28rem;
+  background: var(--admin-panel, #fffbf2);
+  border: 1px solid rgba(115, 88, 50, 0.12);
+  border-radius: 26px;
+  overflow: hidden;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%) scale(0.98);
+  opacity: 0;
+  filter: blur(6px);
+  transition: transform 0.45s ease, opacity 0.45s ease, filter 0.75s ease;
+}
+
+.sheet-overlay.open .sheet-modal {
+  transform: translateX(-50%) translateY(0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+}
+
 .achievement-sheet::-webkit-scrollbar {
   width: 0;
   height: 0;
