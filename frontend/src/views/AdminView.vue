@@ -47,47 +47,6 @@ const reviewForm = reactive({
   achievementReviewAutoApprove: reviewSettings.achievementReviewAutoApprove,
 });
 
-const statCards = computed(() => [
-  ...(activeSection.value === "upload"
-    ? [
-        {
-          label: "图片",
-          value: `${form.imageMaxCount} 张 / ${form.imageMaxSizeMb}MB`,
-          note: "数量与单张大小",
-        },
-        {
-          label: "附件",
-          value: `${form.attachmentMaxCount} 个 / ${form.attachmentMaxSizeMb}MB`,
-          note: "数量与单个大小",
-        },
-      ]
-    : [
-        {
-          label: "个人信息",
-          value: reviewForm.profileReviewEnabled
-            ? reviewForm.profileReviewAutoApprove
-              ? "自动通过"
-              : "人工审核"
-            : "直接生效",
-          note: "资料保存后的处理方式",
-        },
-        {
-          label: "成就",
-          value: reviewForm.achievementReviewEnabled
-            ? reviewForm.achievementReviewAutoApprove
-              ? "自动通过"
-              : "人工审核"
-            : "直接生效",
-          note: "新增与修改后的处理方式",
-        },
-      ]),
-  {
-    label: "当前栏目",
-    value: activeSection.value === "upload" ? "上传限制" : "审核设置",
-    note: activeSection.value === "upload" ? "控制资源上传范围" : "控制审核流程开关",
-  },
-]);
-
 const imageSubtitle = computed(
   () => `最多 ${form.imageMaxCount} 张 · 单张不超过 ${form.imageMaxSizeMb}MB`,
 );
@@ -105,28 +64,6 @@ const attachmentTypeSummary = computed(() =>
     ? enabledPreviewTypes.value.map((item) => item.label).join(" / ")
     : "暂无可用附件类型",
 );
-const reviewCards = computed(() => [
-  {
-    key: "profile",
-    title: "个人信息审核",
-    enabled: reviewForm.profileReviewEnabled,
-    autoApprove: reviewForm.profileReviewAutoApprove,
-    disabledHint: "关闭后，学生提交个人信息会直接生效。",
-    enabledHint: reviewForm.profileReviewAutoApprove
-      ? "开启后仍保留审核轨迹，但系统会默认自动通过。"
-      : "开启后，已保存过的个人信息修改需要管理员审核后才生效。",
-  },
-  {
-    key: "achievement",
-    title: "成就审核",
-    enabled: reviewForm.achievementReviewEnabled,
-    autoApprove: reviewForm.achievementReviewAutoApprove,
-    disabledHint: "关闭后，新增与修改成就会直接生效。",
-    enabledHint: reviewForm.achievementReviewAutoApprove
-      ? "开启后仍保留审核记录，但新增与修改会默认自动通过。"
-      : "开启后，新增与修改成就都会进入待审核状态。",
-  },
-]);
 const activeLoading = computed(() =>
   activeSection.value === "upload" ? uploadLoading.value : reviewLoading.value,
 );
@@ -270,20 +207,6 @@ onMounted(() => {
           {{ activeSection === "review" ? "当前栏目" : "切换查看" }}
         </div>
       </button>
-    </section>
-
-    <section class="admin-hero">
-      <div class="admin-stat-grid">
-        <article
-          v-for="card in statCards"
-          :key="card.label"
-          class="admin-stat-card"
-        >
-          <div class="admin-stat-label">{{ card.label }}</div>
-          <div class="admin-stat-value">{{ card.value }}</div>
-          <div class="admin-stat-note">{{ card.note }}</div>
-        </article>
-      </div>
     </section>
 
     <section v-if="activeSection === 'upload'" class="admin-panel-grid">
@@ -508,9 +431,6 @@ onMounted(() => {
             <div class="admin-setting-index">01</div>
             <div>
               <div class="admin-setting-title">个人信息</div>
-              <div class="admin-field-hint">
-                控制学生资料修改后是直接生效，还是进入审核流程。
-              </div>
             </div>
           </div>
           <div class="admin-toggle-list">
@@ -553,9 +473,6 @@ onMounted(() => {
             <div class="admin-setting-index">02</div>
             <div>
               <div class="admin-setting-title">成就</div>
-              <div class="admin-field-hint">
-                控制学生新增与修改成就后是否需要管理员审核。
-              </div>
             </div>
           </div>
           <div class="admin-toggle-list">
@@ -618,46 +535,6 @@ onMounted(() => {
           </button>
         </div>
       </article>
-
-      <article class="admin-panel admin-preview-panel">
-        <div class="admin-panel-head">
-          <div>
-            <div class="admin-panel-kicker">流程预览</div>
-            <h3 class="admin-panel-title">当前审核生效方式</h3>
-          </div>
-        </div>
-
-        <div class="admin-review-preview">
-          <article
-            v-for="card in reviewCards"
-            :key="card.key"
-            class="admin-review-card"
-          >
-            <div class="admin-review-card-head">
-              <div class="admin-review-card-title">{{ card.title }}</div>
-              <div
-                class="admin-review-badge"
-                :class="{
-                  enabled: card.enabled && !card.autoApprove,
-                  auto: card.enabled && card.autoApprove,
-                  disabled: !card.enabled,
-                }"
-              >
-                {{
-                  !card.enabled
-                    ? "直接生效"
-                    : card.autoApprove
-                      ? "自动通过"
-                      : "人工审核"
-                }}
-              </div>
-            </div>
-            <div class="admin-review-copy">
-              {{ card.enabled ? card.enabledHint : card.disabledHint }}
-            </div>
-          </article>
-        </div>
-      </article>
     </section>
   </main>
 </template>
@@ -708,18 +585,6 @@ onMounted(() => {
   font-size: 0.88rem;
 }
 
-.admin-hero {
-  margin: 0 1.5rem 1.5rem;
-  padding: 0;
-}
-
-.admin-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
-.admin-stat-card,
 .admin-panel,
 .admin-ext-card {
   border: 1px solid var(--admin-line);
@@ -728,28 +593,11 @@ onMounted(() => {
   backdrop-filter: blur(18px);
 }
 
-.admin-stat-card {
-  padding: 1rem 1.05rem;
-}
-
-.admin-stat-label,
 .admin-panel-kicker {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--admin-muted);
-}
-
-.admin-stat-value {
-  margin-top: 0.45rem;
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.admin-stat-note {
-  margin-top: 0.32rem;
-  color: var(--admin-muted);
-  font-size: 0.92rem;
 }
 
 .admin-panel-grid {
@@ -831,11 +679,6 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.admin-field-hint {
-  color: var(--admin-muted);
-  font-size: 0.92rem;
-}
-
 .admin-input-wrap {
   display: flex;
   align-items: center;
@@ -908,8 +751,7 @@ onMounted(() => {
   gap: 0.9rem;
 }
 
-.admin-toggle-card,
-.admin-review-card {
+.admin-toggle-card {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -929,13 +771,11 @@ onMounted(() => {
   gap: 0.3rem;
 }
 
-.admin-toggle-title,
-.admin-review-card-title {
+.admin-toggle-title {
   font-weight: 700;
 }
 
-.admin-toggle-hint,
-.admin-review-copy {
+.admin-toggle-hint {
   color: var(--admin-muted);
   font-size: 0.92rem;
   line-height: 1.55;
@@ -1011,57 +851,13 @@ onMounted(() => {
   cursor: default;
 }
 
-.admin-review-preview {
-  display: grid;
-  gap: 1rem;
-}
-
-.admin-review-card {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.admin-review-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-}
-
-.admin-review-badge {
-  padding: 0.38rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.admin-review-badge.enabled {
-  background: rgba(173, 111, 45, 0.12);
-  color: #8d5f2f;
-}
-
-.admin-review-badge.auto {
-  background: rgba(61, 129, 82, 0.12);
-  color: #25613a;
-}
-
-.admin-review-badge.disabled {
-  background: rgba(109, 109, 109, 0.12);
-  color: #5c5c5c;
-}
-
 @media (max-width: 1300px) {
   .admin-panel-grid {
     grid-template-columns: 1fr;
   }
-
-  .admin-preview-panel {
-    order: 2;
-  }
 }
 
 @media (max-width: 960px) {
-  .admin-stat-grid,
   .admin-form-list.two-cols,
   .admin-ext-grid {
     grid-template-columns: 1fr;
@@ -1070,7 +866,6 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .admin-nav,
-  .admin-hero,
   .admin-panel-grid {
     margin-left: 1rem;
     margin-right: 1rem;
