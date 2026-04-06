@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, shallowRef } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
+import { getUserList } from "../api/admin";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -11,6 +12,10 @@ const ATTACHMENT_TYPE_OPTIONS = [
 
 const profile = reactive(loadUser());
 const saveMessage = shallowRef("");
+const users = shallowRef([]);
+const usersLoading = shallowRef(false);
+const usersError = shallowRef("");
+const activeTab = shallowRef("upload");
 const {
   settings,
   loading,
@@ -110,6 +115,16 @@ async function handleSubmit() {
   }
 }
 
+const ROLE_LABELS = {
+  ADMIN: "管理员",
+  TEACHER: "教师",
+  STUDENT: "学生",
+};
+
+function getRoleLabel(role) {
+  return ROLE_LABELS[role] || role;
+}
+
 function loadUser() {
   try {
     const raw = JSON.parse(localStorage.getItem("gcsc_user") || "{}");
@@ -127,8 +142,22 @@ function loadUser() {
   }
 }
 
+async function loadUsers() {
+  usersLoading.value = true;
+  usersError.value = "";
+  try {
+    const res = await getUserList();
+    users.value = res.data || [];
+  } catch (e) {
+    usersError.value = "加载用户列表失败";
+  } finally {
+    usersLoading.value = false;
+  }
+}
+
 onMounted(() => {
   loadPage();
+  loadUsers();
 });
 </script>
 
@@ -139,16 +168,29 @@ onMounted(() => {
     </header>
 
     <section class="admin-nav">
-      <div class="admin-nav-item active">
+      <div
+        class="admin-nav-item"
+        :class="{ active: activeTab === 'upload' }"
+        @click="activeTab = 'upload'"
+      >
         <div class="admin-nav-title">上传限制</div>
-        <div class="admin-nav-note">当前栏目</div>
+        <div class="admin-nav-note">{{ activeTab === 'upload' ? '当前栏目' : '' }}</div>
       </div>
       <div class="admin-nav-item disabled" aria-disabled="true">
         <div class="admin-nav-title">审核</div>
         <div class="admin-nav-note">入口预留</div>
       </div>
+      <div
+        class="admin-nav-item"
+        :class="{ active: activeTab === 'users' }"
+        @click="activeTab = 'users'"
+      >
+        <div class="admin-nav-title">用户管理</div>
+        <div class="admin-nav-note">{{ activeTab === 'users' ? '当前栏目' : '' }}</div>
+      </div>
     </section>
 
+    <template v-if="activeTab === 'upload'">
     <section class="admin-hero">
       <div class="admin-stat-grid">
         <article
@@ -364,6 +406,47 @@ onMounted(() => {
         </div>
       </article>
     </section>
+    </template>
+
+    <template v-if="activeTab === 'users'">
+    <section class="admin-user-section">
+      <div class="admin-panel-head">
+        <div>
+          <div class="admin-panel-kicker">用户管理</div>
+          <h3 class="admin-panel-title">系统用户列表</h3>
+        </div>
+        <div v-if="usersLoading" class="admin-panel-status">加载中...</div>
+        <div v-else class="admin-panel-status">共 {{ users.length }} 位用户</div>
+      </div>
+
+      <div v-if="usersError" class="admin-feedback error">{{ usersError }}</div>
+
+      <div class="user-table-wrap">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>显示名称</th>
+              <th>角色</th>
+              <th>学号</th>
+              <th>班级</th>
+              <th>学院</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in users" :key="user.id">
+              <td class="user-td-username">{{ user.username }}</td>
+              <td>{{ user.displayName }}</td>
+              <td><span :class="['role-badge', 'role-' + user.role.toLowerCase()]">{{ getRoleLabel(user.role) }}</span></td>
+              <td>{{ user.studentNo || '—' }}</td>
+              <td>{{ user.className || '—' }}</td>
+              <td>{{ user.college || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    </template>
   </main>
 </template>
 
@@ -670,6 +753,70 @@ onMounted(() => {
 
 .admin-format-mock {
   cursor: default;
+}
+
+.admin-user-section {
+  margin: 0 1.5rem;
+}
+
+.user-table-wrap {
+  overflow-x: auto;
+  border-radius: 26px;
+  background: var(--admin-panel);
+  border: 1px solid var(--admin-line);
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.user-table th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.user-table td {
+  padding: 0.95rem 1.2rem;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.user-table tr:last-child td {
+  border-bottom: none;
+}
+
+.user-td-username {
+  font-family: monospace;
+  color: var(--admin-accent);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.role-admin {
+  background: rgba(141, 95, 47, 0.15);
+  color: #8d5f2f;
+}
+
+.role-teacher {
+  background: rgba(61, 100, 156, 0.12);
+  color: #3d649c;
+}
+
+.role-student {
+  background: rgba(61, 129, 82, 0.1);
+  color: #25613a;
 }
 
 @media (max-width: 1300px) {
