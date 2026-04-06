@@ -248,7 +248,7 @@ onMounted(() => {
             </label>
           </div>
 
-          <div class="admin-field">
+          <div class="admin-field" style="margin-top: 1.2rem;">
             <span class="admin-field-label">支持的附件后缀</span>
             <div class="admin-ext-grid">
               <label
