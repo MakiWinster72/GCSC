@@ -346,18 +346,9 @@ async function handleChangePassword() {
   min-height: unset;
 }
 
-.settings-card:hover {
-  border-color: rgba(3, 107, 114, 0.28);
-}
-
 .settings-row.clickable {
   cursor: pointer;
   border-radius: 12px;
-  transition: background 160ms ease;
-}
-
-.settings-row.clickable:hover {
-  background: rgba(3, 107, 114, 0.06);
 }
 
 .chevron {
@@ -384,10 +375,6 @@ async function handleChangePassword() {
   padding-top: 14px;
   margin-top: 4px;
   border-top: 1px solid rgba(3, 107, 114, 0.1);
-}
-
-.settings-expand:hover {
-  border-color: rgba(3, 107, 114, 0.28);
 }
 
 .pw-input {
@@ -441,11 +428,6 @@ async function handleChangePassword() {
     background 160ms ease,
     border-color 160ms ease,
     transform 160ms ease;
-}
-
-.export-option-button:hover {
-  background: rgba(205, 255, 249, 0.72);
-  border-color: rgba(3, 107, 114, 0.3);
 }
 
 .export-option-button:active {
