@@ -3,17 +3,17 @@
     <div class="menu-card-header">
       <Transition name="menu-back-fade">
         <button
-          v-if="isAchievementPanelVisible"
+          v-if="isSubPanelVisible"
           class="menu-card-back"
           type="button"
-          @click="closeAchievementPanel"
+          @click="closeSubPanel"
         >
           &lt;返回
         </button>
       </Transition>
       <Transition :name="titleTransitionName" mode="out-in">
-        <div :key="isAchievementPanelVisible ? 'achievement-title' : 'menu-title'" class="menu-card-title">
-          {{ isAchievementPanelVisible ? "个人成就" : "导航" }}
+        <div :key="currentPanel" class="menu-card-title">
+          {{ panelTitle }}
         </div>
       </Transition>
     </div>
@@ -29,7 +29,7 @@
     >
       <Transition :name="panelTransitionName" mode="out-in">
         <div
-          v-if="isAchievementPanelVisible"
+          v-if="currentPanel === 'achievements'"
           key="achievement-panel"
           class="menu-panel menu-sublist"
         >
@@ -45,17 +45,71 @@
           </button>
         </div>
 
+        <div
+          v-else-if="currentPanel === 'notifications'"
+          key="notification-panel"
+          class="menu-panel menu-notification-list"
+        >
+          <div class="menu-notification-tabs">
+            <button
+              v-for="tab in notificationTabs"
+              :key="tab.key"
+              class="menu-notification-tab"
+              :class="{ active: activeNotificationCategory === tab.key }"
+              type="button"
+              @click="openNotificationCategory(tab.key)"
+            >
+              <span>{{ tab.label }}</span>
+              <span class="menu-notification-tab-count">{{ tab.count }}</span>
+            </button>
+          </div>
+          <div v-if="!filteredInboxEntries.length" class="menu-notification-empty">
+            暂无通知
+          </div>
+          <article
+            v-for="entry in filteredInboxEntries"
+            :key="entry.source + entry.id"
+            class="menu-notification-item"
+            :class="{ active: activeNotificationKey === buildNotificationKey(entry) }"
+            @click="$emit('notification-entry-click', buildNotificationKey(entry))"
+          >
+            <div class="menu-notification-head">
+              <span
+                class="menu-notification-badge"
+                :class="entry.badgeClass"
+              >
+                {{ entry.badgeText }}
+              </span>
+              <span class="menu-notification-time">{{ entry.timeText }}</span>
+            </div>
+            <div class="menu-notification-title">{{ entry.title }}</div>
+            <div class="menu-notification-content">{{ entry.content }}</div>
+            <div class="menu-notification-meta">{{ entry.meta }}</div>
+            <div v-if="entry.reason" class="menu-notification-reason">
+              驳回理由：{{ entry.reason }}
+            </div>
+          </article>
+        </div>
+
         <div v-else key="menu-panel" class="menu-panel menu-list menu-grid">
           <button
             v-for="item in menuItems"
             :key="item.key"
             class="menu-item"
-            :class="{ active: activeMenu === item.key, disabled: !isMenuEnabled(item.key) }"
+            :class="{ active: isItemActive(item.key), disabled: !isMenuEnabled(item.key) }"
             type="button"
             :disabled="!isMenuEnabled(item.key)"
             @click="handleMenuClick(item.key)"
           >
-            <span class="menu-item-label">{{ item.label }}</span>
+            <span class="menu-item-header">
+              <span class="menu-item-label">{{ item.label }}</span>
+              <span
+                v-if="item.key === 'notifications' && pendingCount > 0"
+                class="menu-item-count"
+              >
+                {{ pendingCount }}
+              </span>
+            </span>
             <span class="menu-item-meta">{{ menuMeta[item.key] }}</span>
           </button>
         </div>
@@ -67,6 +121,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUpdated, ref, watch } from "vue";
 import { filterMenuItemsByRole, isMenuEnabled } from "../constants/menu";
+import { useNotifications } from "../composables/useNotifications";
 
 const props = defineProps({
   profile: {
@@ -81,33 +136,76 @@ const props = defineProps({
     type: String,
     default: "all",
   },
+  activeNotificationKey: {
+    type: String,
+    default: "",
+  },
+  activeNotificationCategory: {
+    type: String,
+    default: "pending",
+  },
   showAchievementsDrawer: {
     type: Boolean,
     default: true,
   },
 });
 
-const emit = defineEmits(["menu-click", "achievement-entry-click"]);
+const emit = defineEmits([
+  "menu-click",
+  "achievement-entry-click",
+  "notification-entry-click",
+  "notification-category-click",
+]);
 
-const menuItems = computed(() =>
-  filterMenuItemsByRole(props.profile.role).filter((item) => item.key !== "admin"),
-);
+const { inboxEntries, pendingCount, categoryCounts } = useNotifications(props.profile);
+
+const menuItems = computed(() => filterMenuItemsByRole(props.profile.role));
 
 const menuMeta = {
+  notifications: "待处理请求与结果通知",
   achievements: "查看与维护成果",
   "my-info": "编辑个人档案",
   "student-info": "检索学生资料",
+  admin: "开关与系统设置",
 };
 
-const isAchievementPanelVisible = ref(props.activeMenu === "achievements");
-const panelDirection = ref(props.activeMenu === "achievements" ? "forward" : "back");
+const currentPanel = ref(
+  props.activeMenu === "achievements" || props.activeMenu === "notifications"
+    ? props.activeMenu
+    : "menu",
+);
+const panelDirection = ref(
+  props.activeMenu === "achievements" || props.activeMenu === "notifications"
+    ? "forward"
+    : "back",
+);
 const menuBodyRef = ref(null);
 const showBottomFade = ref(false);
+const isSubPanelVisible = computed(() => currentPanel.value !== "menu");
 const panelTransitionName = computed(() =>
   panelDirection.value === "forward" ? "menu-panel-forward" : "menu-panel-back",
 );
 const titleTransitionName = computed(() =>
   panelDirection.value === "forward" ? "menu-title-forward" : "menu-title-back",
+);
+const panelTitle = computed(() => {
+  if (currentPanel.value === "achievements") {
+    return "个人成就";
+  }
+  if (currentPanel.value === "notifications") {
+    return "通知";
+  }
+  return "导航";
+});
+const notificationTabs = computed(() => [
+  { key: "pending", label: "待处理", count: categoryCounts.value.pending || 0 },
+  { key: "delayed", label: "滞后", count: categoryCounts.value.delayed || 0 },
+  { key: "processed", label: "已处理", count: categoryCounts.value.processed || 0 },
+]);
+const filteredInboxEntries = computed(() =>
+  inboxEntries.value.filter(
+    (entry) => entry.categoryKey === (props.activeNotificationCategory || "pending"),
+  ),
 );
 
 const achievementEntries = [
@@ -126,12 +224,25 @@ const achievementEntries = [
 watch(
   () => props.activeMenu,
   (activeMenu, previousMenu) => {
-    if (activeMenu === "achievements" && previousMenu !== "achievements") {
+    if (
+      (activeMenu === "achievements" || activeMenu === "notifications") &&
+      previousMenu !== activeMenu
+    ) {
       panelDirection.value = "forward";
-    } else if (activeMenu !== "achievements" && previousMenu === "achievements") {
+      currentPanel.value = activeMenu;
+    } else if (
+      activeMenu !== "achievements" &&
+      activeMenu !== "notifications" &&
+      (previousMenu === "achievements" || previousMenu === "notifications")
+    ) {
       panelDirection.value = "back";
+      if (
+        currentPanel.value === "achievements" ||
+        currentPanel.value === "notifications"
+      ) {
+        currentPanel.value = "menu";
+      }
     }
-    isAchievementPanelVisible.value = activeMenu === "achievements";
     nextTick(updateBodyFadeState);
   },
 );
@@ -147,20 +258,49 @@ onUpdated(() => {
 function handleMenuClick(key) {
   if (key === "achievements" && props.showAchievementsDrawer) {
     panelDirection.value = "forward";
-    isAchievementPanelVisible.value = true;
+    currentPanel.value = "achievements";
+    nextTick(updateBodyFadeState);
+    emit("menu-click", key);
+    return;
   }
+  if (key === "notifications") {
+    panelDirection.value = "forward";
+    currentPanel.value = "notifications";
+    emit("menu-click", key);
+    nextTick(updateBodyFadeState);
+    return;
+  }
+  currentPanel.value = "menu";
   emit("menu-click", key);
   nextTick(updateBodyFadeState);
 }
 
-function closeAchievementPanel() {
+function closeSubPanel() {
   panelDirection.value = "back";
-  isAchievementPanelVisible.value = false;
+  currentPanel.value = "menu";
   nextTick(updateBodyFadeState);
 }
 
 function handleBodyScroll() {
   updateBodyFadeState();
+}
+
+function isItemActive(key) {
+  if (key === "notifications") {
+    return currentPanel.value === "notifications";
+  }
+  if (key === "achievements") {
+    return currentPanel.value === "achievements" || props.activeMenu === key;
+  }
+  return currentPanel.value === "menu" && props.activeMenu === key;
+}
+
+function buildNotificationKey(entry) {
+  return `${entry.source}:${entry.sourceId || entry.id}`;
+}
+
+function openNotificationCategory(category) {
+  emit("notification-category-click", category);
 }
 
 function updateBodyFadeState() {

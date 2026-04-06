@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AchievementsView from '../views/AchievementsView.vue'
 import MyInfosView from '../views/MyInfosView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
 import StudentInfoView from '../views/StudentInfoView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import AdminView from '../views/AdminView.vue'
@@ -17,6 +18,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         { path: '', redirect: '/myinfos' },
+        { path: 'notifications', name: 'notifications', component: NotificationsView },
         { path: 'achievements', name: 'achievements', component: AchievementsView },
         { path: 'myinfos', name: 'myinfos', component: MyInfosView },
         { path: 'settings', name: 'settings', component: SettingsView },
