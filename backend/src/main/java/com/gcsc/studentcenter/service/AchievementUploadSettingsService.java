@@ -131,7 +131,7 @@ public class AchievementUploadSettingsService {
             throw new IllegalArgumentException("最多上传 " + settings.imageMaxCount + " 张图片");
         }
 
-        List<Map<String, Object>> attachments = parseAttachmentList(rawAttachmentsJson);
+        List<LinkedHashMap<String, Object>> attachments = parseAttachmentList(rawAttachmentsJson);
         if (attachments.size() > settings.attachmentMaxCount) {
             throw new IllegalArgumentException("最多上传 " + settings.attachmentMaxCount + " 个附件");
         }
@@ -301,7 +301,7 @@ public class AchievementUploadSettingsService {
         }
     }
 
-    private List<Map<String, Object>> parseAttachmentList(String rawJson) {
+    private List<LinkedHashMap<String, Object>> parseAttachmentList(String rawJson) {
         if (rawJson == null || rawJson.isBlank()) {
             return List.of();
         }
