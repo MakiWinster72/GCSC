@@ -1918,13 +1918,14 @@ async function saveAchievement() {
   try {
     if (editId.value) {
       const { data } = await updateAchievement(category, editId.value, payload);
+      const normalizedData = normalizeAchievement(data);
       achievements.value = dedupeAchievements(
         achievements.value.map((item) =>
-          item.id === data.id ? normalizeAchievement(data) : item,
+          item.id === data.id ? normalizedData : item,
         ),
       );
       if (viewItem.value && viewItem.value.id === data.id) {
-        viewItem.value = normalizeAchievement(data);
+        viewItem.value = normalizedData;
       }
       if (profile.role === "STUDENT") {
         submitAchievementReviewRequest({
@@ -1932,15 +1933,20 @@ async function saveAchievement() {
           action: "update",
           category,
           title: titleValue,
-          payloadSnapshot: payload,
+          payloadSnapshot: buildAchievementReviewPayloadSnapshot({
+            category,
+            beforeItem: existingItem,
+            afterItem: normalizedData,
+          }),
           recordId: data.id,
           changes,
         });
       }
     } else {
       const { data } = await createAchievement(category, payload);
+      const normalizedData = normalizeAchievement(data);
       achievements.value = dedupeAchievements([
-        normalizeAchievement(data),
+        normalizedData,
         ...achievements.value,
       ]);
       if (profile.role === "STUDENT") {
@@ -1949,7 +1955,10 @@ async function saveAchievement() {
           action: "create",
           category,
           title: titleValue,
-          payloadSnapshot: payload,
+          payloadSnapshot: buildAchievementReviewPayloadSnapshot({
+            category,
+            afterItem: normalizedData,
+          }),
           recordId: data.id,
           changes,
         });
@@ -2034,6 +2043,73 @@ function resolveImageUrlsFromPayload(payload) {
   } catch {
     return payload?.imageUrl ? [payload.imageUrl] : [];
   }
+}
+
+function resolveAttachmentsFromPayload(payload) {
+  return parseJsonArray(payload?.fields?.[ATTACHMENTS_FIELD])
+    .map((item) => ({
+      url: resolveMediaUrl(item?.url || ""),
+      name: item?.name || item?.originalName || "附件",
+      mediaType: item?.mediaType || "",
+    }))
+    .filter((item) => item.url);
+}
+
+function buildAchievementReviewPayloadSnapshot({
+  category,
+  beforeItem = null,
+  afterItem = null,
+}) {
+  return {
+    type: "achievement-review",
+    category,
+    before: beforeItem
+      ? buildAchievementReviewSnapshot({ category, source: beforeItem })
+      : null,
+    after: afterItem
+      ? buildAchievementReviewSnapshot({ category, source: afterItem })
+      : null,
+  };
+}
+
+function buildAchievementReviewSnapshot({ category, source }) {
+  const config = categoryFieldMap[category] || null;
+  const fields = source?.fields || {};
+  const fieldConfigList = Array.isArray(config?.fields) ? config.fields : [];
+  const titleKey = config?.titleKey || "";
+  const dateKey = config?.dateKey || "";
+  const dateField = fieldConfigList.find((field) => field.key === dateKey) || null;
+  const imageUrls = Array.isArray(source?.imageUrls)
+    ? source.imageUrls.filter(Boolean).map((url) => resolveMediaUrl(url))
+    : resolveImageUrlsFromPayload({
+        imageUrl: source?.imageUrl || source?.image || "",
+        fields,
+      });
+  const attachments = Array.isArray(source?.attachments)
+    ? source.attachments
+        .map((item) => ({
+          url: resolveMediaUrl(item?.url || ""),
+          name: item?.name || "附件",
+          mediaType: item?.mediaType || "",
+        }))
+        .filter((item) => item.url)
+    : resolveAttachmentsFromPayload({ fields });
+
+  return {
+    category,
+    categoryLabel:
+      achievementEntries.find((entry) => entry.key === category)?.label || "成就记录",
+    title: stringifyChangeValue(fields[titleKey]),
+    dateLabel: dateField?.label || "",
+    dateValue: dateKey ? stringifyChangeValue(fields[dateKey]) : "",
+    fieldEntries: fieldConfigList.map((field) => ({
+      key: field.key,
+      label: field.label,
+      value: stringifyChangeValue(fields[field.key]),
+    })),
+    imageUrls,
+    attachments,
+  };
 }
 
 function stringifyChangeValue(value) {

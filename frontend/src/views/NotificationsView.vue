@@ -1,6 +1,8 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import AchievementReviewSnapshotCard from "../components/AchievementReviewSnapshotCard.vue";
+import { API_BASE } from "../api/request";
 import { useNotifications } from "../composables/useNotifications";
 
 const route = useRoute();
@@ -43,6 +45,9 @@ const canProcessSelected = computed(() => {
   }
   return selectedEntry.value.requester?.username !== profile.username;
 });
+const achievementReviewSnapshot = computed(() =>
+  resolveAchievementReviewPayload(selectedEntry.value),
+);
 
 watch(
   () => [filteredEntries.value, activeCategory.value],
@@ -140,6 +145,101 @@ function parseStructuredChangeValue(value) {
     });
 }
 
+function parseJsonArray(value) {
+  if (!value) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function resolveMediaUrl(url) {
+  if (!url) {
+    return "";
+  }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `${API_BASE}${url}`;
+}
+
+function resolveAchievementReviewPayload(entry) {
+  if (!entry || entry.resourceType !== "achievement") {
+    return null;
+  }
+  const payload = entry.payloadSnapshot;
+  if (payload?.type === "achievement-review") {
+    return {
+      before: payload.before || null,
+      after: payload.after || null,
+    };
+  }
+  if (payload && typeof payload === "object" && payload.fields) {
+    return {
+      before: null,
+      after: buildLegacyAchievementSnapshot(entry.category, payload),
+    };
+  }
+  return null;
+}
+
+function buildLegacyAchievementSnapshot(category, payload) {
+  const fields = payload?.fields || {};
+  const hiddenKeys = new Set(["_imageUrls", "_attachments"]);
+  const fieldEntries = Object.entries(fields)
+    .filter(([key]) => !hiddenKeys.has(key))
+    .map(([key, value]) => ({
+      key,
+      label: key,
+      value: formatChangeValue(value),
+    }))
+    .filter((field) => field.value !== "-");
+
+  const imageUrls = [
+    ...(payload?.imageUrl ? [payload.imageUrl] : []),
+    ...parseJsonArray(fields._imageUrls),
+  ]
+    .filter(Boolean)
+    .map((url) => resolveMediaUrl(url));
+  const attachments = parseJsonArray(fields._attachments)
+    .map((item) => ({
+      url: resolveMediaUrl(item?.url || ""),
+      name: item?.name || item?.originalName || "附件",
+      mediaType: item?.mediaType || "",
+    }))
+    .filter((item) => item.url);
+
+  return {
+    category,
+    categoryLabel: entryCategoryLabel(category),
+    title: fieldEntries[0]?.value || payload?.title || "成就记录",
+    dateLabel: "",
+    dateValue: "",
+    fieldEntries,
+    imageUrls,
+    attachments,
+  };
+}
+
+function entryCategoryLabel(category) {
+  const labels = {
+    contest: "学科竞赛、文体艺术",
+    paper: "发表学术论文",
+    journal: "发表期刊作品",
+    patent: "专利(著作权)授权数(项)",
+    certificate: "职业资格证书",
+    research: "学生参与教师科研项目情况",
+    works: "创作、表演的代表性作品",
+    doubleHundred: "双百工程",
+    ieerTraining: "大学生创新创业训练计划项目",
+  };
+  return labels[category] || "成就记录";
+}
+
 function toggleRejectEditor() {
   rejectEditorOpen.value = !rejectEditorOpen.value;
   actionError.value = "";
@@ -207,7 +307,29 @@ function rejectSelectedRequest() {
       <p class="notification-detail-content">{{ selectedEntry.content }}</p>
 
       <section
-        v-if="selectedEntry.changes?.length"
+        v-if="achievementReviewSnapshot"
+        class="notification-changes notification-achievement-review"
+      >
+        <div class="notification-changes-label">成就审核</div>
+        <div class="notification-achievement-compare">
+          <AchievementReviewSnapshotCard
+            :snapshot="achievementReviewSnapshot.before"
+            :empty-text="
+              selectedEntry.action === 'create' ? '新增前暂无记录' : '暂无原记录'
+            "
+          />
+          <div class="notification-achievement-arrow" aria-hidden="true">
+            →
+          </div>
+          <AchievementReviewSnapshotCard
+            :snapshot="achievementReviewSnapshot.after"
+            empty-text="暂无提交内容"
+          />
+        </div>
+      </section>
+
+      <section
+        v-else-if="selectedEntry.changes?.length"
         class="notification-changes"
       >
         <div class="notification-changes-label">变更内容</div>
@@ -471,6 +593,21 @@ function rejectSelectedRequest() {
   gap: 12px;
 }
 
+.notification-achievement-compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.notification-achievement-arrow {
+  display: grid;
+  place-items: center;
+  color: #0f555d;
+  font-size: 28px;
+  font-weight: 700;
+}
+
 .notification-change-item {
   border-radius: 16px;
   padding: 14px;
@@ -609,6 +746,15 @@ function rejectSelectedRequest() {
 }
 
 @media (max-width: 900px) {
+  .notification-achievement-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-achievement-arrow {
+    min-height: 28px;
+    transform: rotate(90deg);
+  }
+
   .notification-change-values {
     grid-template-columns: 1fr;
   }
