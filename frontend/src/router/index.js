@@ -3,22 +3,39 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AchievementsView from '../views/AchievementsView.vue'
 import MyInfosView from '../views/MyInfosView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
 import StudentInfoView from '../views/StudentInfoView.vue'
+import SettingsView from '../views/SettingsView.vue'
 import AdminView from '../views/AdminView.vue'
+import DashboardLayout from '../layouts/DashboardLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/myinfos' },
-    { path: '/achievements', name: 'achievements', component: AchievementsView, meta: { requiresAuth: true } },
-    { path: '/myinfos', name: 'myinfos', component: MyInfosView, meta: { requiresAuth: true } },
     {
-      path: '/student-info',
-      name: 'student-info',
-      component: StudentInfoView,
-      meta: { requiresAuth: true, allowedRoles: ['TEACHER', 'ADMIN'] }
+      path: '/',
+      component: DashboardLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', redirect: '/myinfos' },
+        { path: 'notifications', name: 'notifications', component: NotificationsView },
+        { path: 'achievements', name: 'achievements', component: AchievementsView },
+        { path: 'myinfos', name: 'myinfos', component: MyInfosView },
+        { path: 'settings', name: 'settings', component: SettingsView },
+        {
+          path: 'student-info',
+          name: 'student-info',
+          component: StudentInfoView,
+          meta: { allowedRoles: ['TEACHER', 'ADMIN'] }
+        },
+        {
+          path: 'admin',
+          name: 'admin',
+          component: AdminView,
+          meta: { allowedRoles: ['ADMIN'] }
+        }
+      ]
     },
-    { path: '/admin', name: 'admin', component: AdminView, meta: { requiresAuth: true } },
     { path: '/login', name: 'login', component: LoginView, meta: { guestOnly: true } },
     { path: '/register', name: 'register', component: RegisterView, meta: { guestOnly: true } }
   ]

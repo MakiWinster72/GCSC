@@ -1,6 +1,7 @@
 package com.gcsc.studentcenter.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class StudentProfileRequest {
     private String fullName;
@@ -23,8 +24,11 @@ public class StudentProfileRequest {
     private String classTeacher;
     private String counselor;
     private String phone;
+    private String backupContact;
     private String address;
+    private String idType;
     private String idNo;
+    private LocalDate birthDate;
     private String nativePlace;
     private String leagueNo;
     private LocalDate leagueApplicationDate;
@@ -56,6 +60,8 @@ public class StudentProfileRequest {
     private String motherPhone;
     private String motherWorkUnit;
     private String motherTitle;
+    private List<EducationExperienceItem> educationExperiences;
+    private List<CadreExperienceItem> cadreExperiences;
 
     public String getFullName() {
         return fullName;
@@ -217,6 +223,14 @@ public class StudentProfileRequest {
         this.phone = phone;
     }
 
+    public String getBackupContact() {
+        return backupContact;
+    }
+
+    public void setBackupContact(String backupContact) {
+        this.backupContact = backupContact;
+    }
+
     public String getAddress() {
         return address;
     }
@@ -225,12 +239,28 @@ public class StudentProfileRequest {
         this.address = address;
     }
 
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
+    }
+
     public String getIdNo() {
         return idNo;
     }
 
     public void setIdNo(String idNo) {
         this.idNo = idNo;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
     public String getNativePlace() {
@@ -478,5 +508,21 @@ public class StudentProfileRequest {
 
     public void setMotherTitle(String motherTitle) {
         this.motherTitle = motherTitle;
+    }
+
+    public List<EducationExperienceItem> getEducationExperiences() {
+        return educationExperiences;
+    }
+
+    public void setEducationExperiences(List<EducationExperienceItem> educationExperiences) {
+        this.educationExperiences = educationExperiences;
+    }
+
+    public List<CadreExperienceItem> getCadreExperiences() {
+        return cadreExperiences;
+    }
+
+    public void setCadreExperiences(List<CadreExperienceItem> cadreExperiences) {
+        this.cadreExperiences = cadreExperiences;
     }
 }

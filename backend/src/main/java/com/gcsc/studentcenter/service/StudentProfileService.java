@@ -1,5 +1,7 @@
 package com.gcsc.studentcenter.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,13 +13,20 @@ import com.gcsc.studentcenter.dto.StudentProfileRequest;
 import com.gcsc.studentcenter.dto.StudentProfileResponse;
 import com.gcsc.studentcenter.dto.StudentSearchItemResponse;
 import com.gcsc.studentcenter.dto.StudentSearchResponse;
+import com.gcsc.studentcenter.dto.CadreExperienceItem;
+import com.gcsc.studentcenter.dto.EducationExperienceItem;
 import com.gcsc.studentcenter.entity.AppUser;
+import com.gcsc.studentcenter.entity.CadreExperience;
+import com.gcsc.studentcenter.entity.EducationExperience;
 import com.gcsc.studentcenter.entity.StudentProfile;
+import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
 import com.gcsc.studentcenter.repository.StudentProfileRepository;
 
 @Service
 public class StudentProfileService {
+
+    private static final String FIXED_COLLEGE = "大数据与人工智能学院";
 
     private final StudentProfileRepository studentProfileRepository;
     private final AppUserRepository appUserRepository;
@@ -57,13 +66,37 @@ public class StudentProfileService {
                 return created;
             });
 
+        StudentProfile saved = saveProfileInternal(user, profile, request);
+        return toResponse(user, saved);
+    }
+
+    @Transactional
+    public StudentProfileResponse saveProfileById(String operatorUsername, Long id, StudentProfileRequest request) {
+        AppUser operator = appUserRepository.findByUsername(operatorUsername)
+            .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        if (operator.getRole() != UserRole.ADMIN) {
+            throw new IllegalArgumentException("无权限操作该学生档案");
+        }
+        StudentProfile profile = studentProfileRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("学生档案不存在"));
+        AppUser user = profile.getUser();
+        StudentProfile saved = saveProfileInternal(user, profile, request);
+        return toResponse(user, saved);
+    }
+
+    private StudentProfile saveProfileInternal(
+        AppUser user,
+        StudentProfile profile,
+        StudentProfileRequest request
+    ) {
+
         profile.setFullName(normalize(request.getFullName()));
         profile.setStudentNo(normalize(request.getStudentNo()));
         profile.setClassYear(request.getClassYear());
         profile.setClassMajor(normalize(request.getClassMajor()));
         profile.setClassNo(normalize(request.getClassNo()));
         profile.setClassName(resolveClassName(request));
-        profile.setCollege(normalize(request.getCollege()));
+        profile.setCollege(FIXED_COLLEGE);
         profile.setEnrollmentDate(request.getEnrollmentDate());
         profile.setStudentCategory(normalize(request.getStudentCategory()));
         profile.setEthnicity(normalize(request.getEthnicity()));
@@ -76,8 +109,11 @@ public class StudentProfileService {
         profile.setClassTeacher(normalize(request.getClassTeacher()));
         profile.setCounselor(normalize(request.getCounselor()));
         profile.setPhone(normalize(request.getPhone()));
+        profile.setBackupContact(normalize(request.getBackupContact()));
         profile.setAddress(normalize(request.getAddress()));
+        profile.setIdType(normalize(request.getIdType()));
         profile.setIdNo(normalize(request.getIdNo()));
+        profile.setBirthDate(request.getBirthDate());
         profile.setNativePlace(normalize(request.getNativePlace()));
         profile.setLeagueNo(normalize(request.getLeagueNo()));
         profile.setLeagueApplicationDate(request.getLeagueApplicationDate());
@@ -109,17 +145,19 @@ public class StudentProfileService {
         profile.setMotherPhone(normalize(request.getMotherPhone()));
         profile.setMotherWorkUnit(normalize(request.getMotherWorkUnit()));
         profile.setMotherTitle(normalize(request.getMotherTitle()));
+        syncEducationExperiences(profile, request.getEducationExperiences());
+        syncCadreExperiences(profile, request.getCadreExperiences());
 
         user.setAvatarUrl(normalize(request.getAvatarUrl()));
         syncUserSummary(user, profile);
 
-        StudentProfile saved = studentProfileRepository.save(profile);
-        return toResponse(user, saved);
+        return studentProfileRepository.save(profile);
     }
 
     @Transactional(readOnly = true)
     public StudentSearchResponse searchProfiles(
         Integer classYear,
+        String classNo,
         String college,
         String major,
         Boolean hkMoTw,
@@ -132,6 +170,7 @@ public class StudentProfileService {
         int pageSize = Math.max(size, 1);
         Page<StudentSearchItemResponse> result = studentProfileRepository.searchProfiles(
             classYear,
+            normalize(classNo),
             normalize(college),
             normalize(major),
             hkMoTw,
@@ -155,9 +194,7 @@ public class StudentProfileService {
         }
         user.setStudentNo(profile.getStudentNo());
         user.setClassName(profile.getClassName());
-        if (profile.getCollege() != null) {
-            user.setCollege(profile.getCollege());
-        }
+        user.setCollege(FIXED_COLLEGE);
         appUserRepository.save(user);
     }
 
@@ -179,8 +216,11 @@ public class StudentProfileService {
             profile != null ? profile.getEthnicity() : null,
             profile != null ? profile.getPoliticalStatus() : null,
             profile != null ? profile.getPhone() : null,
+            profile != null ? profile.getBackupContact() : null,
             profile != null ? profile.getAddress() : null,
+            profile != null ? profile.getIdType() : null,
             profile != null ? profile.getIdNo() : null,
+            profile != null ? profile.getBirthDate() : null,
             profile != null ? profile.getNativePlace() : null,
             profile != null ? profile.getDormCampus() : null,
             profile != null ? profile.getDormBuilding() : null,
@@ -218,8 +258,90 @@ public class StudentProfileService {
             profile != null ? profile.getMotherName() : null,
             profile != null ? profile.getMotherPhone() : null,
             profile != null ? profile.getMotherWorkUnit() : null,
-            profile != null ? profile.getMotherTitle() : null
+            profile != null ? profile.getMotherTitle() : null,
+            toEducationItems(profile != null ? profile.getEducationExperiences() : null),
+            toCadreItems(profile != null ? profile.getCadreExperiences() : null)
         );
+    }
+
+    private void syncEducationExperiences(
+        StudentProfile profile,
+        List<EducationExperienceItem> educationExperiences
+    ) {
+        List<EducationExperience> target = profile.getEducationExperiences();
+        target.clear();
+        if (educationExperiences == null) {
+            return;
+        }
+        for (EducationExperienceItem item : educationExperiences) {
+            EducationExperience experience = new EducationExperience();
+            experience.setProfile(profile);
+            experience.setStartDate(item.getStartDate());
+            experience.setEndDate(Boolean.TRUE.equals(item.getIsCurrent()) ? null : item.getEndDate());
+            experience.setSchoolName(normalize(item.getSchoolName()));
+            experience.setEducationLevel(normalize(item.getEducationLevel()));
+            experience.setWitness(normalize(item.getWitness()));
+            experience.setIsCurrent(item.getIsCurrent());
+            target.add(experience);
+        }
+    }
+
+    private List<EducationExperienceItem> toEducationItems(List<EducationExperience> experiences) {
+        if (experiences == null) {
+            return null;
+        }
+        List<EducationExperienceItem> items = new ArrayList<>();
+        for (EducationExperience experience : experiences) {
+            EducationExperienceItem item = new EducationExperienceItem();
+            item.setStartDate(experience.getStartDate());
+            item.setEndDate(experience.getEndDate());
+            item.setSchoolName(experience.getSchoolName());
+            item.setEducationLevel(experience.getEducationLevel());
+            item.setWitness(experience.getWitness());
+            item.setIsCurrent(experience.getIsCurrent());
+            items.add(item);
+        }
+        return items;
+    }
+
+    private void syncCadreExperiences(
+        StudentProfile profile,
+        List<CadreExperienceItem> cadreExperiences
+    ) {
+        List<CadreExperience> target = profile.getCadreExperiences();
+        target.clear();
+        if (cadreExperiences == null) {
+            return;
+        }
+        for (CadreExperienceItem item : cadreExperiences) {
+            CadreExperience experience = new CadreExperience();
+            experience.setProfile(profile);
+            experience.setStartDate(item.getStartDate());
+            experience.setEndDate(Boolean.TRUE.equals(item.getIsCurrent()) ? null : item.getEndDate());
+            experience.setDepartment(normalize(item.getDepartment()));
+            experience.setPosition(normalize(item.getPosition()));
+            experience.setDescription(normalize(item.getDescription()));
+            experience.setIsCurrent(item.getIsCurrent());
+            target.add(experience);
+        }
+    }
+
+    private List<CadreExperienceItem> toCadreItems(List<CadreExperience> experiences) {
+        if (experiences == null) {
+            return null;
+        }
+        List<CadreExperienceItem> items = new ArrayList<>();
+        for (CadreExperience experience : experiences) {
+            CadreExperienceItem item = new CadreExperienceItem();
+            item.setStartDate(experience.getStartDate());
+            item.setEndDate(experience.getEndDate());
+            item.setDepartment(experience.getDepartment());
+            item.setPosition(experience.getPosition());
+            item.setDescription(experience.getDescription());
+            item.setIsCurrent(experience.getIsCurrent());
+            items.add(item);
+        }
+        return items;
     }
 
     private String resolveClassName(StudentProfileRequest request) {

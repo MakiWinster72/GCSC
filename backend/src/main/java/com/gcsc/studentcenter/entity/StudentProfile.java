@@ -1,13 +1,17 @@
 package com.gcsc.studentcenter.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -80,11 +84,20 @@ public class StudentProfile {
     @Column(name = "phone", length = 32)
     private String phone;
 
+    @Column(name = "backup_contact", length = 128)
+    private String backupContact;
+
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "id_no", length = 32)
+    @Column(name = "id_type", length = 64)
+    private String idType;
+
+    @Column(name = "id_no", length = 64)
     private String idNo;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
 
     @Column(name = "native_place", length = 64)
     private String nativePlace;
@@ -177,6 +190,12 @@ public class StudentProfile {
 
     @Column(name = "mother_title", length = 64)
     private String motherTitle;
+
+    @OneToMany(mappedBy = "profile", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<EducationExperience> educationExperiences = new ArrayList<>();
+
+    @OneToMany(mappedBy = "profile", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<CadreExperience> cadreExperiences = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -342,6 +361,14 @@ public class StudentProfile {
         this.phone = phone;
     }
 
+    public String getBackupContact() {
+        return backupContact;
+    }
+
+    public void setBackupContact(String backupContact) {
+        this.backupContact = backupContact;
+    }
+
     public String getAddress() {
         return address;
     }
@@ -350,12 +377,28 @@ public class StudentProfile {
         this.address = address;
     }
 
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
+    }
+
     public String getIdNo() {
         return idNo;
     }
 
     public void setIdNo(String idNo) {
         this.idNo = idNo;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
     public String getNativePlace() {
@@ -603,5 +646,21 @@ public class StudentProfile {
 
     public void setMotherTitle(String motherTitle) {
         this.motherTitle = motherTitle;
+    }
+
+    public List<EducationExperience> getEducationExperiences() {
+        return educationExperiences;
+    }
+
+    public void setEducationExperiences(List<EducationExperience> educationExperiences) {
+        this.educationExperiences = educationExperiences;
+    }
+
+    public List<CadreExperience> getCadreExperiences() {
+        return cadreExperiences;
+    }
+
+    public void setCadreExperiences(List<CadreExperience> cadreExperiences) {
+        this.cadreExperiences = cadreExperiences;
     }
 }

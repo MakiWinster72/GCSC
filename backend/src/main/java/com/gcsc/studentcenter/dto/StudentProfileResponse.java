@@ -1,6 +1,7 @@
 package com.gcsc.studentcenter.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class StudentProfileResponse {
     private Long id;
@@ -19,8 +20,11 @@ public class StudentProfileResponse {
     private String ethnicity;
     private String politicalStatus;
     private String phone;
+    private String backupContact;
     private String address;
+    private String idType;
     private String idNo;
+    private LocalDate birthDate;
     private String nativePlace;
     private String dormCampus;
     private String dormBuilding;
@@ -59,6 +63,8 @@ public class StudentProfileResponse {
     private String motherPhone;
     private String motherWorkUnit;
     private String motherTitle;
+    private List<EducationExperienceItem> educationExperiences;
+    private List<CadreExperienceItem> cadreExperiences;
 
     public StudentProfileResponse(
         Long id,
@@ -77,8 +83,11 @@ public class StudentProfileResponse {
         String ethnicity,
         String politicalStatus,
         String phone,
+        String backupContact,
         String address,
+        String idType,
         String idNo,
+        LocalDate birthDate,
         String nativePlace,
         String dormCampus,
         String dormBuilding,
@@ -116,7 +125,9 @@ public class StudentProfileResponse {
         String motherName,
         String motherPhone,
         String motherWorkUnit,
-        String motherTitle
+        String motherTitle,
+        List<EducationExperienceItem> educationExperiences,
+        List<CadreExperienceItem> cadreExperiences
     ) {
         this.id = id;
         this.username = username;
@@ -134,8 +145,11 @@ public class StudentProfileResponse {
         this.ethnicity = ethnicity;
         this.politicalStatus = politicalStatus;
         this.phone = phone;
+        this.backupContact = backupContact;
         this.address = address;
+        this.idType = idType;
         this.idNo = idNo;
+        this.birthDate = birthDate;
         this.nativePlace = nativePlace;
         this.dormCampus = dormCampus;
         this.dormBuilding = dormBuilding;
@@ -174,6 +188,8 @@ public class StudentProfileResponse {
         this.motherPhone = motherPhone;
         this.motherWorkUnit = motherWorkUnit;
         this.motherTitle = motherTitle;
+        this.educationExperiences = educationExperiences;
+        this.cadreExperiences = cadreExperiences;
     }
 
     public Long getId() {
@@ -240,12 +256,24 @@ public class StudentProfileResponse {
         return phone;
     }
 
+    public String getBackupContact() {
+        return backupContact;
+    }
+
     public String getAddress() {
         return address;
     }
 
     public String getIdNo() {
         return idNo;
+    }
+
+    public String getIdType() {
+        return idType;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
     }
 
     public String getNativePlace() {
@@ -398,5 +426,13 @@ public class StudentProfileResponse {
 
     public String getMotherTitle() {
         return motherTitle;
+    }
+
+    public List<EducationExperienceItem> getEducationExperiences() {
+        return educationExperiences;
+    }
+
+    public List<CadreExperienceItem> getCadreExperiences() {
+        return cadreExperiences;
     }
 }

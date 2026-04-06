@@ -1,11 +1,21 @@
 export const MENU_ITEMS = [
+  { key: "notifications", label: "通知" },
   { key: "achievements", label: "个人成就" },
   { key: "my-info", label: "我的信息" },
   { key: "student-info", label: "学生信息" },
   { key: "admin", label: "后台管理" },
 ];
 
+export const MENU_ROUTE_MAP = {
+  notifications: { path: "/notifications" },
+  achievements: { path: "/achievements", query: { category: "all" } },
+  "my-info": { path: "/myinfos" },
+  "student-info": { path: "/student-info" },
+  admin: { path: "/admin" },
+};
+
 const ENABLED_MENU_KEYS = new Set([
+  "notifications",
   "achievements",
   "my-info",
   "student-info",
@@ -14,6 +24,7 @@ const ENABLED_MENU_KEYS = new Set([
 
 const ROLE_MENU_VISIBILITY = {
   "student-info": new Set(["TEACHER", "ADMIN"]),
+  "admin": new Set(["ADMIN"]),
 };
 
 export function isMenuEnabled(key) {
@@ -29,4 +40,25 @@ export function filterMenuItemsByRole(role) {
     }
     return allowedRoles.has(normalizedRole);
   });
+}
+
+export function getMenuLocation(key) {
+  return MENU_ROUTE_MAP[key] || MENU_ROUTE_MAP["my-info"];
+}
+
+export function getActiveMenuFromRoute(route) {
+  const routeName = route?.name;
+  if (routeName === "notifications") {
+    return "notifications";
+  }
+  if (routeName === "achievements") {
+    return "achievements";
+  }
+  if (routeName === "student-info") {
+    return "student-info";
+  }
+  if (routeName === "admin") {
+    return "admin";
+  }
+  return "my-info";
 }
