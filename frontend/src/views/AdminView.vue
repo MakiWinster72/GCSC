@@ -16,6 +16,9 @@ const users = shallowRef([]);
 const usersLoading = shallowRef(false);
 const usersError = shallowRef("");
 const activeTab = shallowRef("upload");
+const userSearch = shallowRef("");
+const userRoleFilter = shallowRef("");
+const userClassFilter = shallowRef("");
 const {
   settings,
   loading,
@@ -173,6 +176,31 @@ const ROLE_OPTIONS = [
   { value: "TEACHER", label: "教师" },
   { value: "ADMIN", label: "管理员" },
 ];
+
+const filteredUsers = computed(() => {
+  let result = users.value;
+  const q = userSearch.value.trim().toLowerCase();
+  if (q) {
+    result = result.filter(u =>
+      (u.username || "").toLowerCase().includes(q) ||
+      (u.displayName || "").toLowerCase().includes(q) ||
+      (u.studentNo || "").toLowerCase().includes(q) ||
+      (u.className || "").toLowerCase().includes(q)
+    );
+  }
+  if (userRoleFilter.value) {
+    result = result.filter(u => u.role === userRoleFilter.value);
+  }
+  if (userClassFilter.value) {
+    result = result.filter(u => u.className === userClassFilter.value);
+  }
+  return result;
+});
+
+const classOptions = computed(() => {
+  const set = new Set(users.value.map(u => u.className).filter(Boolean));
+  return Array.from(set).sort();
+});
 
 function openEditModal(user) {
   editModal.user = user;
@@ -493,10 +521,29 @@ onMounted(() => {
           <h3 class="admin-panel-title">系统用户列表</h3>
         </div>
         <div v-if="usersLoading" class="admin-panel-status">加载中...</div>
-        <div v-else class="admin-panel-status">共 {{ users.length }} 位用户</div>
+        <div v-else class="admin-panel-status">共 {{ filteredUsers.length }} 位用户</div>
       </div>
 
       <div v-if="usersError" class="admin-feedback error">{{ usersError }}</div>
+
+      <div class="user-filter-bar">
+        <div class="user-search-wrap">
+          <input
+            v-model="userSearch"
+            class="user-search-input"
+            type="text"
+            placeholder="搜索用户名/姓名/学号/班级"
+          />
+        </div>
+        <select v-model="userRoleFilter" class="user-filter-select">
+          <option value="">全部角色</option>
+          <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <select v-model="userClassFilter" class="user-filter-select">
+          <option value="">全部班级</option>
+          <option v-for="cls in classOptions" :key="cls" :value="cls">{{ cls }}</option>
+        </select>
+      </div>
 
       <div class="user-table-wrap">
         <table class="user-table">
@@ -511,7 +558,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="user in users" :key="user.id">
+            <tr v-for="user in filteredUsers" :key="user.id">
               <td class="user-td-username">{{ user.username }}</td>
               <td>{{ user.displayName }}</td>
               <td><span :class="['role-badge', 'role-' + user.role.toLowerCase()]">{{ getRoleLabel(user.role) }}</span></td>
@@ -884,6 +931,51 @@ onMounted(() => {
 
 .admin-user-section {
   margin: 0 1.5rem;
+}
+
+.user-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0 1.5rem 1rem;
+  align-items: center;
+}
+
+.user-search-wrap {
+  flex: 1;
+}
+
+.user-search-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(115, 88, 50, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--admin-text);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.user-search-input::placeholder {
+  color: var(--admin-muted);
+}
+
+.user-search-input:focus {
+  border-color: var(--admin-accent);
+}
+
+.user-filter-select {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(115, 88, 50, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--admin-text);
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.user-filter-select:focus {
+  border-color: var(--admin-accent);
 }
 
 .user-table-wrap {
