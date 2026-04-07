@@ -1015,11 +1015,15 @@ import { API_BASE } from "../api/request";
 import MobileCapsule from "../components/MobileCapsule.vue";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
+import { useNotifications } from "../composables/useNotifications";
+import { useReviewSettings } from "../composables/useReviewSettings";
 
 const router = useRouter();
 const route = useRoute();
 const { openSidebar: openDashboardSidebar } = useDashboardShell();
 const profile = reactive(loadUser());
+const { submitAchievementReviewRequest } = useNotifications(profile);
+const { settings: reviewSettings, fetchSettings: fetchReviewSettings } = useReviewSettings();
 const activeMenu = ref("achievements");
 const editorOpen = ref(false);
 const imageInput = ref(null);
@@ -1905,21 +1909,55 @@ async function saveAchievement() {
       [ATTACHMENTS_FIELD]: JSON.stringify(form.attachments || []),
     },
   };
+  const existingItem = editId.value
+    ? achievements.value.find((item) => item.id === editId.value) || null
+    : null;
+  const changes = buildAchievementChanges({
+    category,
+    payload,
+    existingItem,
+  });
   try {
+    if (profile.role === "STUDENT" && reviewSettings.achievementReviewEnabled) {
+      const reviewRequest = await submitAchievementReviewRequest({
+        actor: profile,
+        action: editId.value ? "update" : "create",
+        category,
+        title: titleValue,
+        payload,
+        payloadSnapshot: buildAchievementReviewPayloadSnapshot({
+          category,
+          beforeItem: existingItem,
+          afterItem: buildAchievementDraftSourceFromPayload(payload),
+        }),
+        recordId: editId.value,
+        changes,
+      });
+      if (reviewSettings.achievementReviewAutoApprove && reviewRequest?.status === "approved") {
+        await fetchAchievements();
+      }
+      resetForm();
+      closeEditor();
+      errorMessage.value = "";
+      return;
+    }
+
     if (editId.value) {
       const { data } = await updateAchievement(category, editId.value, payload);
+      const normalizedData = normalizeAchievement(data);
       achievements.value = dedupeAchievements(
         achievements.value.map((item) =>
-          item.id === data.id ? normalizeAchievement(data) : item,
+          item.id === data.id ? normalizedData : item,
         ),
       );
       if (viewItem.value && viewItem.value.id === data.id) {
-        viewItem.value = normalizeAchievement(data);
+        viewItem.value = normalizedData;
       }
     } else {
       const { data } = await createAchievement(category, payload);
+      const normalizedData = normalizeAchievement(data);
       achievements.value = dedupeAchievements([
-        normalizeAchievement(data),
+        normalizedData,
         ...achievements.value,
       ]);
     }
@@ -1929,6 +1967,164 @@ async function saveAchievement() {
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || "保存失败，请重新登录";
   }
+}
+
+function buildAchievementChanges({ category, payload, existingItem }) {
+  const config = categoryFieldMap[category] || null;
+  if (!config) {
+    return [];
+  }
+  const nextFields = payload?.fields || {};
+  const previousFields = existingItem?.fields || {};
+  const changes = [];
+
+  config.fields.forEach((field) => {
+    const before = stringifyChangeValue(previousFields[field.key]);
+    const after = stringifyChangeValue(nextFields[field.key]);
+    if (!existingItem && after === "-") {
+      return;
+    }
+    if (existingItem && before === after) {
+      return;
+    }
+    changes.push({
+      section: "成就信息",
+      label: field.label,
+      before,
+      after,
+    });
+  });
+
+  const previousImages = stringifyChangeValue(existingItem?.imageUrls || []);
+  const nextImages = stringifyChangeValue(resolveImageUrlsFromPayload(payload));
+  if ((!existingItem && nextImages !== "-") || (existingItem && previousImages !== nextImages)) {
+    changes.push({
+      section: "多媒体",
+      label: "图片",
+      before: previousImages,
+      after: nextImages,
+    });
+  }
+
+  const previousAttachments = stringifyChangeValue(
+    (existingItem?.attachments || []).map((item) => item.name || item.url || ""),
+  );
+  const nextAttachments = stringifyChangeValue(
+    (payload?.fields?.[ATTACHMENTS_FIELD]
+      ? JSON.parse(payload.fields[ATTACHMENTS_FIELD])
+      : []
+    ).map((item) => item.name || item.url || ""),
+  );
+  if (
+    (!existingItem && nextAttachments !== "-") ||
+    (existingItem && previousAttachments !== nextAttachments)
+  ) {
+    changes.push({
+      section: "多媒体",
+      label: "附件",
+      before: previousAttachments,
+      after: nextAttachments,
+    });
+  }
+
+  return changes;
+}
+
+function resolveImageUrlsFromPayload(payload) {
+  const raw = payload?.fields?.[IMAGE_URLS_FIELD];
+  if (!raw) {
+    return payload?.imageUrl ? [payload.imageUrl] : [];
+  }
+  try {
+    return Array.isArray(JSON.parse(raw)) ? JSON.parse(raw) : [];
+  } catch {
+    return payload?.imageUrl ? [payload.imageUrl] : [];
+  }
+}
+
+function resolveAttachmentsFromPayload(payload) {
+  return parseJsonArray(payload?.fields?.[ATTACHMENTS_FIELD])
+    .map((item) => ({
+      url: resolveMediaUrl(item?.url || ""),
+      name: item?.name || item?.originalName || "附件",
+      mediaType: item?.mediaType || "",
+    }))
+    .filter((item) => item.url);
+}
+
+function buildAchievementDraftSourceFromPayload(payload) {
+  return {
+    fields: payload?.fields || {},
+    imageUrl: payload?.imageUrl || "",
+    imageUrls: resolveImageUrlsFromPayload(payload).map((url) => resolveMediaUrl(url)),
+    attachments: resolveAttachmentsFromPayload(payload),
+  };
+}
+
+function buildAchievementReviewPayloadSnapshot({
+  category,
+  beforeItem = null,
+  afterItem = null,
+}) {
+  return {
+    type: "achievement-review",
+    category,
+    before: beforeItem
+      ? buildAchievementReviewSnapshot({ category, source: beforeItem })
+      : null,
+    after: afterItem
+      ? buildAchievementReviewSnapshot({ category, source: afterItem })
+      : null,
+  };
+}
+
+function buildAchievementReviewSnapshot({ category, source }) {
+  const config = categoryFieldMap[category] || null;
+  const fields = source?.fields || {};
+  const fieldConfigList = Array.isArray(config?.fields) ? config.fields : [];
+  const titleKey = config?.titleKey || "";
+  const dateKey = config?.dateKey || "";
+  const dateField = fieldConfigList.find((field) => field.key === dateKey) || null;
+  const imageUrls = Array.isArray(source?.imageUrls)
+    ? source.imageUrls.filter(Boolean).map((url) => resolveMediaUrl(url))
+    : resolveImageUrlsFromPayload({
+        imageUrl: source?.imageUrl || source?.image || "",
+        fields,
+      });
+  const attachments = Array.isArray(source?.attachments)
+    ? source.attachments
+        .map((item) => ({
+          url: resolveMediaUrl(item?.url || ""),
+          name: item?.name || "附件",
+          mediaType: item?.mediaType || "",
+        }))
+        .filter((item) => item.url)
+    : resolveAttachmentsFromPayload({ fields });
+
+  return {
+    category,
+    categoryLabel:
+      achievementEntries.find((entry) => entry.key === category)?.label || "成就记录",
+    title: stringifyChangeValue(fields[titleKey]),
+    dateLabel: dateField?.label || "",
+    dateValue: dateKey ? stringifyChangeValue(fields[dateKey]) : "",
+    fieldEntries: fieldConfigList.map((field) => ({
+      key: field.key,
+      label: field.label,
+      value: stringifyChangeValue(fields[field.key]),
+    })),
+    imageUrls,
+    attachments,
+  };
+}
+
+function stringifyChangeValue(value) {
+  if (Array.isArray(value)) {
+    const filtered = value.filter(Boolean).map((item) => String(item).trim()).filter(Boolean);
+    return filtered.length ? filtered.join("、") : "-";
+  }
+  const text = String(value ?? "").trim();
+  return text || "-";
 }
 
 function triggerImage() {
@@ -2720,6 +2916,7 @@ function handleUploadSettingsUpdated(event) {
 
 onMounted(() => {
   syncCategoryFromRoute();
+  fetchReviewSettings().catch(() => {});
   fetchAchievementUploadSettings().then(() => {
     setUploadLimits({
       imageMaxCount: achievementUploadSettings.imageMaxCount,

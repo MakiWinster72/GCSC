@@ -1,322 +1,294 @@
 <template>
   <main class="dashboard-right">
-      <header class="feed-header">
-        <h1 class="feed-title">学生信息</h1>
-      </header>
+    <header class="feed-header">
+      <h1 class="feed-title">学生信息</h1>
+    </header>
 
-      <section class="info-shell student-right-stack">
-        <section v-show="!gridFullscreen" class="info-card student-filter-card">
-          <div class="student-filter-header">
-            <div class="info-section-title">搜索</div>
-            <input
-              v-model="filters.keyword"
-              class="info-input student-search"
-              type="text"
-              placeholder="搜索姓名 / 班别 / 学院 / 学号"
-            />
-            <button
-              class="student-grid-toggle"
-              type="button"
-              @click="toggleGridView"
-              :title="gridViewOpen ? '切换列表视图' : '切换表格视图'"
-            >
-              <span class="grid-toggle-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path
-                    d="M7 7h10v3h2V5H5v5h2V7zm10 10H7v-3H5v5h14v-5h-2v3zM9 10l-3 2 3 2v-4zm6 4 3-2-3-2v4z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-              {{ gridViewOpen ? "切换列表" : "切换表格" }}
-            </button>
-          </div>
-          <div v-if="!gridViewOpen" class="student-filter-grid">
-            <div class="student-filter-row">
-              <div class="student-filter-field">
-                <span class="info-label">年级</span>
-                <select v-model="filters.classYear" class="info-input">
-                  <option value="">全部</option>
-                  <option
-                    v-for="year in classYearOptions"
-                    :key="year"
-                    :value="String(year)"
-                  >
-                    {{ year }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="student-filter-row">
-              <div class="student-filter-field">
-                <span class="info-label">专业</span>
-                <select v-model="filters.major" class="info-input">
-                  <option value="">全部</option>
-                  <option
-                    v-for="major in availableMajors"
-                    :key="major"
-                    :value="major"
-                  >
-                    {{ major }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="student-filter-row">
-              <div class="student-filter-field">
-                <span class="info-label">班级</span>
-                <div class="student-stepper">
-                  <button
-                    class="stepper-button"
-                    type="button"
-                    :disabled="!canDecrementClass"
-                    @click="decrementClass"
-                  >
-                    −
-                  </button>
-                  <input
-                    v-model="filters.classNo"
-                    class="info-input stepper-input"
-                    type="number"
-                    step="1"
-                    placeholder="全部"
-                    @input="normalizeClassNo"
-                  />
-                  <button
-                    class="stepper-button"
-                    type="button"
-                    :disabled="!canIncrementClass"
-                    @click="incrementClass"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="student-filter-row student-filter-inline">
-              <label class="info-choice">
-                <input v-model="filters.isHkMoTw" type="checkbox" />
-                港澳台
-              </label>
-              <label class="info-choice">
-                <input v-model="filters.isSpecial" type="checkbox" />
-                特殊学生
-              </label>
-            </div>
-          </div>
-          <div v-if="gridViewOpen" class="student-grid-tabs">
-            <button
-              class="student-grid-tab student-grid-tab-add"
-              type="button"
-              @click="openGridFieldDialog"
-              title="选择字段"
-            >
-              +
-            </button>
-            <button
-              v-for="sheet in gridSheets"
-              :key="sheet.id"
-              class="student-grid-tab"
-              :class="{ active: sheet.id === gridActiveSheet }"
-              type="button"
-              @click="gridActiveSheet = sheet.id"
-            >
-              {{ sheet.label }}
-            </button>
-            <span v-if="gridLoading" class="student-grid-status"
-              >加载中...</span
-            >
-            <span v-else class="student-grid-status"
-              >共 {{ gridActiveSheetData.rowData.length }} 条</span
-            >
-          </div>
-        </section>
-
-        <section class="info-card student-results-card">
-          <div v-if="!gridViewOpen" class="student-results-header">
-            <div class="info-section-title">筛选结果</div>
-            <div class="student-results-actions">
-              <button
-                class="ghost-button"
-                type="button"
-                @click="selectCurrentPage"
-              >
-                选择本页
-              </button>
-              <button
-                class="ghost-button"
-                type="button"
-                :disabled="selectAllLoading"
-                @click="selectAllFiltered"
-              >
-                {{ selectAllLoading ? "选择中..." : "选择全部" }}
-              </button>
-            </div>
-          </div>
-          <div
-            v-if="gridViewOpen"
-            ref="gridWrapRef"
-            class="student-grid-wrap"
-            :class="{ fullscreen: gridFullscreen }"
+    <section class="info-shell student-right-stack">
+      <section v-show="!gridFullscreen" class="info-card student-filter-card">
+        <div class="student-filter-header">
+          <div class="info-section-title">搜索</div>
+          <input
+            v-model="filters.keyword"
+            class="info-input student-search"
+            type="text"
+            placeholder="搜索姓名 / 班别 / 学院 / 学号"
+          />
+          <button
+            class="student-grid-toggle"
+            type="button"
+            @click="toggleGridView"
+            :title="gridViewOpen ? '切换列表视图' : '切换表格视图'"
           >
-            <AgGridVue
-              class="ag-theme-quartz student-grid"
-              :row-data="gridActiveSheetData.rowData"
-              :column-defs="gridActiveSheetData.colDefs"
-              :default-col-def="gridDefaultColDef"
-              :locale-text="gridLocaleText"
-              :locale-text-func="gridLocaleTextFunc"
-              :animate-rows="true"
-              :pagination="true"
-              :pagination-page-size="100"
-              :suppress-cell-focus="true"
-            />
-          </div>
-          <div v-else-if="pagedStudents.length" class="student-list">
-            <div
-              v-for="item in pagedStudents"
-              :key="item.id"
-              class="student-row"
-            >
-              <input v-model="selectedIds" type="checkbox" :value="item.id" />
-              <div class="student-main">
-                <div class="student-name">{{ item.name }}</div>
-                <div class="student-meta">
-                  {{ item.gradeYear }}级 {{ item.major }}{{ item.classNo }}班
-                  {{ item.studentNo }}
-                </div>
-              </div>
-              <button
-                class="ghost-button"
-                type="button"
-                @click="openDetail(item)"
-              >
-                详情
-              </button>
-            </div>
-          </div>
-          <div v-else class="empty-tip">没有匹配的学生。</div>
-
-          <div v-if="!gridViewOpen" class="student-pagination">
-            <div class="student-pages">
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                class="page-button"
-                :class="{ active: page === currentPage }"
-                type="button"
-                @click="setPage(page)"
-              >
-                {{ page }}
-              </button>
-              <input
-                v-model.number="pageInput"
-                class="info-input page-input"
-                type="number"
-                :min="1"
-                :max="totalPages"
-                placeholder="页码"
-                @change="applyPageInput"
-              />
-            </div>
-            <div class="page-size">
-              <span class="info-label">每页</span>
-              <select
-                v-model.number="pageSize"
-                class="info-input page-size-input"
-              >
+            <span class="grid-toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  d="M7 7h10v3h2V5H5v5h2V7zm10 10H7v-3H5v5h14v-5h-2v3zM9 10l-3 2 3 2v-4zm6 4 3-2-3-2v4z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+            {{ gridViewOpen ? "切换列表" : "切换表格" }}
+          </button>
+        </div>
+        <div v-if="!gridViewOpen" class="student-filter-grid">
+          <div class="student-filter-row">
+            <div class="student-filter-field">
+              <span class="info-label">年级</span>
+              <select v-model="filters.classYear" class="info-input">
+                <option value="">全部</option>
                 <option
-                  v-for="size in pageSizeOptions"
-                  :key="size"
-                  :value="size"
+                  v-for="year in classYearOptions"
+                  :key="year"
+                  :value="String(year)"
                 >
-                  {{ size }}
+                  {{ year }}
                 </option>
               </select>
             </div>
-            <button
-              class="action-button"
-              type="button"
-              :disabled="exportDisabled"
-              @click="openExportDialog"
-            >
-              {{ exportLabel }}
-            </button>
           </div>
-        </section>
+
+          <div class="student-filter-row">
+            <div class="student-filter-field">
+              <span class="info-label">专业</span>
+              <select v-model="filters.major" class="info-input">
+                <option value="">全部</option>
+                <option
+                  v-for="major in availableMajors"
+                  :key="major"
+                  :value="major"
+                >
+                  {{ major }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="student-filter-row">
+            <div class="student-filter-field">
+              <span class="info-label">班级</span>
+              <div class="student-stepper">
+                <button
+                  class="stepper-button"
+                  type="button"
+                  :disabled="!canDecrementClass"
+                  @click="decrementClass"
+                >
+                  −
+                </button>
+                <input
+                  v-model="filters.classNo"
+                  class="info-input stepper-input"
+                  type="number"
+                  step="1"
+                  placeholder="全部"
+                  @input="normalizeClassNo"
+                />
+                <button
+                  class="stepper-button"
+                  type="button"
+                  :disabled="!canIncrementClass"
+                  @click="incrementClass"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="student-filter-row student-filter-inline">
+            <label class="info-choice">
+              <input v-model="filters.isHkMoTw" type="checkbox" />
+              港澳台
+            </label>
+            <label class="info-choice">
+              <input v-model="filters.isSpecial" type="checkbox" />
+              特殊学生
+            </label>
+          </div>
+        </div>
+        <div v-if="gridViewOpen" class="student-grid-tabs">
+          <button
+            class="student-grid-tab student-grid-tab-add"
+            type="button"
+            @click="openGridFieldDialog"
+            title="选择字段"
+          >
+            +
+          </button>
+          <button
+            v-for="sheet in gridSheets"
+            :key="sheet.id"
+            class="student-grid-tab"
+            :class="{ active: sheet.id === gridActiveSheet }"
+            type="button"
+            @click="gridActiveSheet = sheet.id"
+          >
+            {{ sheet.label }}
+          </button>
+          <span v-if="gridLoading" class="student-grid-status">加载中...</span>
+          <span v-else class="student-grid-status"
+            >共 {{ gridActiveSheetData.rowData.length }} 条</span
+          >
+        </div>
       </section>
 
-      <transition name="export-dialog-backdrop">
+      <section class="info-card student-results-card">
+        <div v-if="!gridViewOpen" class="student-results-header">
+          <div class="info-section-title">筛选结果</div>
+          <div class="student-results-actions">
+            <button
+              class="ghost-button"
+              type="button"
+              @click="selectCurrentPage"
+            >
+              选择本页
+            </button>
+            <button
+              class="ghost-button"
+              type="button"
+              :disabled="selectAllLoading"
+              @click="selectAllFiltered"
+            >
+              {{ selectAllLoading ? "选择中..." : "选择全部" }}
+            </button>
+          </div>
+        </div>
         <div
-          v-if="gridFieldDialogOpen"
-          class="grid-field-dialog-backdrop"
-          @click="closeGridFieldDialog"
-        ></div>
-      </transition>
-      <section
-        class="grid-field-dialog"
-        :class="{ open: gridFieldDialogOpen, closing: gridFieldDialogClosing }"
-      >
-        <header class="export-dialog-header">
-          <div class="export-dialog-title">
-            选择显示字段
-            <label class="export-all-toggle">
-              <input
-                type="checkbox"
-                :checked="isAllSelected"
-                @change="toggleAllSelections($event.target.checked)"
-              />
-              <span>全选</span>
-            </label>
+          v-if="gridViewOpen"
+          ref="gridWrapRef"
+          class="student-grid-wrap"
+          :class="{ fullscreen: gridFullscreen }"
+        >
+          <AgGridVue
+            class="ag-theme-quartz student-grid"
+            :row-data="gridActiveSheetData.rowData"
+            :column-defs="gridActiveSheetData.colDefs"
+            :default-col-def="gridDefaultColDef"
+            :locale-text="gridLocaleText"
+            :locale-text-func="gridLocaleTextFunc"
+            :animate-rows="true"
+            :pagination="true"
+            :pagination-page-size="100"
+            :suppress-cell-focus="true"
+          />
+        </div>
+        <div v-else-if="pagedStudents.length" class="student-list">
+          <div v-for="item in pagedStudents" :key="item.id" class="student-row">
+            <input v-model="selectedIds" type="checkbox" :value="item.id" />
+            <div class="student-main">
+              <div class="student-name">{{ item.name }}</div>
+              <div class="student-meta">
+                {{ item.gradeYear }}级 {{ item.major }}{{ item.classNo }}班
+                {{ item.studentNo }}
+              </div>
+            </div>
+            <button
+              class="ghost-button"
+              type="button"
+              @click="openDetail(item)"
+            >
+              详情
+            </button>
+          </div>
+        </div>
+        <div v-else class="empty-tip">没有匹配的学生。</div>
+
+        <div v-if="!gridViewOpen" class="student-pagination">
+          <div class="student-pages">
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              class="page-button"
+              :class="{ active: page === currentPage }"
+              type="button"
+              @click="setPage(page)"
+            >
+              {{ page }}
+            </button>
+            <input
+              v-model.number="pageInput"
+              class="info-input page-input"
+              type="number"
+              :min="1"
+              :max="totalPages"
+              placeholder="页码"
+              @change="applyPageInput"
+            />
+          </div>
+          <div class="page-size">
+            <span class="info-label">每页</span>
+            <select
+              v-model.number="pageSize"
+              class="info-input page-size-input"
+            >
+              <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                {{ size }}
+              </option>
+            </select>
           </div>
           <button
-            class="ghost-button"
+            class="action-button"
             type="button"
-            @click="closeGridFieldDialog"
+            :disabled="exportDisabled"
+            @click="openExportDialog"
           >
-            关闭
+            {{ exportLabel }}
           </button>
-        </header>
-        <div class="export-dialog-body">
-          <div
-            v-for="group in exportGroups"
-            :key="group.id"
-            class="export-group"
-          >
-            <label class="export-group-title">
-              <span>{{ group.label }}</span>
-              <input
-                type="checkbox"
-                :checked="isGroupChecked(group)"
-                @change="toggleGroupSelection(group, $event.target.checked)"
-              />
-            </label>
-            <div class="export-group-options">
-              <template v-if="group.id === 'family'">
-                <div
-                  v-for="(row, index) in familyRows"
-                  :key="`grid-family-row-${index}`"
-                  class="export-option-row"
-                >
-                  <label
-                    v-for="field in row"
-                    :key="field.key"
-                    class="export-option"
-                  >
-                    <input
-                      v-model="exportSelections[field.key]"
-                      type="checkbox"
-                    />
-                    <span>{{ field.label }}</span>
-                  </label>
-                </div>
-              </template>
-              <template v-else>
+        </div>
+      </section>
+    </section>
+
+    <transition name="export-dialog-backdrop">
+      <div
+        v-if="gridFieldDialogOpen"
+        class="grid-field-dialog-backdrop"
+        @click="closeGridFieldDialog"
+      ></div>
+    </transition>
+    <section
+      class="grid-field-dialog"
+      :class="{ open: gridFieldDialogOpen, closing: gridFieldDialogClosing }"
+    >
+      <header class="export-dialog-header">
+        <div class="export-dialog-title">
+          选择显示字段
+          <label class="export-all-toggle">
+            <input
+              type="checkbox"
+              :checked="isAllSelected"
+              @change="toggleAllSelections($event.target.checked)"
+            />
+            <span>全选</span>
+          </label>
+        </div>
+        <button
+          class="ghost-button"
+          type="button"
+          @click="closeGridFieldDialog"
+        >
+          关闭
+        </button>
+      </header>
+      <div class="export-dialog-body">
+        <div v-for="group in exportGroups" :key="group.id" class="export-group">
+          <label class="export-group-title">
+            <span>{{ group.label }}</span>
+            <input
+              type="checkbox"
+              :checked="isGroupChecked(group)"
+              @change="toggleGroupSelection(group, $event.target.checked)"
+            />
+          </label>
+          <div class="export-group-options">
+            <template v-if="group.id === 'family'">
+              <div
+                v-for="(row, index) in familyRows"
+                :key="`grid-family-row-${index}`"
+                class="export-option-row"
+              >
                 <label
-                  v-for="field in group.fields"
+                  v-for="field in row"
                   :key="field.key"
                   class="export-option"
                 >
@@ -326,101 +298,108 @@
                   />
                   <span>{{ field.label }}</span>
                 </label>
-              </template>
-            </div>
+              </div>
+            </template>
+            <template v-else>
+              <label
+                v-for="field in group.fields"
+                :key="field.key"
+                class="export-option"
+              >
+                <input v-model="exportSelections[field.key]" type="checkbox" />
+                <span>{{ field.label }}</span>
+              </label>
+            </template>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <transition name="publisher-backdrop">
-        <div
-          v-if="viewOpen"
-          class="student-detail-backdrop"
-          @click="closeView"
-        ></div>
-      </transition>
-      <section
-        class="student-detail-view"
-        :class="{
-          open: viewOpen,
-          closing: viewClosing,
-          split: achievementsOpen || achievementsClosing,
-        }"
-        :aria-hidden="!viewOpen"
-      >
-        <header class="publisher-header">
-          <div class="publisher-title">学生详情</div>
-          <button class="publisher-close" type="button" @click="closeView">
-            关闭
-          </button>
-        </header>
-        <div v-if="viewLoading" class="empty-tip">加载中...</div>
-        <StudentProfileEditor
-          v-else-if="viewItem"
-          :student="viewItem"
-          :resolve-media-url="resolveMediaUrl"
-          :save-profile="saveViewProfile"
-          :can-edit="profile.role === 'ADMIN'"
-          :show-achievements="true"
-          @saved="handleViewProfileSaved"
-          @open-achievements="openAchievements"
-        />
-      </section>
-
-      <section
-        class="student-achievements-view"
-        :class="{ open: achievementsOpen, closing: achievementsClosing }"
-        :aria-hidden="!achievementsOpen"
-      >
-        <header class="publisher-header">
-          <div class="publisher-title">个人成就</div>
-          <button
-            class="publisher-close"
-            type="button"
-            @click="closeAchievements"
-          >
-            关闭
-          </button>
-        </header>
-        <div class="student-achievements-body" v-if="viewItem">
-          <iframe
-            class="student-achievements-frame"
-            :key="achievementUrl"
-            :src="achievementUrl"
-            title="学生个人成就"
-          ></iframe>
-        </div>
-      </section>
-
-      <StudentExportDialog
-        :open="exportDialogOpen"
-        filename-prefix="students_export"
-        preview-title="导出预览(仅显示前三人)"
-        empty-message="没有获取到学生详情，请稍后再试。"
-        :load-rows="loadExportRows"
-        @close="closeExportDialog"
+    <transition name="publisher-backdrop">
+      <div
+        v-if="viewOpen"
+        class="student-detail-backdrop"
+        @click="closeView"
+      ></div>
+    </transition>
+    <section
+      class="student-detail-view"
+      :class="{
+        open: viewOpen,
+        closing: viewClosing,
+        split: achievementsOpen || achievementsClosing,
+      }"
+      :aria-hidden="!viewOpen"
+    >
+      <header class="publisher-header">
+        <div class="publisher-title">学生详情</div>
+        <button class="publisher-close" type="button" @click="closeView">
+          关闭
+        </button>
+      </header>
+      <div v-if="viewLoading" class="empty-tip">加载中...</div>
+      <StudentProfileEditor
+        v-else-if="viewItem"
+        :student="viewItem"
+        :resolve-media-url="resolveMediaUrl"
+        :save-profile="saveViewProfile"
+        :can-edit="profile.role === 'ADMIN'"
+        :show-achievements="true"
+        @saved="handleViewProfileSaved"
+        @open-achievements="openAchievements"
       />
+    </section>
 
-      <MobileCapsule @open-sidebar="openDashboardSidebar">
-        <template #right>
-          <button
-            class="capsule-action"
-            type="button"
-            @click="toggleGridView"
-          >
-            {{ gridViewOpen ? "列表" : "表格" }}
-          </button>
-          <button
-            v-if="gridViewOpen"
-            class="capsule-action"
-            :class="{ 'capsule-active': gridFullscreen }"
-            type="button"
-            @click="toggleGridFullscreen"
-          >
-            {{ gridFullscreen ? "退出" : "全屏" }}
-          </button>
-        </template>
-      </MobileCapsule>
+    <section
+      class="student-achievements-view"
+      :class="{ open: achievementsOpen, closing: achievementsClosing }"
+      :aria-hidden="!achievementsOpen"
+    >
+      <header class="publisher-header">
+        <div class="publisher-title">个人成就</div>
+        <button
+          class="publisher-close"
+          type="button"
+          @click="closeAchievements"
+        >
+          关闭
+        </button>
+      </header>
+      <div class="student-achievements-body" v-if="viewItem">
+        <iframe
+          class="student-achievements-frame"
+          :key="achievementUrl"
+          :src="achievementUrl"
+          title="学生个人成就"
+        ></iframe>
+      </div>
+    </section>
+
+    <StudentExportDialog
+      :open="exportDialogOpen"
+      filename-prefix="students_export"
+      preview-title="导出预览(仅显示前三人)"
+      empty-message="没有获取到学生详情，请稍后再试。"
+      :load-rows="loadExportRows"
+      @close="closeExportDialog"
+    />
+
+    <MobileCapsule @open-sidebar="openDashboardSidebar">
+      <template #right>
+        <button class="capsule-action" type="button" @click="toggleGridView">
+          {{ gridViewOpen ? "列表" : "表格" }}
+        </button>
+        <button
+          v-if="gridViewOpen"
+          class="capsule-action"
+          :class="{ 'capsule-active': gridFullscreen }"
+          type="button"
+          @click="toggleGridFullscreen"
+        >
+          {{ gridFullscreen ? "退出" : "全屏" }}
+        </button>
+      </template>
+    </MobileCapsule>
   </main>
 </template>
 
@@ -429,11 +408,11 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { AgGridVue } from "ag-grid-vue3";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useRouter } from "vue-router";
-import {
-  getMenuLocation,
-  isMenuEnabled,
-} from "../constants/menu";
+import { useRouter, useRoute } from "vue-router";
+
+import harmonyFontUrl from "../assets/fonts/HarmonyOS_Sans_SC_Regular.ttf?url";
+import harmonyFontBlackUrl from "../assets/fonts/HarmonyOS_Sans_SC_Black.ttf?url";
+import { getMenuLocation, isMenuEnabled } from "../constants/menu";
 import {
   getStudentProfileById,
   saveStudentProfileById,
@@ -447,6 +426,7 @@ import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
 
 const router = useRouter();
+const route = useRoute();
 const { openSidebar: openDashboardSidebar } = useDashboardShell();
 const API_BASE = "http://localhost:8080";
 
@@ -1040,7 +1020,16 @@ function handleViewProfileSaved(data) {
   });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  const keywordParam = route.query.keyword;
+  if (keywordParam && typeof keywordParam === "string") {
+    filters.keyword = keywordParam;
+    await fetchStudents();
+    if (students.value.length === 1) {
+      openDetail(students.value[0]);
+    }
+    return;
+  }
   fetchStudents();
 });
 
@@ -1273,10 +1262,10 @@ const MAIN_FIELD_META = {
     getter: (item) => item.dormBuilding || "",
   },
   dormRoom: { label: "住宿房间", getter: (item) => item.dormRoom || "" },
-  hkMoTw: { label: "港澳台", getter: (item) => item.hkMoTw ? "是" : "否" },
+  hkMoTw: { label: "港澳台", getter: (item) => (item.hkMoTw ? "是" : "否") },
   specialStudent: {
     label: "特殊学生",
-    getter: (item) => item.specialStudent ? "是" : "否",
+    getter: (item) => (item.specialStudent ? "是" : "否"),
   },
   fatherName: { label: "父亲姓名", getter: (item) => item.fatherName || "" },
   fatherPhone: { label: "父亲电话", getter: (item) => item.fatherPhone || "" },
@@ -1802,7 +1791,9 @@ function buildAchievementOverview(rows, selectedKeys, achievementData) {
     );
     const records = recordEntry?.records || [];
     const categoryFlags = activeCategories.map((category) => {
-      const count = records.filter((record) => record.category === category.key).length;
+      const count = records.filter(
+        (record) => record.category === category.key,
+      ).length;
       return count > 0 ? String(count) : "";
     });
     return [...baseValues, ...categoryFlags];

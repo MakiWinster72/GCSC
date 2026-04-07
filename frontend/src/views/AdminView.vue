@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, shallowRef } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
+import { useReviewSettings } from "../composables/useReviewSettings";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -10,15 +11,24 @@ const ATTACHMENT_TYPE_OPTIONS = [
 ];
 
 const profile = reactive(loadUser());
+const activeSection = shallowRef("upload");
 const saveMessage = shallowRef("");
 const {
   settings,
-  loading,
-  saving,
-  errorMessage,
-  fetchSettings,
-  saveSettings,
+  loading: uploadLoading,
+  saving: uploadSaving,
+  errorMessage: uploadErrorMessage,
+  fetchSettings: fetchUploadSettings,
+  saveSettings: saveUploadSettings,
 } = useAchievementUploadSettings();
+const {
+  settings: reviewSettings,
+  loading: reviewLoading,
+  saving: reviewSaving,
+  errorMessage: reviewErrorMessage,
+  fetchSettings: fetchReviewSettings,
+  saveSettings: saveReviewSettings,
+} = useReviewSettings();
 
 const form = reactive({
   imageMaxCount: settings.imageMaxCount,
@@ -30,19 +40,12 @@ const form = reactive({
   attachmentImageExts: settings.attachmentImageExts,
   attachmentArchiveExts: settings.attachmentArchiveExts,
 });
-
-const statCards = computed(() => [
-  {
-    label: "图片",
-    value: `${form.imageMaxCount} 张 / ${form.imageMaxSizeMb}MB`,
-    note: "数量与单张大小",
-  },
-  {
-    label: "附件",
-    value: `${form.attachmentMaxCount} 个 / ${form.attachmentMaxSizeMb}MB`,
-    note: "数量与单个大小",
-  },
-]);
+const reviewForm = reactive({
+  profileReviewEnabled: reviewSettings.profileReviewEnabled,
+  profileReviewAutoApprove: reviewSettings.profileReviewAutoApprove,
+  achievementReviewEnabled: reviewSettings.achievementReviewEnabled,
+  achievementReviewAutoApprove: reviewSettings.achievementReviewAutoApprove,
+});
 
 const imageSubtitle = computed(
   () => `最多 ${form.imageMaxCount} 张 · 单张不超过 ${form.imageMaxSizeMb}MB`,
@@ -61,6 +64,17 @@ const attachmentTypeSummary = computed(() =>
     ? enabledPreviewTypes.value.map((item) => item.label).join(" / ")
     : "暂无可用附件类型",
 );
+const activeLoading = computed(() =>
+  activeSection.value === "upload" ? uploadLoading.value : reviewLoading.value,
+);
+const activeSaving = computed(() =>
+  activeSection.value === "upload" ? uploadSaving.value : reviewSaving.value,
+);
+const activeErrorMessage = computed(() =>
+  activeSection.value === "upload"
+    ? uploadErrorMessage.value
+    : reviewErrorMessage.value,
+);
 
 function extFieldKey(typeKey) {
   if (typeKey === "document") return "attachmentDocumentExts";
@@ -77,8 +91,9 @@ function parseExts(value) {
 }
 
 async function loadPage() {
-  await fetchSettings();
+  await Promise.all([fetchUploadSettings(), fetchReviewSettings()]);
   syncFormFromSettings();
+  syncReviewFormFromSettings();
 }
 
 function syncFormFromSettings() {
@@ -92,9 +107,17 @@ function syncFormFromSettings() {
   form.attachmentArchiveExts = settings.attachmentArchiveExts;
 }
 
+function syncReviewFormFromSettings() {
+  reviewForm.profileReviewEnabled = reviewSettings.profileReviewEnabled;
+  reviewForm.profileReviewAutoApprove = reviewSettings.profileReviewAutoApprove;
+  reviewForm.achievementReviewEnabled = reviewSettings.achievementReviewEnabled;
+  reviewForm.achievementReviewAutoApprove =
+    reviewSettings.achievementReviewAutoApprove;
+}
+
 async function handleSubmit() {
   saveMessage.value = "";
-  const result = await saveSettings({
+  const result = await saveUploadSettings({
     imageMaxCount: Number(form.imageMaxCount),
     imageMaxSizeMb: Number(form.imageMaxSizeMb),
     attachmentMaxCount: Number(form.attachmentMaxCount),
@@ -108,6 +131,29 @@ async function handleSubmit() {
     saveMessage.value = "上传限制已更新，成就页面会同步显示。";
     syncFormFromSettings();
   }
+}
+
+async function handleReviewSubmit() {
+  saveMessage.value = "";
+  const result = await saveReviewSettings({
+    profileReviewEnabled: Boolean(reviewForm.profileReviewEnabled),
+    profileReviewAutoApprove: reviewForm.profileReviewEnabled
+      ? Boolean(reviewForm.profileReviewAutoApprove)
+      : false,
+    achievementReviewEnabled: Boolean(reviewForm.achievementReviewEnabled),
+    achievementReviewAutoApprove: reviewForm.achievementReviewEnabled
+      ? Boolean(reviewForm.achievementReviewAutoApprove)
+      : false,
+  });
+  if (result.success) {
+    saveMessage.value = "审核设置已更新，前台提交行为会按新规则执行。";
+    syncReviewFormFromSettings();
+  }
+}
+
+function switchSection(sectionKey) {
+  activeSection.value = sectionKey;
+  saveMessage.value = "";
 }
 
 function loadUser() {
@@ -139,38 +185,38 @@ onMounted(() => {
     </header>
 
     <section class="admin-nav">
-      <div class="admin-nav-item active">
+      <button
+        class="admin-nav-item"
+        :class="{ active: activeSection === 'upload' }"
+        type="button"
+        @click="switchSection('upload')"
+      >
         <div class="admin-nav-title">上传限制</div>
-        <div class="admin-nav-note">当前栏目</div>
-      </div>
-      <div class="admin-nav-item disabled" aria-disabled="true">
+        <div class="admin-nav-note">
+          {{ activeSection === "upload" ? "当前栏目" : "切换查看" }}
+        </div>
+      </button>
+      <button
+        class="admin-nav-item"
+        :class="{ active: activeSection === 'review' }"
+        type="button"
+        @click="switchSection('review')"
+      >
         <div class="admin-nav-title">审核</div>
-        <div class="admin-nav-note">入口预留</div>
-      </div>
+        <div class="admin-nav-note">
+          {{ activeSection === "review" ? "当前栏目" : "切换查看" }}
+        </div>
+      </button>
     </section>
 
-    <section class="admin-hero">
-      <div class="admin-stat-grid">
-        <article
-          v-for="card in statCards"
-          :key="card.label"
-          class="admin-stat-card"
-        >
-          <div class="admin-stat-label">{{ card.label }}</div>
-          <div class="admin-stat-value">{{ card.value }}</div>
-          <div class="admin-stat-note">{{ card.note }}</div>
-        </article>
-      </div>
-    </section>
-
-    <section class="admin-panel-grid">
+    <section v-if="activeSection === 'upload'" class="admin-panel-grid">
       <article class="admin-panel admin-form-panel">
         <div class="admin-panel-head">
           <div>
             <div class="admin-panel-kicker">系统设置</div>
             <h3 class="admin-panel-title">成就页面上传限制</h3>
           </div>
-          <div v-if="loading" class="admin-panel-status">加载中...</div>
+          <div v-if="activeLoading" class="admin-panel-status">加载中...</div>
         </div>
 
         <div class="admin-setting-block">
@@ -282,8 +328,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="errorMessage" class="admin-feedback error">
-          {{ errorMessage }}
+        <div v-if="activeErrorMessage" class="admin-feedback error">
+          {{ activeErrorMessage }}
         </div>
         <div v-if="saveMessage" class="admin-feedback success">
           {{ saveMessage }}
@@ -300,10 +346,10 @@ onMounted(() => {
           <button
             class="admin-primary-btn"
             type="button"
-            :disabled="saving"
+            :disabled="activeSaving"
             @click="handleSubmit"
           >
-            {{ saving ? "保存中..." : "保存设置" }}
+            {{ activeSaving ? "保存中..." : "保存设置" }}
           </button>
         </div>
       </article>
@@ -369,6 +415,127 @@ onMounted(() => {
         </div>
       </article>
     </section>
+
+    <section v-else class="admin-panel-grid">
+      <article class="admin-panel admin-form-panel">
+        <div class="admin-panel-head">
+          <div>
+            <div class="admin-panel-kicker">审核入口</div>
+            <h3 class="admin-panel-title">审核策略设置</h3>
+          </div>
+          <div v-if="activeLoading" class="admin-panel-status">加载中...</div>
+        </div>
+
+        <div class="admin-setting-block">
+          <div class="admin-setting-heading">
+            <div class="admin-setting-index">01</div>
+            <div>
+              <div class="admin-setting-title">个人信息</div>
+            </div>
+          </div>
+          <div class="admin-toggle-list">
+            <label class="admin-toggle-card">
+              <div class="admin-toggle-copy">
+                <span class="admin-toggle-title">开启个人信息审核</span>
+                <span class="admin-toggle-hint">
+                  关闭后，学生提交个人信息会直接更新。
+                </span>
+              </div>
+              <input
+                v-model="reviewForm.profileReviewEnabled"
+                class="admin-toggle-input"
+                type="checkbox"
+              />
+            </label>
+
+            <label
+              class="admin-toggle-card"
+              :class="{ muted: !reviewForm.profileReviewEnabled }"
+            >
+              <div class="admin-toggle-copy">
+                <span class="admin-toggle-title">默认通过</span>
+                <span class="admin-toggle-hint">
+                  开启审核但自动通过，保留审核流程入口与记录。
+                </span>
+              </div>
+              <input
+                v-model="reviewForm.profileReviewAutoApprove"
+                class="admin-toggle-input"
+                type="checkbox"
+                :disabled="!reviewForm.profileReviewEnabled"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div class="admin-setting-block">
+          <div class="admin-setting-heading">
+            <div class="admin-setting-index">02</div>
+            <div>
+              <div class="admin-setting-title">成就</div>
+            </div>
+          </div>
+          <div class="admin-toggle-list">
+            <label class="admin-toggle-card">
+              <div class="admin-toggle-copy">
+                <span class="admin-toggle-title">开启成就审核</span>
+                <span class="admin-toggle-hint">
+                  关闭后，新增和修改成就都会直接生效。
+                </span>
+              </div>
+              <input
+                v-model="reviewForm.achievementReviewEnabled"
+                class="admin-toggle-input"
+                type="checkbox"
+              />
+            </label>
+
+            <label
+              class="admin-toggle-card"
+              :class="{ muted: !reviewForm.achievementReviewEnabled }"
+            >
+              <div class="admin-toggle-copy">
+                <span class="admin-toggle-title">默认通过</span>
+                <span class="admin-toggle-hint">
+                  开启审核但自动通过，适合先保留入口再平滑切换。
+                </span>
+              </div>
+              <input
+                v-model="reviewForm.achievementReviewAutoApprove"
+                class="admin-toggle-input"
+                type="checkbox"
+                :disabled="!reviewForm.achievementReviewEnabled"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div v-if="activeErrorMessage" class="admin-feedback error">
+          {{ activeErrorMessage }}
+        </div>
+        <div v-if="saveMessage" class="admin-feedback success">
+          {{ saveMessage }}
+        </div>
+
+        <div class="admin-actions">
+          <button
+            class="admin-secondary-btn"
+            type="button"
+            @click="syncReviewFormFromSettings"
+          >
+            重置
+          </button>
+          <button
+            class="admin-primary-btn"
+            type="button"
+            :disabled="activeSaving"
+            @click="handleReviewSubmit"
+          >
+            {{ activeSaving ? "保存中..." : "保存设置" }}
+          </button>
+        </div>
+      </article>
+    </section>
   </main>
 </template>
 
@@ -391,22 +558,21 @@ onMounted(() => {
 }
 
 .admin-nav-item {
+  appearance: none;
   min-width: 9.5rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--admin-line);
   border-radius: 18px;
   background: rgba(255, 251, 242, 0.72);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .admin-nav-item.active {
   border-color: rgba(141, 95, 47, 0.24);
   background: rgba(255, 253, 249, 0.96);
   box-shadow: 0 14px 28px rgba(74, 51, 23, 0.08);
-}
-
-.admin-nav-item.disabled {
-  opacity: 0.72;
-  cursor: default;
 }
 
 .admin-nav-title {
@@ -419,18 +585,6 @@ onMounted(() => {
   font-size: 0.88rem;
 }
 
-.admin-hero {
-  margin: 0 1.5rem 1.5rem;
-  padding: 0;
-}
-
-.admin-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
-.admin-stat-card,
 .admin-panel,
 .admin-ext-card {
   border: 1px solid var(--admin-line);
@@ -439,28 +593,11 @@ onMounted(() => {
   backdrop-filter: blur(18px);
 }
 
-.admin-stat-card {
-  padding: 1rem 1.05rem;
-}
-
-.admin-stat-label,
 .admin-panel-kicker {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--admin-muted);
-}
-
-.admin-stat-value {
-  margin-top: 0.45rem;
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.admin-stat-note {
-  margin-top: 0.32rem;
-  color: var(--admin-muted);
-  font-size: 0.92rem;
 }
 
 .admin-panel-grid {
@@ -542,11 +679,6 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.admin-field-hint {
-  color: var(--admin-muted);
-  font-size: 0.92rem;
-}
-
 .admin-input-wrap {
   display: flex;
   align-items: center;
@@ -612,6 +744,48 @@ onMounted(() => {
   color: var(--admin-text);
   outline: none;
   font-size: 0.95rem;
+}
+
+.admin-toggle-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-toggle-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(115, 88, 50, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.admin-toggle-card.muted {
+  opacity: 0.7;
+}
+
+.admin-toggle-copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.admin-toggle-title {
+  font-weight: 700;
+}
+
+.admin-toggle-hint {
+  color: var(--admin-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.admin-toggle-input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.2rem;
+  accent-color: var(--admin-accent);
 }
 
 .admin-feedback {
@@ -681,14 +855,9 @@ onMounted(() => {
   .admin-panel-grid {
     grid-template-columns: 1fr;
   }
-
-  .admin-preview-panel {
-    order: 2;
-  }
 }
 
 @media (max-width: 960px) {
-  .admin-stat-grid,
   .admin-form-list.two-cols,
   .admin-ext-grid {
     grid-template-columns: 1fr;
@@ -697,7 +866,6 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .admin-nav,
-  .admin-hero,
   .admin-panel-grid {
     margin-left: 1rem;
     margin-right: 1rem;
