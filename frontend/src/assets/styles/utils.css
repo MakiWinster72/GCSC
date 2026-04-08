@@ -1,0 +1,306 @@
+/**
+ * Utils Styles - 通用工具类样式
+ *
+ * 包含内容:
+ * - Achievement Utils: 成果相关工具类 (intro card, category pills/tags)
+ * - Footer Action: 固定底部操作按钮
+ * - Achievement Add: 添加成果浮动按钮
+ * - Edit Dock: 编辑时固定的底部操作栏
+ * - Education Row Transitions: 教育经历行过渡动画
+ * - iOS Switch: iOS 风格开关
+ * - Simple List: 简单列表样式
+ * - Empty Tip: 空状态提示
+ * - Achievement Category: 成果类别标签
+ */
+
+/* ── Achievement Intro ─────────────────────────────────── */
+.achievement-intro-card {
+  margin-bottom: 12px;
+}
+
+.achievement-intro-text {
+  margin: 8px 0 0;
+  color: #3b5c63;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.achievement-category-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(3, 107, 114, 0.12);
+  color: #0f555d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.achievement-category-tag {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(3, 107, 114, 0.1);
+  color: #0f555d;
+  font-weight: 600;
+}
+
+/* ── Footer Action ──────────────────────────────────────── */
+.footer-action {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  border: 1px solid rgba(3, 107, 114, 0.45);
+  background: rgba(255, 255, 255, 0.6);
+  color: #0f555d;
+  border-radius: 999px;
+  height: 36px;
+  padding: 0 18px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.18);
+  z-index: 30;
+}
+
+.footer-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Achievement Add Button ────────────────────────────── */
+.achievement-add {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #036b72;
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.28);
+  z-index: 30;
+}
+
+.achievement-add:active {
+  transform: translateY(1px);
+}
+
+/* ── Edit Dock ──────────────────────────────────────────── */
+.edit-dock {
+  position: sticky;
+  bottom: 18px;
+  z-index: 45;
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 0 12px 6px;
+  overflow: hidden;
+}
+
+.edit-dock-inner {
+  width: min(520px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(3, 107, 114, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(120%);
+}
+
+.edit-dock-inner .ghost-button,
+.edit-dock-inner .action-button {
+  width: 100%;
+  height: 44px;
+  margin-top: 0;
+}
+
+.edit-dock-enter-active,
+.edit-dock-leave-active {
+  transition:
+    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    margin-top 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-bottom 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.edit-dock-enter-from,
+.edit-dock-leave-to {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-bottom: 0;
+}
+
+.edit-dock-enter-to,
+.edit-dock-leave-from {
+  opacity: 1;
+  max-height: 120px;
+  margin-top: 24px;
+  padding-bottom: 6px;
+}
+
+.edit-dock-enter-active .edit-dock-inner,
+.edit-dock-leave-active .edit-dock-inner {
+  transition:
+    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center bottom;
+}
+
+.edit-dock-enter-from .edit-dock-inner,
+.edit-dock-leave-to .edit-dock-inner {
+  opacity: 0;
+  transform: translateY(18px) scale(0.965);
+  filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(3, 107, 114, 0.04);
+}
+
+.edit-dock-enter-to .edit-dock-inner,
+.edit-dock-leave-from .edit-dock-inner {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* ── Education Row Transitions ─────────────────────────── */
+.education-row-enter-active,
+.education-row-leave-active {
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+}
+
+.education-row-enter-from,
+.education-row-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.education-row-move {
+  transition: transform 260ms ease;
+}
+
+.education-row-leave-active {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+/* ── iOS Switch ─────────────────────────────────────────── */
+.ios-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 52px;
+  height: 30px;
+}
+
+.ios-switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ios-slider {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #d7e2e3, #bfc9cb);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.ios-slider::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.ios-switch input:checked + .ios-slider {
+  background: linear-gradient(180deg, #3bdc6a, #27c356);
+}
+
+.ios-switch input:checked + .ios-slider::after {
+  transform: translateX(22px);
+}
+
+/* ── Simple List ────────────────────────────────────────── */
+.simple-list {
+  display: grid;
+  gap: 10px;
+}
+
+.simple-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+  font-size: 14px;
+}
+
+/* ── Empty Tip ──────────────────────────────────────────── */
+.empty-tip {
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.45);
+  color: #4f6870;
+}
+
+.form-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #b34b2e;
+}
+
+/* ── Responsive Utils ──────────────────────────────────── */
+@media (max-width: 840px) {
+  .footer-action {
+    display: none;
+  }
+
+  .achievement-add {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .edit-dock {
+    bottom: 12px;
+    margin-top: 18px;
+    padding: 0 6px 4px;
+  }
+
+  .edit-dock-inner {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  .edit-dock-enter-to,
+  .edit-dock-leave-from {
+    margin-top: 18px;
+    padding-bottom: 4px;
+  }
+}

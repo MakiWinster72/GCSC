@@ -1,0 +1,328 @@
+/**
+ * Dialog Styles - 对话框/弹窗相关样式
+ *
+ * 包含内容:
+ * - Media Dialog: 媒体上传对话框
+ * - Dialog Card: 通用对话框卡片
+ * - Dialog Transitions: fade/pop 过渡动画
+ * - Hint Components: 提示按钮和提示项
+ * - Upload Queue: 上传队列进度条
+ * - Toast: 轻量级提示消息
+ * - Sheet Overlay/Modal: 底部弹出模态框
+ */
+
+/* ── Media Dialog ──────────────────────────────────────── */
+.media-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(6px);
+  z-index: 70;
+}
+
+.media-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 32px));
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 70px rgba(3, 107, 114, 0.24);
+  z-index: 80;
+  overflow: hidden;
+}
+
+.media-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(3, 107, 114, 0.18);
+}
+
+.media-dialog-title {
+  font-weight: 800;
+  color: #083d45;
+}
+
+.media-dialog-close {
+  border: 1px solid rgba(3, 107, 114, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  height: 32px;
+  padding: 0 10px;
+  cursor: pointer;
+  color: #04555d;
+}
+
+.media-dialog-body {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.media-dialog-hint {
+  font-size: 12px;
+  color: #5b6f78;
+}
+
+/* ── Upload Queue ──────────────────────────────────────── */
+.upload-queue {
+  display: grid;
+  gap: 10px;
+}
+
+.upload-row {
+  display: grid;
+  gap: 6px;
+}
+
+.upload-row-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #375a62;
+}
+
+.upload-name {
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-percent {
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(3, 107, 114, 0.12);
+  overflow: hidden;
+}
+
+.upload-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #11a1ab, #0f6e76);
+  transition: width 0.2s linear;
+}
+
+/* ── Dialog Card ───────────────────────────────────────── */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 18, 20, 0.35);
+  backdrop-filter: blur(6px);
+  z-index: 75;
+}
+
+.dialog-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    150deg,
+    rgba(205, 255, 249, 0.96),
+    rgba(197, 217, 226, 0.86)
+  );
+  box-shadow: 0 24px 60px rgba(3, 107, 114, 0.22);
+  backdrop-filter: blur(12px);
+  padding: 16px;
+  z-index: 80;
+  display: grid;
+  gap: 12px;
+}
+
+.dialog-header {
+  font-weight: 700;
+  color: #123f45;
+}
+
+.dialog-body {
+  color: #2a4b52;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dialog-actions .ghost-button,
+.dialog-actions .action-button {
+  width: 100%;
+  height: 40px;
+  margin-top: 0;
+}
+
+/* ── Dialog Transitions ───────────────────────────────── */
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition:
+    opacity 0.35s ease,
+    backdrop-filter 0.35s ease;
+}
+
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.dialog-fade-enter-to,
+.dialog-fade-leave-from {
+  opacity: 1;
+  backdrop-filter: blur(6px);
+}
+
+.dialog-pop-enter-active,
+.dialog-pop-leave-active {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease;
+}
+
+.dialog-pop-enter-from,
+.dialog-pop-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -48%) scale(0.96);
+}
+
+.dialog-pop-enter-to,
+.dialog-pop-leave-from {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ── Hint Components ───────────────────────────────────── */
+.hint-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(3, 107, 114, 0.45);
+  background: rgba(3, 107, 114, 0.08);
+  color: #3a7a82;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  vertical-align: middle;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+  line-height: 1;
+}
+
+.hint-button:hover {
+  background: rgba(3, 107, 114, 0.18);
+  border-color: rgba(3, 107, 114, 0.6);
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #2a4b52;
+}
+
+.hint-label {
+  font-weight: 600;
+  color: #123f45;
+}
+
+.hint-sep {
+  color: #8ba5ab;
+  margin: 0 8px;
+}
+
+/* ── Toast ─────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 72px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.18);
+  color: #0d515a;
+  font-size: 13px;
+  z-index: 90;
+}
+
+/* ── Sheet Overlay & Modal ──────────────────────────────── */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(52, 37, 22, 0.35);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.sheet-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet-overlay.open .sheet-modal {
+  transform: translateX(-50%) translateY(-50%) scale(1);
+  filter: blur(0);
+}
+
+.sheet-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(calc(-50% + 60px)) scale(0.98);
+  filter: blur(6px);
+  width: 100%;
+  max-width: 400px;
+  max-height: 85vh;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(245, 255, 253, 0.94)
+  );
+  border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(3, 107, 114, 0.22);
+  padding: 28px 24px;
+  overflow-y: auto;
+  transition: transform 0.45s ease, filter 0.75s ease;
+}
+
+@media (max-width: 520px) {
+  .sheet-modal {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+@media (max-width: 840px) {
+  .toast {
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
