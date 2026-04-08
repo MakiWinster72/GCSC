@@ -15,7 +15,7 @@
 .media-dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 18, 20, 0.35);
+  background: rgba(61, 7, 112, 0.35);
   backdrop-filter: blur(6px);
   z-index: 70;
 }
@@ -30,7 +30,7 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(12px);
-  box-shadow: 0 24px 70px rgba(3, 107, 114, 0.24);
+  box-shadow: 0 24px 70px rgba(100, 12, 114, 0.24);
   z-index: 80;
   overflow: hidden;
 }
@@ -40,7 +40,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(3, 107, 114, 0.18);
+  border-bottom: 1px solid rgba(100, 12, 114, 0.18);
 }
 
 .media-dialog-title {
@@ -49,7 +49,7 @@
 }
 
 .media-dialog-close {
-  border: 1px solid rgba(3, 107, 114, 0.35);
+  border: 1px solid rgba(100, 12, 114, 0.35);
   background: rgba(255, 255, 255, 0.5);
   border-radius: 12px;
   height: 32px;
@@ -101,7 +101,7 @@
 .upload-bar {
   height: 6px;
   border-radius: 999px;
-  background: rgba(3, 107, 114, 0.12);
+  background: rgba(100, 12, 114, 0.12);
   overflow: hidden;
 }
 
@@ -116,7 +116,7 @@
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 18, 20, 0.35);
+  background: rgba(61, 7, 112, 0.35);
   backdrop-filter: blur(6px);
   z-index: 75;
 }
@@ -132,9 +132,9 @@
   background: linear-gradient(
     150deg,
     rgba(205, 255, 249, 0.96),
-    rgba(197, 217, 226, 0.86)
+    rgba(210, 180, 240, 0.86)
   );
-  box-shadow: 0 24px 60px rgba(3, 107, 114, 0.22);
+  box-shadow: 0 24px 60px rgba(100, 12, 114, 0.22);
   backdrop-filter: blur(12px);
   padding: 16px;
   z-index: 80;
@@ -213,8 +213,8 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1.5px solid rgba(3, 107, 114, 0.45);
-  background: rgba(3, 107, 114, 0.08);
+  border: 1.5px solid rgba(100, 12, 114, 0.45);
+  background: rgba(100, 12, 114, 0.08);
   color: #3a7a82;
   font-size: 12px;
   font-weight: 700;
@@ -228,8 +228,8 @@
 }
 
 .hint-button:hover {
-  background: rgba(3, 107, 114, 0.18);
-  border-color: rgba(3, 107, 114, 0.6);
+  background: rgba(100, 12, 114, 0.18);
+  border-color: rgba(100, 12, 114, 0.6);
 }
 
 .hint-item {
@@ -261,7 +261,7 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
-  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.18);
+  box-shadow: 0 18px 40px rgba(100, 12, 114, 0.18);
   color: #0d515a;
   font-size: 13px;
   z-index: 90;
@@ -307,7 +307,7 @@
     rgba(245, 255, 253, 0.94)
   );
   border-radius: 24px;
-  box-shadow: 0 16px 48px rgba(3, 107, 114, 0.22);
+  box-shadow: 0 16px 48px rgba(100, 12, 114, 0.22);
   padding: 28px 24px;
   overflow-y: auto;
   transition: transform 0.45s ease, filter 0.75s ease;

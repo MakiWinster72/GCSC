@@ -14,13 +14,13 @@
 /* ── Dashboard Shell ────────────────────────────────────── */
 .dashboard-shell {
   min-height: 100vh;
-  padding: 24px;
+  padding: 28px;
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .dashboard-shell.dashboard-shell-embedded {
-  padding: 12px;
+  padding: 14px;
 }
 
 .dashboard-shell.dashboard-shell-embedded .dashboard-left,
@@ -31,8 +31,8 @@
 /* ── Dashboard Grid Layout ──────────────────────────────── */
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
 
@@ -40,8 +40,8 @@
   display: grid;
   gap: 14px;
   position: sticky;
-  top: 24px;
-  max-height: calc(100vh - 48px);
+  top: 28px;
+  max-height: calc(100vh - 56px);
   align-self: start;
   align-content: start;
   overflow: hidden;
@@ -201,7 +201,7 @@
 /* ── Responsive Layout ──────────────────────────────────── */
 @media (max-width: 1080px) {
   .dashboard-layout {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 
