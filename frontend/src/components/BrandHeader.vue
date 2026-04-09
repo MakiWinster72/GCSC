@@ -1,0 +1,311 @@
+<template>
+  <header class="brand-header">
+    <!-- Left: Logo + Wordmark -->
+    <div class="brand-logo-group">
+      <img
+        src="/assets/icons/xylogo.png"
+        alt="XY"
+        class="brand-logo-icon"
+      />
+      <img
+        src="/assets/icons/xylogo_with_text.png"
+        alt="大数据与人工智能学院"
+        class="brand-logo-text"
+      />
+    </div>
+
+    <!-- Right: User Profile Chip -->
+    <div class="brand-profile-chip">
+      <!-- Avatar -->
+      <div class="chip-avatar">
+        <img
+          v-if="profile.avatarUrl"
+          :src="resolveMediaUrl(profile.avatarUrl)"
+          alt="头像"
+        />
+        <span v-else>{{ avatarText }}</span>
+      </div>
+
+      <!-- Name & Role -->
+      <div class="chip-info">
+        <span class="chip-name">
+          {{ profile.displayName || profile.username || "同学" }}
+        </span>
+        <span class="chip-role">{{ roleLabel }}</span>
+      </div>
+
+      <!-- Divider -->
+      <div class="chip-divider" aria-hidden="true" />
+
+      <!-- Actions -->
+      <div class="chip-actions">
+        <button
+          v-if="profile.role === 'ADMIN'"
+          class="chip-btn chip-btn--primary"
+          type="button"
+          aria-label="管理后台"
+          @click="$emit('menu-click', 'admin')"
+        >
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span>管理</span>
+        </button>
+        <button
+          class="chip-btn chip-btn--ghost"
+          type="button"
+          aria-label="设置"
+          @click="$emit('settings-click')"
+        >
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M10 2v1.5M10 16.5V18M18 10h-1.5M3.5 10H2M16.24 3.76l-1.06 1.06M4.82 15.18l-1.06 1.06M16.24 16.24l-1.06-1.06M4.82 4.82L3.76 3.76" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+</template>
+
+<script setup>
+import { computed } from "vue";
+import { API_BASE } from "../api/request";
+
+const props = defineProps({
+  profile: {
+    type: Object,
+    required: true,
+  },
+});
+
+defineEmits(["settings-click", "menu-click"]);
+
+const avatarText = computed(() => {
+  const name = props.profile.displayName || props.profile.username || "同学";
+  return name.slice(0, 1).toUpperCase();
+});
+
+const roleLabel = computed(() => {
+  if (props.profile.role === "ADMIN") return "管理员";
+  if (props.profile.role === "TEACHER") return "教师";
+  return "学生";
+});
+
+function resolveMediaUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${API_BASE}${url}`;
+}
+</script>
+
+<style scoped>
+/* ── Header Shell ──────────────────────────────────────── */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 72px;
+  background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 50%, #5c0f7a 100%);
+  border-bottom: 1px solid rgba(212, 156, 59, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle top highlight line */
+.brand-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.2) 70%,
+    transparent 100%
+  );
+}
+
+/* ── Logo Group ────────────────────────────────────────── */
+.brand-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.brand-logo-icon {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(100, 12, 114, 0.4));
+}
+
+.brand-logo-text {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.95;
+}
+
+/* ── Profile Chip ──────────────────────────────────────── */
+.brand-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 48px;
+  padding: 6px 8px 6px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+.brand-profile-chip:hover {
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ── Avatar ────────────────────────────────────────────── */
+.chip-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(212, 156, 59, 0.25);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #f5d89a;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(212, 156, 59, 0.35);
+  transition: border-color 200ms ease;
+}
+
+.brand-profile-chip:hover .chip-avatar {
+  border-color: rgba(212, 156, 59, 0.55);
+}
+
+.chip-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Name & Role ───────────────────────────────────────── */
+.chip-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10px 0 10px;
+  gap: 1px;
+}
+
+.chip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.chip-role {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
+}
+
+/* ── Divider ───────────────────────────────────────────── */
+.chip-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Actions ──────────────────────────────────────────── */
+.chip-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 4px;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip-btn:active {
+  transform: scale(0.96);
+}
+
+/* Primary (Manage) */
+.chip-btn--primary {
+  height: 30px;
+  padding: 0 12px;
+  background: linear-gradient(135deg, #d49a3b 0%, #c8892a 100%);
+  color: #fff;
+  box-shadow:
+    0 2px 8px rgba(212, 156, 59, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.chip-btn--primary:hover {
+  background: linear-gradient(135deg, #e0a844 0%, #d49a3b 100%);
+  box-shadow:
+    0 4px 12px rgba(212, 156, 59, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.chip-btn--primary svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Ghost (Settings) */
+.chip-btn--ghost {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.chip-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chip-btn--ghost svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+</style>

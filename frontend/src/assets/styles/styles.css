@@ -36,7 +36,7 @@
 /* ── 05. Card Styles ───────────────────────────────────────────────────────── */
 /**
  * cards.css - 卡片组件样式
- * 包含: 卡片基础样式 (profile-card, menu-card, composer-card, panel-card)、Profile Card 用户信息卡片、Menu Card 菜单卡片、导航菜单项、通知菜单相关样式、菜单面板过渡动画
+ * 包含: 卡片基础样式 (menu-card, composer-card, panel-card)、Menu Card 菜单卡片、导航菜单项、通知菜单相关样式、菜单面板过渡动画
  */
 @import './cards.css';
 

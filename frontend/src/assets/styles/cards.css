@@ -2,15 +2,13 @@
  * Card Styles - 卡片组件样式
  *
  * 包含内容:
- * - Card Base: profile-card, menu-card, composer-card, panel-card 共同基础样式
- * - Profile Card: 用户信息卡片
+ * - Card Base: menu-card, composer-card, panel-card 共同基础样式
  * - Menu Card: 菜单卡片、导航列表
  * - Notification Menu: 通知菜单相关样式
  * - Menu Transitions: 菜单面板过渡动画
  */
 
 /* ── Card Base ─────────────────────────────────────────── */
-.profile-card,
 .menu-card,
 .composer-card,
 .panel-card {
@@ -29,7 +27,6 @@
   background-clip: padding-box;
 }
 
-.profile-card::before,
 .menu-card::before,
 .composer-card::before,
 .panel-card::before {
@@ -41,142 +38,6 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.34),
     inset 0 -1px 0 rgba(255, 255, 255, 0.08);
-}
-
-/* ── Profile Card ───────────────────────────────────────── */
-.profile-card {
-  padding: 14px 14px 8px;
-}
-
-.profile-card.compact {
-  padding: 12px 16px;
-  display: grid;
-  gap: 10px;
-}
-
-.profile-row {
-  min-height: 36px;
-  display: flex;
-  align-items: center;
-  border-radius: 12px;
-  padding: 0 14px;
-  color: #36545f;
-  font-size: 15px;
-}
-
-.profile-main {
-  background: rgba(3, 107, 114, 0.09);
-  min-height: 60px;
-  margin-bottom: 4px;
-}
-
-.profile-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #036b72;
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  overflow: hidden;
-}
-
-.profile-name-wrap {
-  margin-left: 10px;
-  flex: 1;
-}
-
-.profile-name {
-  margin: 0;
-  color: #063f45;
-  font-weight: 700;
-}
-
-.profile-role {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: #57808a;
-}
-
-.profile-settings {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  border: 1px solid rgba(3, 107, 114, 0.25);
-  background: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-}
-
-.profile-actions {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.profile-manage {
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(3, 107, 114, 0.24);
-  background: rgba(255, 255, 255, 0.54);
-  color: #0c5a62;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    box-shadow 180ms ease,
-    background-color 180ms ease,
-    color 180ms ease;
-}
-
-.profile-manage:hover {
-  box-shadow: 0 6px 12px rgba(3, 107, 114, 0.06);
-}
-
-.profile-settings img {
-  width: 18px;
-  height: 18px;
-}
-
-.profile-meta-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.profile-meta-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.48);
-  color: #36545f;
-  font-size: 13px;
-}
-
-.ghost-button {
-  border: 1px solid rgba(3, 107, 114, 0.35);
-  background: rgba(255, 255, 255, 0.45);
-  border-radius: 10px;
-  height: 32px;
-  padding: 0 10px;
-  cursor: pointer;
-  color: #04555d;
-}
-
-.profile-avatar img,
-.post-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  object-fit: cover;
 }
 
 /* ── Menu Card ──────────────────────────────────────────── */

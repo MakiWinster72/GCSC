@@ -1,10 +1,12 @@
 <template>
   <div class="dashboard-shell" :class="{ 'dashboard-shell-embedded': isEmbedded }">
     <!-- Full-width brand header -->
-    <div class="brand-header" v-if="!isEmbedded">
-      <img src="/assets/icons/xylogo.png" alt="XY" class="brand-icon" />
-      <img src="/assets/icons/xylogo_with_text.png" alt="大数据与人工智能学院" class="brand-text" />
-    </div>
+    <BrandHeader
+      v-if="!isEmbedded"
+      :profile="profile"
+      @menu-click="handleMenuClick"
+      @settings-click="goToSettings"
+    />
 
     <div class="dashboard-layout">
       <DashboardSidebar
@@ -30,6 +32,7 @@
 <script setup>
 import { computed, provide, reactive, ref, watch } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
+import BrandHeader from "../components/BrandHeader.vue";
 import DashboardSidebar from "../components/DashboardSidebar.vue";
 import {
   getActiveMenuFromRoute,
@@ -160,27 +163,3 @@ function loadUser() {
   }
 }
 </script>
-
-<style scoped>
-.brand-header {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 16px 28px;
-  background: linear-gradient(160deg, #1a0a2e 0%, #2d1050 40%, #640c72 100%);
-  border-bottom: 1px solid rgba(212, 156, 59, 0.2);
-}
-
-.brand-icon {
-  height: 72px;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.brand-text {
-  height: 46px;
-  width: auto;
-  object-fit: contain;
-}
-</style>

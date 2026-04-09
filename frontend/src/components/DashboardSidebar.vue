@@ -1,12 +1,5 @@
 <template>
   <aside class="dashboard-left">
-    <ProfileCard
-      :profile="profile"
-      :compact="false"
-      @menu-click="$emit('menu-click', $event)"
-      @settings-click="$emit('settings-click')"
-    />
-
     <div class="dashboard-menu-scroll">
       <CardMenu
         :profile="profile"
@@ -26,7 +19,6 @@
 
 <script setup>
 import CardMenu from "./CardMenu.vue";
-import ProfileCard from "./ProfileCard.vue";
 
 defineProps({
   profile: {
