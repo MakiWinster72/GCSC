@@ -219,13 +219,24 @@
   transition:
     background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
     color 180ms ease,
-    border-color 180ms ease,
+    border-color 160ms ease,
     transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
-.menu-item:active:not(.disabled) {
-  transform: scale(0.98);
+.menu-item:active:not(.disabled):not(.active) {
+  transform: scale(0.97);
+}
+
+.menu-item:active:not(.disabled).active {
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes itemActivePop {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.96); }
+  100% { transform: scale(1); }
 }
 
 .menu-item-header {
@@ -243,6 +254,8 @@
 .menu-item.active {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
+  border-color: transparent;
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .menu-item-label {
@@ -286,7 +299,7 @@
   min-height: 38px;
   padding: 0 12px;
   text-align: left;
-  border: 0;
+  border: 1.5px solid transparent;
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
@@ -295,26 +308,33 @@
   color: var(--text-sub);
   background: rgba(255, 255, 255, 0.48);
   transition:
-    box-shadow 160ms ease,
-    color 180ms ease,
-    background-color 180ms ease,
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
     transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
-.menu-subitem:active {
+.menu-subitem:active:not(.active) {
   transform: scale(0.97);
+}
+
+.menu-subitem:active.active {
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .menu-subitem:hover:not(.active) {
   background: rgba(255, 255, 255, 0.75);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
   color: var(--text-main);
 }
 
 .menu-subitem.active {
   color: #fff;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-color: transparent;
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* ── Notification Menu ──────────────────────────────────── */
@@ -330,14 +350,14 @@
 
 .menu-notification-tab {
   min-height: 38px;
-  border: 1px solid var(--line);
+  border: 1.5px solid transparent;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.48);
   color: var(--text-sub);
   display: grid;
   gap: 4px;
   place-items: center;
-  padding: 6px 8px;
+  padding: 5px 8px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
@@ -347,22 +367,27 @@
     color 160ms ease,
     transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
-.menu-notification-tab:active {
+.menu-notification-tab:active:not(.active) {
   transform: scale(0.96);
+}
+
+.menu-notification-tab:active.active {
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .menu-notification-tab:hover:not(.active) {
   background: rgba(255, 255, 255, 0.75);
-  border-color: var(--line-strong);
+  border-color: var(--primary);
   color: var(--primary-dark);
 }
 
 .menu-notification-tab.active {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  border-color: transparent;
   color: #fff;
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .menu-notification-tab-count {
@@ -396,29 +421,35 @@
 .menu-notification-item {
   display: grid;
   gap: 7px;
+  border: 1.5px solid transparent;
   border-radius: 16px;
-  padding: 14px;
+  padding: 13px;
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition:
     background-color 180ms ease,
-    box-shadow 180ms ease,
+    border-color 160ms ease,
     transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
-.menu-notification-item:active {
+.menu-notification-item:active:not(.active) {
   transform: scale(0.98);
+}
+
+.menu-notification-item:active.active {
+  animation: itemActivePop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .menu-notification-item:hover:not(.active) {
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
 }
 
 .menu-notification-item.active {
-  background: rgba(100, 12, 114, 0.06);
-  box-shadow: inset 0 0 0 1.5px var(--primary);
+  background: rgba(100, 12, 114, 0.07);
+  border-color: var(--primary);
 }
 
 .menu-notification-head {
@@ -598,23 +629,20 @@
 .menu-title-back-enter-active,
 .menu-title-back-leave-active {
   transition:
-    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .menu-panel-forward-enter-from,
 .menu-panel-back-leave-to {
   opacity: 0;
-  transform: translateX(14px) scale(0.985);
-  filter: blur(3px);
+  transform: translateX(12px) scale(0.98);
 }
 
 .menu-panel-forward-leave-to,
 .menu-panel-back-enter-from {
   opacity: 0;
-  transform: translateX(-12px) scale(0.985);
-  filter: blur(3px);
+  transform: translateX(-10px) scale(0.98);
 }
 
 .menu-title-forward-enter-from,
@@ -647,6 +675,12 @@
 .menu-back-fade-leave-to {
   opacity: 0;
   transform: translateX(-8px);
+}
+
+@keyframes itemActivePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
