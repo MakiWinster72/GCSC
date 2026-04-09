@@ -67,7 +67,11 @@ public class AchievementService {
         AppUser user = appUserRepository.findByUsername(username).orElse(null);
         boolean allowStudentFilter = hasStudentFilter && isPrivileged(user);
         if (allowStudentFilter) {
-            return listByStudent(safeStudentNo, safeStudentName, category);
+            String normalized = normalizeCategory(category);
+            if (normalized == null) {
+                return listAllByStudent(safeStudentNo, safeStudentName);
+            }
+            return listByStudent(safeStudentNo, safeStudentName, normalized);
         }
         if (category == null || category.isBlank()) {
             return listAll(username);
