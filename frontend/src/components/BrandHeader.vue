@@ -143,8 +143,8 @@ function resolveMediaUrl(url) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
-  height: 72px;
+  padding: 0 34px;
+  height: 86px;
   background: linear-gradient(135deg, #1a0a2e 0%, #2d1050 50%, #5c0f7a 100%);
   border: 1px solid rgba(212, 156, 59, 0.15);
   border-radius: 20px;
@@ -179,19 +179,19 @@ function resolveMediaUrl(url) {
 .brand-logo-group {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   flex-shrink: 0;
 }
 
 .brand-logo-icon {
-  height: 52px;
+  height: 72px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(100, 12, 114, 0.4));
 }
 
 .brand-logo-text {
-  height: 36px;
+  height: 43px;
   width: auto;
   object-fit: contain;
   opacity: 0.95;
@@ -202,8 +202,8 @@ function resolveMediaUrl(url) {
   display: flex;
   align-items: center;
   gap: 0;
-  height: 48px;
-  padding: 6px 8px 6px 6px;
+  height: 58px;
+  padding: 7px 10px 7px 7px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
@@ -224,14 +224,14 @@ function resolveMediaUrl(url) {
 
 /* ── Avatar ────────────────────────────────────────────── */
 .chip-avatar {
-  width: 36px;
-  height: 36px;
+  width: 43px;
+  height: 43px;
   border-radius: 999px;
   background: rgba(212, 156, 59, 0.25);
   display: grid;
   place-items: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 17px;
   color: #f5d89a;
   overflow: hidden;
   flex-shrink: 0;
@@ -254,12 +254,12 @@ function resolveMediaUrl(url) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 10px 0 10px;
-  gap: 1px;
+  padding: 0 12px 0 12px;
+  gap: 2px;
 }
 
 .chip-name {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
   line-height: 1.2;
@@ -267,7 +267,7 @@ function resolveMediaUrl(url) {
 }
 
 .chip-role {
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.5);
   line-height: 1;
 }
@@ -275,7 +275,7 @@ function resolveMediaUrl(url) {
 /* ── Divider ───────────────────────────────────────────── */
 .chip-divider {
   width: 1px;
-  height: 24px;
+  height: 29px;
   background: rgba(255, 255, 255, 0.12);
   margin: 0 4px;
   flex-shrink: 0;
@@ -285,18 +285,18 @@ function resolveMediaUrl(url) {
 .chip-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding-left: 4px;
+  gap: 5px;
+  padding-left: 5px;
 }
 
 .chip-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   transition:
@@ -312,8 +312,8 @@ function resolveMediaUrl(url) {
 
 /* Primary (Manage) */
 .chip-btn--primary {
-  height: 30px;
-  padding: 0 12px;
+  height: 36px;
+  padding: 0 14px;
   background: linear-gradient(135deg, #d49a3b 0%, #c8892a 100%);
   color: #fff;
   box-shadow:
@@ -329,15 +329,15 @@ function resolveMediaUrl(url) {
 }
 
 .chip-btn--primary svg {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
 }
 
 /* Ghost (Settings) */
 .chip-btn--ghost {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.6);
@@ -349,8 +349,8 @@ function resolveMediaUrl(url) {
 }
 
 .settings-icon {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
 }
