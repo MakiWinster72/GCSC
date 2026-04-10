@@ -13,7 +13,10 @@ const profile = reactive(loadUser());
 const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest } = useNotifications(profile);
 
 const rejectEditorOpen = ref(false);
-const rejectReason = ref("");
+const rejectReason = ref(localStorage.getItem("gcsc_reject_draft") || "");
+watch(rejectReason, (val) => {
+  if (val) localStorage.setItem("gcsc_reject_draft", val);
+});
 const actionError = ref("");
 const selectedId = ref(null);
 
@@ -78,7 +81,6 @@ watch(
 
 watch(selectedId, () => {
   rejectEditorOpen.value = false;
-  rejectReason.value = "";
   actionError.value = "";
   cancelConfirmOpen.value = false;
   closeStudentDetail();
@@ -204,6 +206,7 @@ async function rejectSelectedRequest() {
     await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "rejected", reviewer: profile, reason: rejectReason.value });
     rejectEditorOpen.value = false;
     rejectReason.value = "";
+    localStorage.removeItem("gcsc_reject_draft");
   } catch (error) {
     actionError.value = error?.message || "处理失败，请稍后重试";
   }
@@ -212,7 +215,6 @@ async function rejectSelectedRequest() {
 function toggleRejectEditor() {
   rejectEditorOpen.value = !rejectEditorOpen.value;
   actionError.value = "";
-  if (!rejectEditorOpen.value) rejectReason.value = "";
 }
 
 function openCancelConfirm() { cancelConfirmOpen.value = true; }
