@@ -323,6 +323,39 @@
   opacity: 0;
 }
 
+.sheet-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sheet-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.sheet-modal-body {
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+.sheet-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sheet-modal-actions .ghost-button,
+.sheet-modal-actions .action-button {
+  width: 100%;
+  height: 42px;
+  margin-top: 0;
+}
+
 @media (max-width: 520px) {
   .sheet-modal {
     max-width: 100%;

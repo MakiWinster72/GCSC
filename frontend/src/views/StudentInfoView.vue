@@ -490,6 +490,30 @@
         </button>
       </template>
     </MobileCapsule>
+
+    <div
+      :class="['sheet-overlay', { open: gridViewConfirmOpen }]"
+      @click.self="closeGridViewConfirm"
+    >
+      <div class="sheet-modal" @click.stop>
+        <header class="sheet-modal-header">
+          <div class="sheet-modal-title">提示</div>
+        </header>
+        <div class="sheet-modal-body">
+          当前学生数量为 {{ totalItems }} 人，表格视图加载大量数据可能会造成卡顿。<br />
+          建议使用导出功能下载表格查看。<br />
+          是否继续切换到表格视图？
+        </div>
+        <div class="sheet-modal-actions">
+          <button class="ghost-button" type="button" @click="closeGridViewConfirm">
+            取消
+          </button>
+          <button class="action-button" type="button" @click="confirmGridView">
+            继续
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -545,6 +569,7 @@ const gridFieldDialogOpen = ref(false);
 const gridFieldDialogClosing = ref(false);
 const gridActiveSheet = ref("main");
 const gridFullscreen = ref(false);
+const gridViewConfirmOpen = ref(false);
 const gridWrapRef = ref(null);
 const gridHasFullDetail = ref(false);
 let gridRequestId = 0;
@@ -1011,10 +1036,24 @@ async function fetchGridDetails(items, requestId) {
 }
 
 function toggleGridView() {
+  if (!gridViewOpen.value && totalItems.value > 100) {
+    gridViewConfirmOpen.value = true;
+    return;
+  }
   gridViewOpen.value = !gridViewOpen.value;
   if (gridViewOpen.value) {
     fetchGridStudents();
   }
+}
+
+function confirmGridView() {
+  gridViewConfirmOpen.value = false;
+  gridViewOpen.value = true;
+  fetchGridStudents();
+}
+
+function closeGridViewConfirm() {
+  gridViewConfirmOpen.value = false;
 }
 
 function toggleGridFullscreen() {
