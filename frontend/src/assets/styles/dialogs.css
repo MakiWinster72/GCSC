@@ -45,7 +45,7 @@
 
 .media-dialog-title {
   font-weight: 800;
-  color: #083d45;
+  color: var(--primary-dark);
 }
 
 .media-dialog-close {
@@ -55,7 +55,18 @@
   height: 32px;
   padding: 0 10px;
   cursor: pointer;
-  color: #04555d;
+  color: var(--primary);
+  transition: background 180ms ease, border-color 180ms ease, transform 120ms ease;
+}
+
+.media-dialog-close:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.media-dialog-close:active {
+  transform: scale(0.95);
 }
 
 .media-dialog-body {
@@ -66,7 +77,7 @@
 
 .media-dialog-hint {
   font-size: 12px;
-  color: #5b6f78;
+  color: var(--text-sub);
 }
 
 /* ── Upload Queue ──────────────────────────────────────── */
@@ -84,7 +95,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #375a62;
+  color: var(--primary-dark);
 }
 
 .upload-name {
@@ -108,7 +119,7 @@
 .upload-bar-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #11a1ab, #0f6e76);
+  background: linear-gradient(90deg, var(--primary-light), var(--primary));
   transition: width 0.2s linear;
 }
 
@@ -144,11 +155,11 @@
 
 .dialog-header {
   font-weight: 700;
-  color: #123f45;
+  color: var(--primary-dark);
 }
 
 .dialog-body {
-  color: #2a4b52;
+  color: var(--primary-dark);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -215,7 +226,7 @@
   border-radius: 50%;
   border: 1.5px solid rgba(100, 12, 114, 0.45);
   background: rgba(100, 12, 114, 0.08);
-  color: #3a7a82;
+  color: var(--primary);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -223,13 +234,15 @@
   vertical-align: middle;
   transition:
     background 0.2s,
-    border-color 0.2s;
+    border-color 0.2s,
+    transform 0.12s ease;
   line-height: 1;
 }
 
 .hint-button:hover {
   background: rgba(100, 12, 114, 0.18);
   border-color: rgba(100, 12, 114, 0.6);
+  transform: scale(1.1);
 }
 
 .hint-item {
@@ -238,16 +251,16 @@
   gap: 0;
   padding: 4px 0;
   font-size: 14px;
-  color: #2a4b52;
+  color: var(--primary-dark);
 }
 
 .hint-label {
   font-weight: 600;
-  color: #123f45;
+  color: var(--primary-dark);
 }
 
 .hint-sep {
-  color: #8ba5ab;
+  color: var(--text-sub);
   margin: 0 8px;
 }
 
@@ -262,7 +275,7 @@
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
   box-shadow: 0 18px 40px rgba(100, 12, 114, 0.18);
-  color: #0d515a;
+  color: var(--primary-dark);
   font-size: 13px;
   z-index: 90;
 }

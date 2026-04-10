@@ -20,7 +20,7 @@
 
 .achievement-intro-text {
   margin: 8px 0 0;
-  color: #3b5c63;
+  color: var(--text-sub);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -28,8 +28,8 @@
 .achievement-category-pill {
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(3, 107, 114, 0.12);
-  color: #0f555d;
+  background: var(--primary-surface);
+  color: var(--primary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -37,8 +37,8 @@
 .achievement-category-tag {
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(3, 107, 114, 0.1);
-  color: #0f555d;
+  background: var(--primary-surface);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -47,9 +47,9 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  border: 1px solid rgba(3, 107, 114, 0.45);
+  border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.6);
-  color: #0f555d;
+  color: var(--primary);
   border-radius: 999px;
   height: 36px;
   padding: 0 18px;
@@ -57,8 +57,24 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   backdrop-filter: blur(12px);
-  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.18);
+  box-shadow: var(--shadow);
   z-index: 30;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 120ms ease,
+    box-shadow 180ms ease;
+}
+
+.footer-action:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.footer-action:active {
+  transform: translateY(0);
 }
 
 .footer-action:disabled {
@@ -75,19 +91,27 @@
   height: 56px;
   border-radius: 50%;
   border: none;
-  background: #036b72;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   font-size: 32px;
   line-height: 1;
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 18px 40px rgba(3, 107, 114, 0.28);
+  box-shadow: 0 18px 40px rgba(100, 12, 114, 0.28);
   z-index: 30;
+  transition:
+    transform 160ms ease,
+    box-shadow 180ms ease;
+}
+
+.achievement-add:hover {
+  transform: scale(1.06);
+  box-shadow: 0 22px 48px rgba(100, 12, 114, 0.36);
 }
 
 .achievement-add:active {
-  transform: translateY(1px);
+  transform: scale(0.96);
 }
 
 /* ── Edit Dock ──────────────────────────────────────────── */
@@ -108,10 +132,11 @@
   grid-template-columns: 1fr 1.2fr;
   gap: 10px;
   padding: 10px;
-  border: 1px solid rgba(3, 107, 114, 0.14);
+  border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px) saturate(120%);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--shadow);
 }
 
 .edit-dock-inner .ghost-button,
@@ -124,10 +149,10 @@
 .edit-dock-enter-active,
 .edit-dock-leave-active {
   transition:
-    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    margin-top 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    padding-bottom 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    margin-top 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-bottom 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .edit-dock-enter-from,
@@ -149,19 +174,19 @@
 .edit-dock-enter-active .edit-dock-inner,
 .edit-dock-leave-active .edit-dock-inner {
   transition:
-    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 360ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 400ms cubic-bezier(0.34, 1.2, 0.64, 1),
+    filter 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: center bottom;
 }
 
 .edit-dock-enter-from .edit-dock-inner,
 .edit-dock-leave-to .edit-dock-inner {
   opacity: 0;
-  transform: translateY(18px) scale(0.965);
-  filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(3, 107, 114, 0.04);
+  transform: translateY(20px) scale(0.96);
+  filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.06);
 }
 
 .edit-dock-enter-to .edit-dock-inner,
@@ -169,6 +194,7 @@
   opacity: 1;
   transform: translateY(0) scale(1);
   filter: blur(0);
+  box-shadow: var(--shadow);
 }
 
 /* ── Education Row Transitions ─────────────────────────── */
@@ -264,13 +290,13 @@
   border-radius: 14px;
   padding: 12px;
   background: rgba(255, 255, 255, 0.45);
-  color: #4f6870;
+  color: var(--text-sub);
 }
 
 .form-tip {
   margin-top: 8px;
   font-size: 12px;
-  color: #b34b2e;
+  color: var(--danger);
 }
 
 /* ── Responsive Utils ──────────────────────────────────── */

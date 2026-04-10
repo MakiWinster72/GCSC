@@ -24,16 +24,16 @@
   background:
     linear-gradient(
       160deg,
-      rgba(255, 255, 255, 0.88),
-      rgba(213, 241, 236, 0.55)
+      rgba(255, 255, 255, 0.92),
+      rgba(243, 213, 255, 0.55)
     ),
     radial-gradient(
       circle at top left,
-      rgba(3, 107, 114, 0.08),
+      rgba(100, 12, 114, 0.07),
       transparent 55%
     );
-  border: 1px solid rgba(3, 107, 114, 0.12);
-  box-shadow: 0 22px 50px rgba(3, 107, 114, 0.12);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
 }
 
 .info-shell-editing {
@@ -47,9 +47,9 @@
 
 .settings-card {
   border-radius: 18px;
-  border: 1px solid rgba(3, 107, 114, 0.12);
+  border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 26px rgba(3, 107, 114, 0.1);
+  box-shadow: var(--shadow-sm);
   padding: 18px 20px;
   display: grid;
   gap: 12px;
@@ -70,12 +70,12 @@
 .settings-title {
   font-size: 16px;
   font-weight: 800;
-  color: #0b3f47;
+  color: var(--primary-dark);
 }
 
 .settings-subtitle {
   font-size: 13px;
-  color: #5e7680;
+  color: var(--text-sub);
 }
 
 .settings-actions {
@@ -87,29 +87,48 @@
 }
 
 .settings-action {
-  border: 1px solid rgba(3, 107, 114, 0.35);
+  border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.8);
-  color: #0f555d;
+  color: var(--primary);
   border-radius: 14px;
   height: 40px;
   padding: 0 18px;
   font-weight: 700;
   letter-spacing: 0.2px;
   cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+}
+
+.settings-action:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.settings-action:active {
+  transform: translateY(0);
 }
 
 .settings-action.danger {
   border-color: rgba(203, 53, 53, 0.5);
-  color: #c43232;
+  color: var(--danger);
   background: rgba(255, 255, 255, 0.9);
+}
+
+.settings-action.danger:hover {
+  border-color: var(--danger);
 }
 
 /* ── Info Hero ──────────────────────────────────────────── */
 .info-hero {
   border-radius: 18px;
-  border: 1px solid rgba(3, 107, 114, 0.12);
+  border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 26px rgba(3, 107, 114, 0.1);
+  box-shadow: var(--shadow-sm);
   padding: 18px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -118,21 +137,54 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.info-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(
+    circle at center,
+    rgba(100, 12, 114, 0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .avatar-square {
   width: 140px;
   height: 140px;
   border-radius: 18px;
-  border: 1px dashed rgba(3, 107, 114, 0.28);
+  border: 1.5px dashed var(--line-strong);
   background: rgba(255, 255, 255, 0.9);
   overflow: hidden;
-  color: #0f555d;
+  color: var(--primary);
   font-weight: 700;
   cursor: pointer;
   padding: 12px;
   text-align: center;
   line-height: 1.4;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.avatar-square:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(100, 12, 114, 0.14);
+}
+
+.avatar-square:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .avatar-square:disabled {
@@ -156,11 +208,11 @@
 .info-hero-title {
   font-size: 20px;
   font-weight: 800;
-  color: #0b3f47;
+  color: var(--primary-dark);
 }
 
 .info-label {
-  color: #5b717a;
+  color: var(--text-sub);
   font-weight: 600;
   font-size: 13px;
   letter-spacing: 0.3px;
@@ -168,7 +220,7 @@
 
 .info-hint {
   font-size: 12px;
-  color: #9aa7ad;
+  color: var(--text-sub);
   font-style: italic;
   line-height: 1.4;
   margin-top: 4px;
@@ -176,7 +228,7 @@
 
 .info-hero-subtitle {
   font-size: 13px;
-  color: #5e7680;
+  color: var(--text-sub);
 }
 
 /* ── Info Card ──────────────────────────────────────────── */
@@ -184,7 +236,7 @@
   padding: 12px 6px 18px;
   display: grid;
   gap: 12px;
-  border-bottom: 1px solid rgba(3, 107, 114, 0.12);
+  border-bottom: 1px solid var(--line);
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -197,7 +249,7 @@
 .info-section-title {
   font-size: 15px;
   font-weight: 800;
-  color: #0f4d55;
+  color: var(--primary-dark);
   letter-spacing: 0.3px;
   padding-left: 10px;
   position: relative;
@@ -214,8 +266,8 @@
   border-radius: 999px;
   background: linear-gradient(
     180deg,
-    rgba(3, 107, 114, 0.8),
-    rgba(3, 107, 114, 0.3)
+    var(--primary) 0%,
+    var(--primary-light) 100%
   );
 }
 
@@ -239,7 +291,7 @@
   grid-column: 1 / -1;
   font-size: 13px;
   font-weight: 700;
-  color: #0f4d55;
+  color: var(--primary-dark);
   letter-spacing: 0.3px;
   padding: 8px 0 4px;
 }
@@ -249,9 +301,19 @@
   gap: 6px;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(3, 107, 114, 0.1);
+  border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.78);
   min-width: 0;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.field-card:focus-within {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px var(--primary-surface);
 }
 
 .field-full {
@@ -325,15 +387,15 @@
 .education-table-wrap {
   overflow: visible;
   border-radius: 18px;
-  border: 1px solid rgba(3, 107, 114, 0.12);
+  border: 1px solid var(--line);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.78),
-    rgba(249, 253, 252, 0.72)
+    rgba(255, 255, 255, 0.82),
+    rgba(249, 245, 255, 0.72)
   );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    0 8px 22px rgba(3, 107, 114, 0.05);
+    var(--shadow-sm);
 }
 
 /* ── Record List ────────────────────────────────────────── */
@@ -347,11 +409,20 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border: 1px solid rgba(3, 107, 114, 0.1);
+  border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 6px 18px rgba(3, 107, 114, 0.04);
+  box-shadow: var(--shadow-sm);
   min-width: 0;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.record-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow);
 }
 
 .record-grid {
@@ -377,10 +448,10 @@
 .record-field-time .education-period {
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(3, 107, 114, 0.1);
+  border: 1px solid var(--line);
   background: linear-gradient(
     180deg,
-    rgba(3, 107, 114, 0.04),
+    rgba(100, 12, 114, 0.04),
     rgba(255, 255, 255, 0.72)
   );
 }
@@ -437,7 +508,7 @@
 }
 
 .education-sep {
-  color: #6a7d85;
+  color: var(--text-sub);
   font-size: 12px;
   white-space: nowrap;
   text-align: center;
@@ -454,7 +525,7 @@
 
 /* ── Education Controls ─────────────────────────────────── */
 .education-controls-wrap {
-  border-top: 1px solid rgba(3, 107, 114, 0.08);
+  border-top: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.48);
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
@@ -471,9 +542,9 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  border: 1px solid rgba(3, 107, 114, 0.18);
+  border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.9);
-  color: #1f4f57;
+  color: var(--primary);
   font-size: 18px;
   line-height: 1;
   display: inline-flex;
@@ -483,12 +554,19 @@
   transition:
     transform 160ms ease,
     border-color 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .education-control:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgba(3, 107, 114, 0.4);
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.12);
+}
+
+.education-control:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
 .education-control:disabled {
@@ -502,11 +580,11 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #1f4f57;
+  color: var(--primary-dark);
 }
 
 .info-choice-muted {
-  color: #6d7c83;
+  color: var(--text-sub);
 }
 
 .class-inline {
@@ -535,7 +613,7 @@
 }
 
 .class-text {
-  color: #5c6f77;
+  color: var(--text-sub);
   font-size: 13px;
 }
 
