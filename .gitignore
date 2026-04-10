@@ -20,3 +20,6 @@ AGENTS.md
 
 # python
 __pycache__/
+
+# jmeter
+jmeter/
