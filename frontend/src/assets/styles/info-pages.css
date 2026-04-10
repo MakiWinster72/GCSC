@@ -261,27 +261,31 @@
 .info-input {
   flex: 1;
   min-width: 0;
-  border: 1px solid rgba(3, 107, 114, 0.18);
+  border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.96);
-  color: #0f4d55;
+  color: var(--primary-dark);
   border-radius: 12px;
-  height: 38px;
+  height: 44px;
   padding: 0 12px;
   outline: none;
   transition:
     border-color 180ms ease,
-    background 180ms ease;
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.info-input[type="date"] {
-  appearance: auto;
-  -webkit-appearance: auto;
+.info-input::placeholder {
+  color: var(--text-sub);
 }
 
 .info-input:focus {
-  border-color: rgba(3, 107, 114, 0.45);
+  border-color: var(--primary);
   background: rgba(255, 255, 255, 1);
-  box-shadow: 0 6px 16px rgba(3, 107, 114, 0.12);
+  box-shadow: 0 0 0 3px var(--primary-surface);
+}
+
+.info-input:focus-visible {
+  outline: none;
 }
 
 .info-input:disabled {
