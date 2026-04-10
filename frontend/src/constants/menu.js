@@ -1,8 +1,8 @@
 export const MENU_ITEMS = [
-  { key: "notifications", label: "通知" },
-  { key: "achievements", label: "个人成就" },
   { key: "my-info", label: "我的信息" },
+  { key: "achievements", label: "个人成就" },
   { key: "student-info", label: "学生信息" },
+  { key: "notifications", label: "通知" },
   { key: "admin", label: "后台管理" },
 ];
 
