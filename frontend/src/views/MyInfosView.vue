@@ -1326,9 +1326,13 @@ const idNoMaxLength = computed(() => {
   }
 });
 const hasSavedProfileBefore = computed(() => Boolean(savedProfileData.value?.id));
-const saveActionLabel = computed(() =>
-  hasSavedProfileBefore.value && reviewSettings.profileReviewEnabled ? "请求审核" : "保存",
+const isReviewer = computed(() =>
+  profile.role === "ADMIN" || profile.role === "TEACHER"
 );
+const saveActionLabel = computed(() => {
+  if (isReviewer.value) return "保存";
+  return hasSavedProfileBefore.value && reviewSettings.profileReviewEnabled ? "请求审核" : "保存";
+});
 
 const MIN_YEAR = 2000;
 
@@ -1919,7 +1923,7 @@ function cancelEdit() {
 }
 
 async function confirmEdit() {
-  const requiresReview = hasSavedProfileBefore.value && reviewSettings.profileReviewEnabled;
+  const requiresReview = hasSavedProfileBefore.value && reviewSettings.profileReviewEnabled && !isReviewer.value;
   const className = buildClassName(
     info.classYear,
     info.classMajor,
@@ -2096,6 +2100,7 @@ async function confirmEdit() {
   try {
     if (requiresReview) {
       const { data: requestData } = await submitProfileReviewRequest({
+        actor: profile.value?.username,
         payloadSnapshot: payload,
         changes,
       });
