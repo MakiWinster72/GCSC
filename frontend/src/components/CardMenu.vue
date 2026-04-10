@@ -45,47 +45,6 @@
           </button>
         </div>
 
-        <div
-          v-else-if="currentPanel === 'notifications'"
-          key="notification-panel"
-          class="menu-panel menu-notification-list"
-        >
-          <div class="menu-notification-tabs">
-            <button
-              v-for="tab in notificationTabs"
-              :key="tab.key"
-              class="menu-notification-tab"
-              :class="{ active: activeNotificationCategory === tab.key }"
-              type="button"
-              @click="openNotificationCategory(tab.key)"
-            >
-              <span>{{ tab.label }}</span>
-              <span class="menu-notification-tab-count">{{ tab.count }}</span>
-            </button>
-          </div>
-          <div v-if="!filteredInboxEntries.length" class="menu-notification-empty">
-            暂无通知
-          </div>
-          <article
-            v-for="entry in filteredInboxEntries"
-            :key="entry.source + entry.id"
-            class="menu-notification-item"
-            :class="{ active: activeNotificationKey === buildNotificationKey(entry) }"
-            @click="$emit('notification-entry-click', buildNotificationKey(entry))"
-          >
-            <div class="menu-notification-head">
-              <span
-                class="menu-notification-badge"
-                :class="entry.badgeClass"
-              >
-                {{ entry.badgeText }}
-              </span>
-              <span class="menu-notification-time">{{ entry.timeText }}</span>
-            </div>
-            <div class="menu-notification-title">{{ entry.title }}</div>
-          </article>
-        </div>
-
         <div v-else key="menu-panel" class="menu-panel menu-list menu-grid">
           <button
             v-for="item in menuItems"
@@ -131,14 +90,6 @@ const props = defineProps({
     type: String,
     default: "all",
   },
-  activeNotificationKey: {
-    type: String,
-    default: "",
-  },
-  activeNotificationCategory: {
-    type: String,
-    default: "pending",
-  },
   showAchievementsDrawer: {
     type: Boolean,
     default: true,
@@ -148,11 +99,9 @@ const props = defineProps({
 const emit = defineEmits([
   "menu-click",
   "achievement-entry-click",
-  "notification-entry-click",
-  "notification-category-click",
 ]);
 
-const { inboxEntries, pendingCount, categoryCounts } = useNotifications(props.profile);
+const { pendingCount } = useNotifications(props.profile);
 
 const menuItems = computed(() => filterMenuItemsByRole(props.profile.role));
 
@@ -165,42 +114,22 @@ const menuMeta = {
 };
 
 const currentPanel = ref(
-  props.activeMenu === "achievements" || props.activeMenu === "notifications"
-    ? props.activeMenu
-    : "menu",
+  props.activeMenu === "achievements" ? "achievements" : "menu",
 );
 const panelDirection = ref(
-  props.activeMenu === "achievements" || props.activeMenu === "notifications"
-    ? "forward"
-    : "back",
+  props.activeMenu === "achievements" ? "forward" : "back",
 );
 const menuBodyRef = ref(null);
 const showBottomFade = ref(false);
-const isSubPanelVisible = computed(() => currentPanel.value !== "menu");
+const isSubPanelVisible = computed(() => currentPanel.value === "achievements");
 const panelTransitionName = computed(() =>
   panelDirection.value === "forward" ? "menu-panel-forward" : "menu-panel-back",
 );
 const titleTransitionName = computed(() =>
   panelDirection.value === "forward" ? "menu-title-forward" : "menu-title-back",
 );
-const panelTitle = computed(() => {
-  if (currentPanel.value === "achievements") {
-    return "个人成就";
-  }
-  if (currentPanel.value === "notifications") {
-    return "通知";
-  }
-  return "导航";
-});
-const notificationTabs = computed(() => [
-  { key: "pending", label: "待处理", count: categoryCounts.value.pending || 0 },
-  { key: "delayed", label: "滞后", count: categoryCounts.value.delayed || 0 },
-  { key: "processed", label: "已处理", count: categoryCounts.value.processed || 0 },
-]);
-const filteredInboxEntries = computed(() =>
-  inboxEntries.value.filter(
-    (entry) => entry.categoryKey === (props.activeNotificationCategory || "pending"),
-  ),
+const panelTitle = computed(() =>
+  currentPanel.value === "achievements" ? "个人成就" : "导航",
 );
 
 const achievementEntries = [
@@ -219,24 +148,12 @@ const achievementEntries = [
 watch(
   () => props.activeMenu,
   (activeMenu, previousMenu) => {
-    if (
-      (activeMenu === "achievements" || activeMenu === "notifications") &&
-      previousMenu !== activeMenu
-    ) {
+    if (activeMenu === "achievements" && previousMenu !== activeMenu) {
       panelDirection.value = "forward";
-      currentPanel.value = activeMenu;
-    } else if (
-      activeMenu !== "achievements" &&
-      activeMenu !== "notifications" &&
-      (previousMenu === "achievements" || previousMenu === "notifications")
-    ) {
+      currentPanel.value = "achievements";
+    } else if (activeMenu !== "achievements" && previousMenu === "achievements") {
       panelDirection.value = "back";
-      if (
-        currentPanel.value === "achievements" ||
-        currentPanel.value === "notifications"
-      ) {
-        currentPanel.value = "menu";
-      }
+      currentPanel.value = "menu";
     }
     nextTick(updateBodyFadeState);
   },
@@ -258,13 +175,6 @@ function handleMenuClick(key) {
     emit("menu-click", key);
     return;
   }
-  if (key === "notifications") {
-    panelDirection.value = "forward";
-    currentPanel.value = "notifications";
-    emit("menu-click", key);
-    nextTick(updateBodyFadeState);
-    return;
-  }
   currentPanel.value = "menu";
   emit("menu-click", key);
   nextTick(updateBodyFadeState);
@@ -281,21 +191,10 @@ function handleBodyScroll() {
 }
 
 function isItemActive(key) {
-  if (key === "notifications") {
-    return currentPanel.value === "notifications";
-  }
   if (key === "achievements") {
     return currentPanel.value === "achievements" || props.activeMenu === key;
   }
   return currentPanel.value === "menu" && props.activeMenu === key;
-}
-
-function buildNotificationKey(entry) {
-  return `${entry.source}:${entry.sourceId || entry.id}`;
-}
-
-function openNotificationCategory(category) {
-  emit("notification-category-click", category);
 }
 
 function updateBodyFadeState() {
