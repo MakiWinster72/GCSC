@@ -13,7 +13,6 @@
 
 /* ── Dashboard Shell ────────────────────────────────────── */
 .dashboard-shell {
-  min-height: 100vh;
   padding: 28px;
   display: grid;
   gap: 20px;
