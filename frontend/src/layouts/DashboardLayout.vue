@@ -23,7 +23,7 @@
       <RouterView />
     </div>
 
-    <div style="margin-top: auto">
+    <div v-if="!isEmbedded" style="margin-top: auto">
       <AppFooter />
     </div>
   </div>
