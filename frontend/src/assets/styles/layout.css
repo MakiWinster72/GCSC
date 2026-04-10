@@ -71,7 +71,7 @@
 .mobile-sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 18, 20, 0.35);
+  background: rgba(61, 7, 112, 0.35);
   backdrop-filter: blur(6px);
   z-index: 45;
 }

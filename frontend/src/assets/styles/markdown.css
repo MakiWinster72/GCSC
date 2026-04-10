@@ -16,23 +16,23 @@
   margin: 10px 0;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid rgba(3, 107, 114, 0.16);
+  border: 1px solid rgba(100, 12, 114, 0.16);
 }
 
 .md-table th,
 .md-table td {
   padding: 8px 10px;
-  border-bottom: 1px solid rgba(3, 107, 114, 0.12);
-  border-right: 1px solid rgba(3, 107, 114, 0.12);
+  border-bottom: 1px solid rgba(100, 12, 114, 0.12);
+  border-right: 1px solid rgba(100, 12, 114, 0.12);
   font-size: 13px;
-  color: #21414a;
+  color: var(--text-main);
   vertical-align: top;
 }
 
 .md-table th {
   background: rgba(255, 255, 255, 0.52);
   font-weight: 800;
-  color: #083d45;
+  color: var(--primary-dark);
 }
 
 .md-table tr:last-child td {
@@ -74,6 +74,6 @@
 
 /* ── Links ──────────────────────────────────────────────── */
 .md-link {
-  color: #0f555d;
+  color: var(--primary);
   text-decoration: underline;
 }

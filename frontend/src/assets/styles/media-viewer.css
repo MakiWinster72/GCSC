@@ -196,8 +196,8 @@
 .viewer-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid rgba(3, 107, 114, 0.15);
-  border-top-color: #036b72;
+  border: 3px solid rgba(100, 12, 114, 0.15);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: viewer-spin 0.8s linear infinite;
 }
@@ -257,7 +257,7 @@
 .pptx-title {
   font-size: 18px;
   font-weight: 700;
-  color: #0d3f45;
+  color: var(--primary-dark);
 }
 
 .pptx-hint {
@@ -274,7 +274,7 @@
   margin-top: 8px;
   padding: 10px 20px;
   border-radius: 12px;
-  background: #036b72;
+  background: var(--primary);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -285,9 +285,9 @@
 }
 
 .pptx-download-btn:hover {
-  background: #04555d;
+  background: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(3, 107, 114, 0.25);
+  box-shadow: 0 8px 20px rgba(100, 12, 114, 0.25);
   text-decoration: none;
   color: #fff;
 }
@@ -383,7 +383,7 @@
 .docx-wrapper h4 {
   margin: 16px 0 8px;
   font-weight: 700;
-  color: #0d3f45;
+  color: var(--primary-dark);
 }
 
 .docx-wrapper table {
@@ -400,7 +400,7 @@
 }
 
 .docx-wrapper th {
-  background: rgba(3, 107, 114, 0.08);
+  background: rgba(100, 12, 114, 0.08);
   font-weight: 700;
 }
 
@@ -443,8 +443,8 @@
   display: flex;
   gap: 4px;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(3, 107, 114, 0.12);
-  background: rgba(3, 107, 114, 0.03);
+  border-bottom: 1px solid rgba(100, 12, 114, 0.12);
+  background: rgba(100, 12, 114, 0.03);
   overflow-x: auto;
 }
 
@@ -461,12 +461,12 @@
 }
 
 .sheet-tab:hover {
-  background: rgba(3, 107, 114, 0.08);
-  color: #036b72;
+  background: rgba(100, 12, 114, 0.08);
+  color: var(--primary);
 }
 
 .sheet-tab.active {
-  background: #036b72;
+  background: var(--primary);
   color: #fff;
 }
 
@@ -495,23 +495,23 @@
 }
 
 .sheet-table-wrapper th {
-  background: rgba(3, 107, 114, 0.08);
+  background: rgba(100, 12, 114, 0.08);
   font-weight: 700;
-  color: #0d3f45;
+  color: var(--primary-dark);
   position: sticky;
   top: 0;
 }
 
 .sheet-table-wrapper tr:nth-child(even) {
-  background: rgba(3, 107, 114, 0.03);
+  background: rgba(100, 12, 114, 0.03);
 }
 
 .sheet-footer {
   padding: 8px 16px;
-  border-top: 1px solid rgba(3, 107, 114, 0.12);
+  border-top: 1px solid rgba(100, 12, 114, 0.12);
   font-size: 12px;
   color: #7a8a90;
-  background: rgba(3, 107, 114, 0.03);
+  background: rgba(100, 12, 114, 0.03);
 }
 
 .sheet-error {
