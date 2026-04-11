@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, shallowRef } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
+import { getUserList, updateUser, deleteUser } from "../api/admin";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -13,6 +14,12 @@ const ATTACHMENT_TYPE_OPTIONS = [
 const profile = reactive(loadUser());
 const activeSection = shallowRef("upload");
 const saveMessage = shallowRef("");
+const users = shallowRef([]);
+const usersLoading = shallowRef(false);
+const usersError = shallowRef("");
+const userSearch = shallowRef("");
+const userRoleFilter = shallowRef("");
+const userClassFilter = shallowRef("");
 const {
   settings,
   loading: uploadLoading,
@@ -64,6 +71,18 @@ const attachmentTypeSummary = computed(() =>
     ? enabledPreviewTypes.value.map((item) => item.label).join(" / ")
     : "暂无可用附件类型",
 );
+const statCards = computed(() => [
+  {
+    label: "图片",
+    value: `${form.imageMaxCount} 张 / ${form.imageMaxSizeMb}MB`,
+    note: "数量与单张大小",
+  },
+  {
+    label: "附件",
+    value: `${form.attachmentMaxCount} 个 / ${form.attachmentMaxSizeMb}MB`,
+    note: "数量与单个大小",
+  },
+]);
 const activeLoading = computed(() =>
   activeSection.value === "upload" ? uploadLoading.value : reviewLoading.value,
 );
@@ -173,8 +192,133 @@ function loadUser() {
   }
 }
 
+// User management
+const ROLE_LABELS = {
+  ADMIN: "管理员",
+  TEACHER: "教师",
+  STUDENT: "学生",
+};
+const ROLE_OPTIONS = [
+  { value: "STUDENT", label: "学生" },
+  { value: "TEACHER", label: "教师" },
+  { value: "ADMIN", label: "管理员" },
+];
+
+function getRoleLabel(role) {
+  return ROLE_LABELS[role] || role;
+}
+
+async function loadUsers() {
+  usersLoading.value = true;
+  usersError.value = "";
+  try {
+    const res = await getUserList();
+    users.value = res.data || [];
+  } catch (e) {
+    usersError.value = "加载用户列表失败";
+  } finally {
+    usersLoading.value = false;
+  }
+}
+
+const filteredUsers = computed(() => {
+  let result = users.value;
+  const q = userSearch.value.trim().toLowerCase();
+  if (q) {
+    result = result.filter(u =>
+      (u.username || "").toLowerCase().includes(q) ||
+      (u.displayName || "").toLowerCase().includes(q) ||
+      (u.studentNo || "").toLowerCase().includes(q) ||
+      (u.className || "").toLowerCase().includes(q)
+    );
+  }
+  if (userRoleFilter.value) {
+    result = result.filter(u => u.role === userRoleFilter.value);
+  }
+  if (userClassFilter.value) {
+    result = result.filter(u => u.className === userClassFilter.value);
+  }
+  return result;
+});
+
+const classOptions = computed(() => {
+  const set = new Set(users.value.map(u => u.className).filter(Boolean));
+  return Array.from(set).sort();
+});
+
+const editModal = reactive({
+  visible: false,
+  user: null,
+  saving: false,
+  error: "",
+  form: {
+    username: "",
+    password: "",
+    role: "",
+  },
+});
+
+function openEditModal(user) {
+  editModal.user = user;
+  editModal.form.username = user.username;
+  editModal.form.password = "";
+  editModal.form.role = user.role;
+  editModal.error = "";
+  editModal.visible = true;
+}
+
+function closeEditModal() {
+  editModal.visible = false;
+  editModal.user = null;
+}
+
+async function handleUpdateUser() {
+  editModal.saving = true;
+  editModal.error = "";
+  try {
+    const data = {};
+    if (editModal.form.username && editModal.form.username !== editModal.user.username) {
+      data.username = editModal.form.username;
+    }
+    if (editModal.form.password) {
+      data.password = editModal.form.password;
+    }
+    if (editModal.form.role !== editModal.user.role) {
+      data.role = editModal.form.role;
+    }
+    if (Object.keys(data).length === 0) {
+      closeEditModal();
+      return;
+    }
+    const res = await updateUser(editModal.user.id, data);
+    if (res.data.success === false) {
+      editModal.error = res.data.message || "更新失败";
+      return;
+    }
+    await loadUsers();
+    closeEditModal();
+  } catch (e) {
+    editModal.error = e?.response?.data?.message || "更新失败";
+  } finally {
+    editModal.saving = false;
+  }
+}
+
+async function handleDeleteUser(user) {
+  if (!confirm(`确定要删除用户「${user.displayName}」吗？此操作不可恢复。`)) {
+    return;
+  }
+  try {
+    await deleteUser(user.id);
+    await loadUsers();
+  } catch (e) {
+    alert(e?.response?.data?.message || "删除失败");
+  }
+}
+
 onMounted(() => {
   loadPage();
+  loadUsers();
 });
 </script>
 
@@ -212,10 +356,35 @@ onMounted(() => {
         </svg>
         审核策略
       </button>
+      <button
+        class="admin-tab"
+        :class="{ active: activeSection === 'users' }"
+        role="tab"
+        :aria-selected="activeSection === 'users'"
+        type="button"
+        @click="switchSection('users')"
+      >
+        <svg class="admin-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        用户管理
+      </button>
     </nav>
 
     <!-- Upload Section -->
     <div v-if="activeSection === 'upload'" class="admin-panel-grid">
+      <!-- Stat Cards -->
+      <div class="admin-stat-grid">
+        <div
+          v-for="card in statCards"
+          :key="card.label"
+          class="admin-stat-card"
+        >
+          <div class="admin-stat-label">{{ card.label }}</div>
+          <div class="admin-stat-value">{{ card.value }}</div>
+          <div class="admin-stat-note">{{ card.note }}</div>
+        </div>
+      </div>
       <!-- Form Card -->
       <div class="admin-card">
         <div class="admin-card-header">
@@ -559,6 +728,116 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Users Section -->
+    <div v-if="activeSection === 'users'" class="admin-user-section">
+      <div class="admin-user-header">
+        <div class="admin-panel-kicker">用户管理</div>
+        <h2 class="admin-panel-title">系统用户列表</h2>
+        <div v-if="usersLoading" class="admin-panel-status">加载中...</div>
+        <div v-else class="admin-panel-status">共 {{ filteredUsers.length }} 位用户</div>
+      </div>
+
+      <div v-if="usersError" class="admin-feedback error">{{ usersError }}</div>
+
+      <div class="user-filter-bar">
+        <div class="user-search-wrap">
+          <input
+            v-model="userSearch"
+            class="user-search-input"
+            type="text"
+            placeholder="搜索用户名/姓名/学号/班级"
+          />
+        </div>
+        <select v-model="userRoleFilter" class="user-filter-select">
+          <option value="">全部角色</option>
+          <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <select v-model="userClassFilter" class="user-filter-select">
+          <option value="">全部班级</option>
+          <option v-for="cls in classOptions" :key="cls" :value="cls">{{ cls }}</option>
+        </select>
+      </div>
+
+      <div class="user-table-wrap">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>用户名</th>
+              <th>显示名称</th>
+              <th>角色</th>
+              <th>学号</th>
+              <th>班级</th>
+              <th style="width: 3rem;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredUsers" :key="user.id">
+              <td class="user-td-username">{{ user.username }}</td>
+              <td>{{ user.displayName }}</td>
+              <td><span :class="['role-badge', 'role-' + user.role.toLowerCase()]">{{ getRoleLabel(user.role) }}</span></td>
+              <td>{{ user.studentNo || '—' }}</td>
+              <td>{{ user.className || '—' }}</td>
+              <td class="user-td-action">
+                <button class="action-menu-btn" @click.stop="openEditModal(user)" aria-label="编辑用户">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <Teleport to="body">
+      <div :class="['sheet-overlay', { open: editModal.visible }]" @click.self="closeEditModal">
+        <div class="sheet-modal user-edit-modal">
+          <header class="sheet-modal-header">
+            <div class="sheet-modal-title">编辑用户</div>
+            <button class="sheet-modal-close" type="button" aria-label="关闭" @click="closeEditModal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </header>
+          <div class="modal-body">
+            <div class="modal-user-info">
+              <span class="modal-user-label">当前编辑：</span>
+              <span class="modal-user-name">{{ editModal.user?.displayName }}</span>
+            </div>
+
+            <label class="modal-field">
+              <span class="modal-field-label">用户名</span>
+              <input v-model="editModal.form.username" class="modal-input" type="text" placeholder="留空则不修改" />
+            </label>
+
+            <label class="modal-field">
+              <span class="modal-field-label">密码</span>
+              <input v-model="editModal.form.password" class="modal-input" type="password" placeholder="留空则不修改" />
+            </label>
+
+            <label class="modal-field">
+              <span class="modal-field-label">角色</span>
+              <select v-model="editModal.form.role" class="modal-select">
+                <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              </select>
+            </label>
+
+            <div v-if="editModal.error" class="modal-error">{{ editModal.error }}</div>
+          </div>
+          <div class="modal-foot">
+            <button class="modal-btn danger" type="button" @click="handleDeleteUser(editModal.user)">删除用户</button>
+            <div class="modal-foot-right">
+              <button class="modal-btn secondary" type="button" @click="closeEditModal">取消</button>
+              <button class="modal-btn primary" type="button" :disabled="editModal.saving" @click="handleUpdateUser">
+                {{ editModal.saving ? "保存中..." : "保存" }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </main>
 </template>
 
@@ -1196,5 +1475,363 @@ onMounted(() => {
 
 .feedback-slide-leave-to {
   opacity: 0;
+}
+
+/* ── Stat Cards ─────────────────────────────────────────── */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.admin-stat-card {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-stat-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.admin-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+.admin-stat-note {
+  font-size: 11.5px;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+/* ── User Management ─────────────────────────────────────── */
+.admin-user-section {
+  border-radius: 24px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.admin-user-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-user-header .admin-panel-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-user-header .admin-panel-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+.admin-panel-status {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+
+.user-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.user-search-wrap {
+  flex: 1;
+  min-width: 180px;
+}
+
+.user-search-input {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.user-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-surface);
+}
+
+.user-search-input::placeholder {
+  color: var(--text-sub);
+}
+
+.user-filter-select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
+  font-size: 13.5px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 180ms ease;
+}
+
+.user-filter-select:focus {
+  border-color: var(--primary);
+}
+
+.user-table-wrap {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  overflow: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.user-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--primary-surface);
+}
+
+.user-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-main);
+}
+
+.user-table tr:last-child td {
+  border-bottom: none;
+}
+
+.user-table tr:hover td {
+  background: rgba(100, 12, 114, 0.03);
+}
+
+.user-td-username {
+  font-family: monospace;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.user-td-action {
+  text-align: center;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.role-admin {
+  background: rgba(192, 57, 43, 0.1);
+  color: var(--danger);
+}
+
+.role-teacher {
+  background: rgba(100, 12, 114, 0.1);
+  color: var(--primary);
+}
+
+.role-student {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--success);
+}
+
+.action-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-surface);
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.action-menu-btn:hover {
+  background: rgba(100, 12, 114, 0.15);
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* ── User Edit Modal ─────────────────────────────────────── */
+.user-edit-modal {
+  max-width: 400px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-user-info {
+  padding: 10px 14px;
+  background: var(--primary-surface);
+  border-radius: 12px;
+  font-size: 13.5px;
+}
+
+.modal-user-label {
+  color: var(--text-sub);
+}
+
+.modal-user-name {
+  font-weight: 700;
+  color: var(--primary);
+  margin-left: 4px;
+}
+
+.modal-field {
+  display: grid;
+  gap: 6px;
+}
+
+.modal-field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.modal-input,
+.modal-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
+}
+
+.modal-input:focus,
+.modal-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-surface);
+}
+
+.modal-error {
+  padding: 10px 14px;
+  background: rgba(192, 57, 43, 0.08);
+  color: var(--danger);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.modal-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-foot-right {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.modal-btn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, filter 160ms ease, transform 120ms ease;
+}
+
+.modal-btn:active {
+  transform: scale(0.97);
+}
+
+.modal-btn.primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.3);
+}
+
+.modal-btn.primary:hover {
+  filter: brightness(1.1);
+}
+
+.modal-btn.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-btn.secondary {
+  background: var(--primary-surface);
+  color: var(--primary);
+}
+
+.modal-btn.secondary:hover {
+  background: rgba(100, 12, 114, 0.14);
+}
+
+.modal-btn.danger {
+  background: rgba(192, 57, 43, 0.08);
+  color: var(--danger);
+}
+
+.modal-btn.danger:hover {
+  background: rgba(192, 57, 43, 0.14);
 }
 </style>
