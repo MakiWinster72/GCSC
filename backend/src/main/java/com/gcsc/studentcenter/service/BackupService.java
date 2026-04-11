@@ -27,16 +27,14 @@ public class BackupService {
 
     /**
      * Execute mysqldump and return the SQL file content as a byte array.
-     * Saves a copy to the backups/ directory under the project root.
      * Redirects stderr to /dev/null to prevent deprecation warnings from polluting stdout.
      */
-    public DumpResult dumpDatabase() throws IOException, InterruptedException {
+    public byte[] dumpDatabase() throws IOException, InterruptedException {
         String[] dbInfo = parseJdbcUrl(jdbcUrl);
         String host = dbInfo[0];
         int port = Integer.parseInt(dbInfo[1]);
         String database = dbInfo[2];
 
-        // Use sh to redirect stderr to /dev/null, avoiding MariaDB deprecation warnings in stdout
         String dumpCmd = String.format(
                 "mysqldump -h %s -P %d -u %s --password=%s --single-transaction --quick --lock-tables=false --add-drop-table --add-drop-trigger --databases %s 2>/dev/null",
                 host, port, username, password, database
@@ -61,16 +59,7 @@ public class BackupService {
             throw new RuntimeException("mysqldump failed with exit code " + exitCode);
         }
 
-        byte[] sqlContent = baos.toByteArray();
-
-        // Save to backups/ directory under project root
-        String filename = generateBackupFilename();
-        Path backupsDir = Paths.get(System.getProperty("user.dir"), "backups");
-        Files.createDirectories(backupsDir);
-        Path filePath = backupsDir.resolve(filename);
-        Files.write(filePath, sqlContent);
-
-        return new DumpResult(sqlContent, filePath.toAbsolutePath().toString());
+        return baos.toByteArray();
     }
 
     /**
@@ -83,12 +72,10 @@ public class BackupService {
         int port = Integer.parseInt(dbInfo[1]);
         String database = dbInfo[2];
 
-        // Write SQL to a temp file to avoid stdin buffering issues with large files
         Path tempSqlFile = Files.createTempFile("gcsc_restore_", ".sql");
         try {
             Files.write(tempSqlFile, sqlContent);
 
-            // Use mariadb client, redirect stderr to suppress warnings
             String mysqlCmd = String.format(
                     "mariadb -h %s -P %d -u %s --password=%s %s < %s 2>/dev/null",
                     host, port, username, password, database, tempSqlFile
@@ -99,7 +86,6 @@ public class BackupService {
 
             Process p = pb.start();
 
-            // Drain stdout to prevent blocking
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             try (InputStream is = p.getInputStream()) {
                 byte[] buf = new byte[4096];
@@ -123,10 +109,7 @@ public class BackupService {
         return "gcsc_backup_" + LocalDateTime.now().format(FILE_DATE_FMT) + ".sql";
     }
 
-    public record DumpResult(byte[] content, String absolutePath) {}
-
     private String[] parseJdbcUrl(String jdbcUrl) {
-        // jdbc:mysql://localhost:3306/gcsc?...
         Pattern p = Pattern.compile("jdbc:mysql://([^:]+):(\\d+)/(\\w+)");
         Matcher m = p.matcher(jdbcUrl);
         if (!m.find()) {

@@ -24,37 +24,28 @@ const backupForm = reactive({
   restoreAttachments: false,
 });
 const backupLoading = shallowRef(false);
-const backupMessage = shallowRef({ type: "", text: "" });
 const restoreLoading = shallowRef(false);
-const restoreMessage = shallowRef({ type: "", text: "" });
 
 async function handleBackupDownload() {
   backupLoading.value = true;
-  backupMessage.value = { type: "", text: "" };
   try {
     const res = await downloadBackupDb();
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      backupMessage.value = { type: "error", text: errData.message || "备份失败" };
+      window.$toast.error(errData.message || "备份失败");
       return;
     }
     const blob = await res.blob();
     const filename = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] || "gcsc_backup.sql";
-    const serverPath = res.headers.get("X-Backup-Path") || "";
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    backupMessage.value = {
-      type: "success",
-      text: serverPath
-        ? "SQL 文件已下载，已保存至：" + serverPath
-        : "SQL 文件已下载",
-    };
+    window.$toast.success("SQL 文件已下载");
   } catch (e) {
-    backupMessage.value = { type: "error", text: "备份失败，请检查服务端 mysqldump 是否可用" };
+    window.$toast.error("备份失败，请检查服务端 mysqldump 是否可用");
   } finally {
     backupLoading.value = false;
   }
@@ -62,25 +53,23 @@ async function handleBackupDownload() {
 
 async function handleRestore() {
   if (!backupForm.sqlFile) {
-    restoreMessage.value = { type: "error", text: "请先选择 SQL 备份文件" };
+    window.$toast.error("请先选择 SQL 备份文件");
     return;
   }
   restoreLoading.value = true;
-  restoreMessage.value = { type: "", text: "" };
   try {
     const res = await restoreBackupDb(backupForm.sqlFile);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      restoreMessage.value = { type: "error", text: data.message || "恢复失败" };
+      window.$toast.error(data.message || "恢复失败");
       return;
     }
-    restoreMessage.value = { type: "success", text: "数据库恢复成功" };
+    window.$toast.success("数据库恢复成功");
     backupForm.sqlFile = null;
-    // reset file input
     const input = document.getElementById("sql-file");
     if (input) input.value = "";
   } catch (e) {
-    restoreMessage.value = { type: "error", text: "恢复失败，请检查服务端 mysql 是否可用" };
+    window.$toast.error("恢复失败，请检查服务端 mysql 是否可用");
   } finally {
     restoreLoading.value = false;
   }
@@ -88,36 +77,28 @@ async function handleRestore() {
 
 async function handleRestoreAttachments() {
   if (!backupForm.zipFile) {
-    restoreMessage.value = { type: "error", text: "请先选择附件压缩包" };
+    window.$toast.error("请先选择附件压缩包");
     return;
   }
-  restoreLoading.value = true;
-  restoreMessage.value = { type: "", text: "" };
-  try {
-    restoreMessage.value = { type: "info", text: "附件恢复功能待后端实现" };
-  } finally {
-    restoreLoading.value = false;
-  }
+  window.$toast.info("附件恢复功能待后端实现");
 }
 
 function onSqlFileChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
   if (!file.name.endsWith(".sql")) {
-    restoreMessage.value = { type: "error", text: "请选择 .sql 格式的备份文件" };
+    window.$toast.error("请选择 .sql 格式的备份文件");
     backupForm.sqlFile = null;
     return;
   }
   backupForm.sqlFile = file;
-  restoreMessage.value = { type: "", text: "" };
 }
 
 function onZipFileChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  if (!["zip", "rar", "7z"].includes(ext)) {
-    restoreMessage.value = { type: "error", text: "请选择 zip 格式的压缩文件" };
+  if (!file.name.toLowerCase().endsWith(".zip")) {
+    window.$toast.error("请选择 .zip 格式的压缩文件");
     backupForm.zipFile = null;
     return;
   }
@@ -993,14 +974,6 @@ watch([userSearch, userRoleFilter], () => {
                   {{ backupLoading && backupForm.backupAttachments ? "打包中…" : "导出 ZIP 文件" }}
                 </button>
               </div>
-              <Transition name="msg-fade">
-                <div v-if="backupMessage.text" :class="['msg-banner', backupMessage.type || 'info']" role="status">
-                  <svg class="msg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {{ backupMessage.text }}
-                </div>
-              </Transition>
             </div>
           </div>
 
@@ -1093,14 +1066,6 @@ watch([userSearch, userRoleFilter], () => {
                   </div>
                 </div>
               </div>
-              <Transition name="msg-fade">
-                <div v-if="restoreMessage.text" :class="['msg-banner', restoreMessage.type || 'info']" role="alert">
-                  <svg class="msg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {{ restoreMessage.text }}
-                </div>
-              </Transition>
             </div>
           </div>
         </div>
