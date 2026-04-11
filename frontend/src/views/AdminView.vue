@@ -721,50 +721,65 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
         <!-- Users Section -->
         <div v-else-if="activeSection === 'users'" class="admin-panel-single">
           <div class="admin-card users-card">
-            <div class="card-header">
-              <div class="card-header-icon users-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+            <!-- Card Header -->
+            <div class="users-card-header">
+              <div class="users-card-meta">
+                <div class="users-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <div class="users-card-titles">
+                  <div class="card-kicker">用户管理</div>
+                  <h2 class="card-title">系统用户列表</h2>
+                </div>
               </div>
-              <div>
-                <div class="card-kicker">用户管理</div>
-                <h2 class="card-title">系统用户列表</h2>
+              <div class="users-count-badge">
+                <span class="count-num">{{ userTotal }}</span>
+                <span class="count-label">位用户</span>
               </div>
             </div>
-            <div class="users-body">
-              <div class="users-toolbar">
-                <div class="search-wrap">
-                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    v-model="userSearch"
-                    class="search-input"
-                    type="text"
-                    placeholder="搜索用户名、姓名、学号、班级…"
-                    aria-label="搜索用户"
-                  />
-                </div>
-                <select v-model="userRoleFilter" class="filter-select" aria-label="按角色筛选">
-                  <option value="">全部角色</option>
-                  <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                </select>
-                <select v-model="userClassFilter" class="filter-select" aria-label="按班级筛选">
-                  <option value="">全部班级</option>
-                  <option v-for="cls in classOptions" :key="cls" :value="cls">{{ cls }}</option>
-                </select>
-              </div>
 
-              <div v-if="usersLoading" class="users-loading">
+            <!-- Toolbar -->
+            <div class="users-toolbar">
+              <div class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  v-model="userSearch"
+                  class="search-input"
+                  type="text"
+                  placeholder="搜索用户名、姓名、学号、班级…"
+                  aria-label="搜索用户"
+                />
+              </div>
+              <select v-model="userRoleFilter" class="filter-select" aria-label="按角色筛选">
+                <option value="">全部角色</option>
+                <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              </select>
+              <select v-model="userClassFilter" class="filter-select" aria-label="按班级筛选">
+                <option value="">全部班级</option>
+                <option v-for="cls in classOptions" :key="cls" :value="cls">{{ cls }}</option>
+              </select>
+            </div>
+
+            <!-- Table or States -->
+            <div class="users-content">
+              <div v-if="usersLoading" class="users-center-state">
                 <svg class="loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
                 </svg>
-                加载中…
+                <span>加载中…</span>
               </div>
-              <div v-else-if="usersError" class="msg-banner error" role="alert">{{ usersError }}</div>
-              <div v-else-if="users.length === 0" class="users-empty">
-                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <div v-else-if="usersError" class="users-center-state">
+                <svg class="state-icon error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span>{{ usersError }}</span>
+              </div>
+              <div v-else-if="users.length === 0" class="users-center-state">
+                <svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span>暂无符合条件的用户</span>
@@ -803,39 +818,35 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
                   </tbody>
                 </table>
               </div>
+            </div>
 
-              <!-- Pagination -->
-              <div v-if="userPages > 1" class="pagination">
-                <button
-                  class="page-btn"
-                  :disabled="userCurrentPage <= 1"
-                  @click="loadUsers(userCurrentPage - 1)"
-                  aria-label="上一页"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <div class="page-info">
-                  <span class="page-current">{{ userCurrentPage }}</span>
-                  <span class="page-sep">/</span>
-                  <span class="page-total">{{ userPages }}</span>
-                </div>
-                <button
-                  class="page-btn"
-                  :disabled="userCurrentPage >= userPages"
-                  @click="loadUsers(userCurrentPage + 1)"
-                  aria-label="下一页"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+            <!-- Pagination -->
+            <div v-if="userPages > 1" class="users-pagination">
+              <button
+                class="page-btn"
+                :disabled="userCurrentPage <= 1"
+                @click="loadUsers(userCurrentPage - 1)"
+                aria-label="上一页"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div class="page-info">
+                <span class="page-current">{{ userCurrentPage }}</span>
+                <span class="page-sep">/</span>
+                <span class="page-total">{{ userPages }}</span>
               </div>
-
-              <div class="users-footer">
-                共 {{ userTotal }} 位用户
-              </div>
+              <button
+                class="page-btn"
+                :disabled="userCurrentPage >= userPages"
+                @click="loadUsers(userCurrentPage + 1)"
+                aria-label="下一页"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -1713,28 +1724,89 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   border-top: 1px solid var(--line);
 }
 
-/* ── Users Section ─────────────────────────────────────── */
+/* ── Users Card ────────────────────────────────────────── */
 .users-card {
-  max-width: 100%;
+  overflow: visible;
 }
 
-.users-body {
-  padding: 0 22px 22px;
+/* Card Header */
+.users-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.users-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.users-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(100, 12, 114, 0.08);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(100, 12, 114, 0.1);
+}
+
+.users-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.users-card-titles {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 1px;
 }
 
+.users-count-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(100, 12, 114, 0.06);
+  border: 1px solid rgba(100, 12, 114, 0.12);
+  flex-shrink: 0;
+}
+
+.count-num {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.3px;
+}
+
+.count-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+/* Toolbar */
 .users-toolbar {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line);
 }
 
 .search-wrap {
   flex: 1;
-  min-width: 180px;
+  min-width: 200px;
   position: relative;
 }
 
@@ -1754,7 +1826,7 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   padding: 9px 14px 9px 36px;
   border: 1.5px solid var(--line-strong);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text-main);
   font-size: 14px;
   outline: none;
@@ -1771,21 +1843,20 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
 }
 
 .filter-select {
-  padding: 9px 12px;
+  padding: 9px 32px 9px 12px;
   border: 1.5px solid var(--line-strong);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text-main);
   font-size: 13.5px;
   font-weight: 600;
   outline: none;
   cursor: pointer;
-  transition: border-color 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b5a94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
-  padding-right: 30px;
 }
 
 .filter-select:focus {
@@ -1793,35 +1864,45 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   box-shadow: 0 0 0 3px var(--primary-surface);
 }
 
-.users-loading,
-.users-empty {
+/* Content */
+.users-content {
+  padding: 0;
+}
+
+/* Center state */
+.users-center-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 40px;
+  padding: 56px 20px;
   color: var(--text-sub);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .loading-spinner {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   animation: spin 0.9s linear infinite;
   flex-shrink: 0;
+  color: var(--primary);
 }
 
-.empty-icon {
-  width: 40px;
-  height: 40px;
-  opacity: 0.4;
+.state-icon {
+  width: 44px;
+  height: 44px;
+  opacity: 0.35;
 }
 
-/* ── Table ─────────────────────────────────────────────── */
+.state-icon.error {
+  opacity: 1;
+  color: var(--danger);
+}
+
+/* Table */
 .table-wrap {
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.65);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -1830,44 +1911,45 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   width: 100%;
   border-collapse: collapse;
   font-size: 13.5px;
-  min-width: 500px;
 }
 
 .users-table th {
-  padding: 11px 14px;
+  padding: 11px 16px;
   text-align: left;
   font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-sub);
   border-bottom: 1px solid var(--line);
-  background: var(--primary-surface);
+  background: rgba(100, 12, 114, 0.04);
   white-space: nowrap;
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 
 .users-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 13px 16px;
   color: var(--text-main);
   vertical-align: middle;
+  background: transparent;
+  transition: background 120ms ease;
 }
 
-.users-table tr:last-child td {
-  border-bottom: none;
+.users-table tr + tr td {
+  border-top: 1px solid rgba(100, 12, 114, 0.06);
 }
 
 .user-row:hover td {
-  background: rgba(100, 12, 114, 0.025);
+  background: rgba(100, 12, 114, 0.035);
 }
 
 .td-mono {
   font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .td-action {
@@ -1875,7 +1957,7 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   width: 3rem;
 }
 
-/* ── Role Chip ─────────────────────────────────────────── */
+/* Role Chip */
 .role-chip {
   display: inline-flex;
   align-items: center;
@@ -1883,24 +1965,25 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   border-radius: 999px;
   font-size: 11.5px;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .role-admin {
-  background: rgba(192, 57, 43, 0.1);
+  background: rgba(192, 57, 43, 0.09);
   color: var(--danger);
 }
 
 .role-teacher {
-  background: rgba(100, 12, 114, 0.1);
+  background: rgba(100, 12, 114, 0.09);
   color: var(--primary);
 }
 
 .role-student {
-  background: rgba(39, 174, 96, 0.1);
+  background: rgba(39, 174, 96, 0.09);
   color: var(--success);
 }
 
-/* ── Icon Button ───────────────────────────────────────── */
+/* Icon Button */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -1909,8 +1992,8 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   height: 34px;
   border: none;
   border-radius: 9px;
-  background: var(--primary-surface);
-  color: var(--primary);
+  background: transparent;
+  color: var(--text-sub);
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, transform 120ms ease;
 }
@@ -1921,7 +2004,8 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
 }
 
 .icon-btn:hover {
-  background: rgba(100, 12, 114, 0.16);
+  background: rgba(100, 12, 114, 0.1);
+  color: var(--primary);
 }
 
 .icon-btn:active {
@@ -1933,19 +2017,14 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   outline-offset: 2px;
 }
 
-.users-footer {
-  font-size: 12.5px;
-  color: var(--text-sub);
-  text-align: right;
-}
-
-/* ── Pagination ────────────────────────────────────────── */
-.pagination {
+/* Pagination */
+.users-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 4px 0;
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
 }
 
 .page-btn {
@@ -1956,7 +2035,7 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   height: 34px;
   border: 1.5px solid var(--line-strong);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--primary);
   cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease, transform 120ms ease, opacity 160ms ease;
@@ -2169,18 +2248,30 @@ watch([userSearch, userRoleFilter, userClassFilter], () => {
   .card-body {
     padding: 14px 16px 18px;
   }
-  .users-body {
-    padding: 0 16px 18px;
+  .users-card-header {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .users-count-badge {
+    align-self: flex-start;
   }
   .users-toolbar {
     flex-direction: column;
+    padding: 12px 16px;
+    gap: 8px;
   }
   .search-wrap,
   .filter-select {
     width: 100%;
+    min-width: 0;
+    flex: none;
   }
   .filter-select {
     flex: 1;
+  }
+  .users-pagination {
+    padding: 12px 16px;
   }
   .modal-footer {
     flex-direction: column;
