@@ -60,7 +60,8 @@
         </div>
         <div class="footer-copy">
           <p class="footer-copyright">
-            版权所有&copy;广东财经大学-大数据与人工智能学院　备案号：粤ICP备05000001号
+            版权所有&copy;广东财经大学-大数据与人工智能学院
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="footer-beian-link">备案号：粤ICP备05000001号</a>
           </p>
         </div>
       </div>
@@ -241,6 +242,16 @@ const friendLinks = [
   color: var(--text-sub);
   text-align: right;
   line-height: 1.5;
+}
+
+.footer-beian-link {
+  color: var(--text-sub);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.footer-beian-link:hover {
+  color: var(--primary);
 }
 
 /* ── Responsive ─────────────────────────── */
