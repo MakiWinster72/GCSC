@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, shallowRef } from "vue";
+import { computed, onMounted, reactive, shallowRef, watch } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
 import { getUserList, updateUser, deleteUser } from "../api/admin";
@@ -21,6 +21,10 @@ const usersError = shallowRef("");
 const userSearch = shallowRef("");
 const userRoleFilter = shallowRef("");
 const userClassFilter = shallowRef("");
+const userCurrentPage = shallowRef(1);
+const userPageSize = shallowRef(20);
+const userTotal = shallowRef(0);
+const userPages = computed(() => Math.ceil(userTotal.value / userPageSize.value));
 const {
   settings,
   loading: uploadLoading,
@@ -197,12 +201,21 @@ function getRoleLabel(role) {
   return ROLE_LABELS[role] || role;
 }
 
-async function loadUsers() {
+async function loadUsers(page = userCurrentPage.value) {
   usersLoading.value = true;
   usersError.value = "";
   try {
-    const res = await getUserList();
-    users.value = res.data || [];
+    const res = await getUserList({
+      page,
+      size: userPageSize.value,
+      search: userSearch.value.trim() || undefined,
+      role: userRoleFilter.value || undefined,
+      className: userClassFilter.value || undefined,
+    });
+    const payload = res.data;
+    users.value = payload.data || [];
+    userTotal.value = payload.total || 0;
+    userCurrentPage.value = payload.page || page;
   } catch (e) {
     usersError.value = "加载用户列表失败";
   } finally {
@@ -210,30 +223,15 @@ async function loadUsers() {
   }
 }
 
-const filteredUsers = computed(() => {
-  let result = users.value;
-  const q = userSearch.value.trim().toLowerCase();
-  if (q) {
-    result = result.filter(u =>
-      (u.username || "").toLowerCase().includes(q) ||
-      (u.displayName || "").toLowerCase().includes(q) ||
-      (u.studentNo || "").toLowerCase().includes(q) ||
-      (u.className || "").toLowerCase().includes(q)
-    );
-  }
-  if (userRoleFilter.value) {
-    result = result.filter(u => u.role === userRoleFilter.value);
-  }
-  if (userClassFilter.value) {
-    result = result.filter(u => u.className === userClassFilter.value);
-  }
-  return result;
-});
+const classOptions = shallowRef([]);
 
-const classOptions = computed(() => {
-  const set = new Set(users.value.map(u => u.className).filter(Boolean));
-  return Array.from(set).sort();
-});
+async function loadClassOptions() {
+  try {
+    const res = await getUserList({ page: 1, size: 1000 });
+    const set = new Set((res.data?.data || []).map(u => u.className).filter(Boolean));
+    classOptions.value = Array.from(set).sort();
+  } catch {}
+}
 
 const editModal = reactive({
   visible: false,
@@ -284,7 +282,7 @@ async function handleUpdateUser() {
       editModal.error = res.data.message || "更新失败";
       return;
     }
-    await loadUsers();
+    await loadUsers(userCurrentPage.value);
     closeEditModal();
   } catch (e) {
     editModal.error = e?.response?.data?.message || "更新失败";
@@ -308,6 +306,15 @@ async function handleDeleteUser(user) {
 onMounted(() => {
   loadPage();
   loadUsers();
+  loadClassOptions();
+});
+
+// Reload from page 1 when filters change
+watch([userSearch, userRoleFilter, userClassFilter], () => {
+  if (activeSection.value === "users") {
+    userCurrentPage.value = 1;
+    loadUsers(1);
+  }
 });
 </script>
 
@@ -756,7 +763,7 @@ onMounted(() => {
                 加载中…
               </div>
               <div v-else-if="usersError" class="msg-banner error" role="alert">{{ usersError }}</div>
-              <div v-else-if="filteredUsers.length === 0" class="users-empty">
+              <div v-else-if="users.length === 0" class="users-empty">
                 <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -775,7 +782,7 @@ onMounted(() => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="user in filteredUsers" :key="user.id" class="user-row">
+                    <tr v-for="user in users" :key="user.id" class="user-row">
                       <td class="td-mono">{{ user.username }}</td>
                       <td>{{ user.displayName }}</td>
                       <td>
@@ -796,8 +803,38 @@ onMounted(() => {
                   </tbody>
                 </table>
               </div>
+
+              <!-- Pagination -->
+              <div v-if="userPages > 1" class="pagination">
+                <button
+                  class="page-btn"
+                  :disabled="userCurrentPage <= 1"
+                  @click="loadUsers(userCurrentPage - 1)"
+                  aria-label="上一页"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <div class="page-info">
+                  <span class="page-current">{{ userCurrentPage }}</span>
+                  <span class="page-sep">/</span>
+                  <span class="page-total">{{ userPages }}</span>
+                </div>
+                <button
+                  class="page-btn"
+                  :disabled="userCurrentPage >= userPages"
+                  @click="loadUsers(userCurrentPage + 1)"
+                  aria-label="下一页"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
               <div class="users-footer">
-                共 {{ filteredUsers.length }} 位用户
+                共 {{ userTotal }} 位用户
               </div>
             </div>
           </div>
@@ -1900,6 +1937,77 @@ onMounted(() => {
   font-size: 12.5px;
   color: var(--text-sub);
   text-align: right;
+}
+
+/* ── Pagination ────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--primary);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease, opacity 160ms ease;
+}
+
+.page-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-surface);
+  border-color: var(--primary);
+}
+
+.page-btn:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.page-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.page-info {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-current {
+  font-weight: 800;
+  color: var(--primary-dark);
+  font-size: 16px;
+}
+
+.page-sep {
+  color: var(--text-sub);
+  font-size: 12px;
+}
+
+.page-total {
+  color: var(--text-sub);
+  font-size: 13px;
 }
 
 /* ── Edit Modal ────────────────────────────────────────── */
