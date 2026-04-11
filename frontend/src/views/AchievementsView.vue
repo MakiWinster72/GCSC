@@ -864,11 +864,11 @@
               </button>
             </div>
 
-            <div class="viewer-stage" @click.stop>
+            <div class="viewer-stage">
               <button
                 v-if="previewImages.length > 1 && previewIndex > 0"
                 class="viewer-arrow viewer-prev"
-                @click="previewPrev"
+                @click.stop="previewPrev"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="15 18 9 12 15 6"></polyline>
@@ -876,7 +876,7 @@
               </button>
 
               <Transition :name="'slide-' + slideDirection" mode="out-in">
-                <div class="viewer-media" :key="previewIndex">
+                <div class="viewer-media" :key="previewIndex" @click.stop>
                   <video
                     v-if="previewType === 'video'"
                     :src="previewImages[previewIndex]"
@@ -918,6 +918,7 @@
                     :src="previewImages[previewIndex]"
                     class="viewer-image"
                     alt=""
+                    @click.stop
                   />
                 </div>
               </Transition>
@@ -925,7 +926,7 @@
               <button
                 v-if="previewImages.length > 1 && previewIndex < previewImages.length - 1"
                 class="viewer-arrow viewer-next"
-                @click="previewNext"
+                @click.stop="previewNext"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="9 18 15 12 9 6"></polyline>
