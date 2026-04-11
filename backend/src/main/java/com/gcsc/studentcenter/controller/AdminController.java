@@ -146,4 +146,61 @@ public class AdminController {
                     .body(Map.of("success", false, "message", "恢复失败: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/backup/attachments")
+    public ResponseEntity<?> backupAttachments(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            byte[] zipContent = backupService.dumpAttachments();
+            if (zipContent.length == 0) {
+                return ResponseEntity.ok(Map.of("success", false, "message", "附件目录为空，无需导出"));
+            }
+            ByteArrayResource resource = new ByteArrayResource(zipContent);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + backupService.generateAttachmentsFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(zipContent.length))
+                    .body(resource);
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "导出失败: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "导出失败: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/restore/attachments")
+    public ResponseEntity<?> restoreAttachments(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            @RequestParam("file") MultipartFile file
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "请上传附件压缩包"));
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".zip")) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "请上传 .zip 格式的压缩包"));
+        }
+        try {
+            byte[] zipContent = file.getBytes();
+            backupService.restoreAttachments(zipContent);
+            return ResponseEntity.ok(Map.of("success", true, "message", "附件恢复成功"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "恢复失败: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "恢复失败: " + e.getMessage()));
+        }
+    }
 }

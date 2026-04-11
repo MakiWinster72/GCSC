@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, shallowRef, watch } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
-import { getUserList, updateUser, deleteUser, downloadBackupDb, restoreBackupDb } from "../api/admin";
+import { getUserList, updateUser, deleteUser, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments } from "../api/admin";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -16,17 +16,13 @@ const activeSection = shallowRef("upload");
 
 // Backup & Restore
 const backupForm = reactive({
-  backupDb: true,
-  backupAttachments: false,
   sqlFile: null,
   zipFile: null,
-  restoreDb: true,
-  restoreAttachments: false,
 });
 const backupLoading = shallowRef(false);
 const restoreLoading = shallowRef(false);
 
-async function handleBackupDownload() {
+async function handleBackupDb() {
   backupLoading.value = true;
   try {
     const res = await downloadBackupDb();
@@ -46,6 +42,31 @@ async function handleBackupDownload() {
     window.$toast.success("SQL 文件已下载");
   } catch (e) {
     window.$toast.error("备份失败，请检查服务端 mysqldump 是否可用");
+  } finally {
+    backupLoading.value = false;
+  }
+}
+
+async function handleBackupZip() {
+  backupLoading.value = true;
+  try {
+    const res = await downloadBackupAttachments();
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      window.$toast.error(errData.message || "打包失败");
+      return;
+    }
+    const blob = await res.blob();
+    const filename = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] || "gcsc_attachments.zip";
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    window.$toast.success("ZIP 文件已下载");
+  } catch (e) {
+    window.$toast.error("打包失败，请稍后重试");
   } finally {
     backupLoading.value = false;
   }
@@ -80,7 +101,23 @@ async function handleRestoreAttachments() {
     window.$toast.error("请先选择附件压缩包");
     return;
   }
-  window.$toast.info("附件恢复功能待后端实现");
+  restoreLoading.value = true;
+  try {
+    const res = await restoreBackupAttachments(backupForm.zipFile);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      window.$toast.error(data.message || "恢复失败");
+      return;
+    }
+    window.$toast.success("附件恢复成功");
+    backupForm.zipFile = null;
+    const input = document.getElementById("zip-file");
+    if (input) input.value = "";
+  } catch (e) {
+    window.$toast.error("恢复失败，请稍后重试");
+  } finally {
+    restoreLoading.value = false;
+  }
 }
 
 function onSqlFileChange(e) {
@@ -949,7 +986,7 @@ watch([userSearch, userRoleFilter], () => {
                   class="btn btn-primary backup-btn"
                   :disabled="backupLoading"
                   type="button"
-                  @click="() => { backupForm.backupDb = true; backupForm.backupAttachments = false; handleBackupDownload(); }"
+                  @click="handleBackupDb"
                 >
                   <svg v-if="backupLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
@@ -957,13 +994,13 @@ watch([userSearch, userRoleFilter], () => {
                   <svg v-else class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {{ backupLoading && backupForm.backupDb ? "生成中…" : "导出 SQL 文件" }}
+                  {{ backupLoading ? "生成中…" : "导出 SQL 文件" }}
                 </button>
                 <button
                   class="btn btn-primary backup-btn"
                   :disabled="backupLoading"
                   type="button"
-                  @click="() => { backupForm.backupDb = false; backupForm.backupAttachments = true; handleBackupDownload(); }"
+                  @click="handleBackupZip"
                 >
                   <svg v-if="backupLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
@@ -971,7 +1008,7 @@ watch([userSearch, userRoleFilter], () => {
                   <svg v-else class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {{ backupLoading && backupForm.backupAttachments ? "打包中…" : "导出 ZIP 文件" }}
+                  {{ backupLoading ? "打包中…" : "导出 ZIP 文件" }}
                 </button>
               </div>
             </div>

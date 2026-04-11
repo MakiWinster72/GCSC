@@ -35,3 +35,23 @@ export function restoreBackupDb(file) {
     body: formData
   })
 }
+
+// Download attachments as ZIP
+export function downloadBackupAttachments() {
+  const token = localStorage.getItem('gcsc_token')
+  return fetch(`${API_BASE}/api/admin/backup/attachments`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+}
+
+// Restore attachments from ZIP upload
+export function restoreBackupAttachments(file) {
+  const token = localStorage.getItem('gcsc_token')
+  const formData = new FormData()
+  formData.append('file', file)
+  return fetch(`${API_BASE}/api/admin/restore/attachments`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  })
+}

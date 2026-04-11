@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class BackupService {
@@ -21,6 +24,9 @@ public class BackupService {
 
     @Value("${spring.datasource.password}")
     private String password;
+
+    @Value("${app.upload-dir:./uploads}")
+    private String uploadDir;
 
     private static final DateTimeFormatter FILE_DATE_FMT =
             DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
@@ -107,6 +113,68 @@ public class BackupService {
 
     public String generateBackupFilename() {
         return "gcsc_backup_" + LocalDateTime.now().format(FILE_DATE_FMT) + ".sql";
+    }
+
+    public String generateAttachmentsFilename() {
+        return "gcsc_attachments_" + LocalDateTime.now().format(FILE_DATE_FMT) + ".zip";
+    }
+
+    /**
+     * Zip the uploads/ directory and return as byte array.
+     */
+    public byte[] dumpAttachments() throws IOException {
+        Path uploadsPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        if (!Files.exists(uploadsPath)) {
+            return new byte[0];
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            Files.walk(uploadsPath)
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(filePath -> {
+                        try {
+                            String entryName = uploadsPath.relativize(filePath).toString().replace("\\", "/");
+                            ZipEntry entry = new ZipEntry(entryName);
+                            zos.putNextEntry(entry);
+                            Files.copy(filePath, zos);
+                            zos.closeEntry();
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+        }
+        return baos.toByteArray();
+    }
+
+    /**
+     * Extract ZIP content to the uploads/ directory.
+     * Existing files are overwritten.
+     */
+    public void restoreAttachments(byte[] zipContent) throws IOException {
+        if (zipContent == null || zipContent.length == 0) {
+            throw new RuntimeException("ZIP 文件内容为空");
+        }
+        Path uploadsPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Files.createDirectories(uploadsPath);
+
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipContent))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                Path targetPath = uploadsPath.resolve(entry.getName()).normalize();
+                // Prevent zip slip vulnerability
+                if (!targetPath.startsWith(uploadsPath)) {
+                    throw new RuntimeException("非法文件路径: " + entry.getName());
+                }
+                if (entry.isDirectory()) {
+                    Files.createDirectories(targetPath);
+                } else {
+                    Files.createDirectories(targetPath.getParent());
+                    Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                zis.closeEntry();
+            }
+        }
     }
 
     private String[] parseJdbcUrl(String jdbcUrl) {
