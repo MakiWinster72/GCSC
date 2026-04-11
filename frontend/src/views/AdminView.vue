@@ -13,6 +13,85 @@ const ATTACHMENT_TYPE_OPTIONS = [
 
 const profile = reactive(loadUser());
 const activeSection = shallowRef("upload");
+
+// Backup & Restore
+const backupForm = reactive({
+  backupDb: true,
+  backupAttachments: false,
+  sqlFile: null,
+  zipFile: null,
+  restoreDb: true,
+  restoreAttachments: false,
+});
+const backupLoading = shallowRef(false);
+const backupMessage = shallowRef({ type: "", text: "" });
+const restoreLoading = shallowRef(false);
+const restoreMessage = shallowRef({ type: "", text: "" });
+
+function handleBackupDownload() {
+  if (!backupForm.backupDb && !backupForm.backupAttachments) {
+    backupMessage.value = { type: "error", text: "请至少选择一项进行备份" };
+    return;
+  }
+  backupLoading.value = true;
+  backupMessage.value = { type: "", text: "" };
+  setTimeout(() => {
+    backupLoading.value = false;
+    backupMessage.value = { type: "info", text: "备份接口尚未接入后端，请先完成服务端实现。" };
+  }, 800);
+}
+
+function handleRestore() {
+  // DB card — always implicit restoreDb=true, check sqlFile
+  if (!backupForm.sqlFile) {
+    restoreMessage.value = { type: "error", text: "请先选择 SQL 备份文件" };
+    return;
+  }
+  restoreLoading.value = true;
+  restoreMessage.value = { type: "", text: "" };
+  setTimeout(() => {
+    restoreLoading.value = false;
+    restoreMessage.value = { type: "info", text: "恢复接口尚未接入后端，请先完成服务端实现。" };
+  }, 800);
+}
+
+function handleRestoreAttachments() {
+  // Attachments card — check zipFile
+  if (!backupForm.zipFile) {
+    restoreMessage.value = { type: "error", text: "请先选择附件压缩包" };
+    return;
+  }
+  restoreLoading.value = true;
+  restoreMessage.value = { type: "", text: "" };
+  setTimeout(() => {
+    restoreLoading.value = false;
+    restoreMessage.value = { type: "info", text: "恢复接口尚未接入后端，请先完成服务端实现。" };
+  }, 800);
+}
+
+function onSqlFileChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (!file.name.endsWith(".sql")) {
+    restoreMessage.value = { type: "error", text: "请选择 .sql 格式的备份文件" };
+    backupForm.sqlFile = null;
+    return;
+  }
+  backupForm.sqlFile = file;
+  restoreMessage.value = { type: "", text: "" };
+}
+
+function onZipFileChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (!["zip", "rar", "7z"].includes(ext)) {
+    restoreMessage.value = { type: "error", text: "请选择 zip 格式的压缩文件" };
+    backupForm.zipFile = null;
+    return;
+  }
+  backupForm.zipFile = file;
+}
 const saveMessage = shallowRef("");
 const sectionKey = shallowRef(0); // force section re-render for transition
 const users = shallowRef([]);
@@ -318,6 +397,7 @@ watch([userSearch, userRoleFilter], () => {
           { key: 'upload', label: '上传限制', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
           { key: 'review', label: '审核策略', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
           { key: 'users', label: '用户管理', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+          { key: 'backup', label: '备份与恢复', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4' },
         ]"
         :key="tab.key"
         class="admin-tab"
@@ -830,6 +910,166 @@ watch([userSearch, userRoleFilter], () => {
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backup & Restore Section -->
+        <div v-else-if="activeSection === 'backup'" class="backup-panel">
+          <!-- Backup Card -->
+          <div class="admin-card backup-card">
+            <div class="card-header">
+              <div class="card-header-icon backup-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+              </div>
+              <div>
+                <div class="card-kicker">数据安全</div>
+                <h2 class="card-title">备份</h2>
+              </div>
+            </div>
+            <div class="card-body backup-card-body">
+              <p class="backup-desc">导出 SQL 文件，包含用户、成就、审核策略等全部业务数据。</p>
+              <p class="backup-desc">导出 ZIP 压缩包，包含学生荣誉中上传的所有附件文件。</p>
+              <div class="backup-two-btns">
+                <button
+                  class="btn btn-primary backup-btn"
+                  :disabled="backupLoading"
+                  type="button"
+                  @click="() => { backupForm.backupDb = true; backupForm.backupAttachments = false; handleBackupDownload(); }"
+                >
+                  <svg v-if="backupLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                  </svg>
+                  <svg v-else class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {{ backupLoading && backupForm.backupDb ? "生成中…" : "导出 SQL 文件" }}
+                </button>
+                <button
+                  class="btn btn-primary backup-btn"
+                  :disabled="backupLoading"
+                  type="button"
+                  @click="() => { backupForm.backupDb = false; backupForm.backupAttachments = true; handleBackupDownload(); }"
+                >
+                  <svg v-if="backupLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                  </svg>
+                  <svg v-else class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {{ backupLoading && backupForm.backupAttachments ? "打包中…" : "导出 ZIP 文件" }}
+                </button>
+              </div>
+              <Transition name="msg-fade">
+                <div v-if="backupMessage.text" :class="['msg-banner', backupMessage.type || 'info']" role="status">
+                  <svg class="msg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ backupMessage.text }}
+                </div>
+              </Transition>
+            </div>
+          </div>
+
+          <!-- Restore Card -->
+          <div class="admin-card restore-card">
+            <div class="card-header">
+              <div class="card-header-icon restore-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <div>
+                <div class="card-kicker">数据安全</div>
+                <h2 class="card-title">恢复</h2>
+              </div>
+            </div>
+            <div class="card-body restore-card-body">
+              <div class="restore-warning">
+                <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span>恢复操作会覆盖现有数据，建议提前备份。</span>
+              </div>
+              <div class="restore-two-items">
+                <!-- Restore DB -->
+                <div class="restore-item">
+                  <div class="restore-item-label">恢复数据库</div>
+                  <div class="restore-item-row">
+                    <div class="file-input-wrap">
+                      <input
+                        id="sql-file"
+                        type="file"
+                        accept=".sql"
+                        class="file-input"
+                        aria-label="选择 SQL 备份文件"
+                        @change="onSqlFileChange"
+                      />
+                      <label for="sql-file" class="file-label">
+                        <svg class="file-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="file-label-text">{{ backupForm.sqlFile ? backupForm.sqlFile.name : "选择 .sql 文件" }}</span>
+                      </label>
+                    </div>
+                    <button
+                      class="btn btn-danger restore-btn"
+                      :disabled="restoreLoading || !backupForm.sqlFile"
+                      type="button"
+                      @click="handleRestore"
+                    >
+                      <svg v-if="restoreLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                      </svg>
+                      {{ restoreLoading ? "恢复中…" : "恢复" }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Restore Attachments -->
+                <div class="restore-item">
+                  <div class="restore-item-label">恢复附件</div>
+                  <div class="restore-item-row">
+                    <div class="file-input-wrap">
+                      <input
+                        id="zip-file"
+                        type="file"
+                        accept=".zip"
+                        class="file-input"
+                        aria-label="选择附件压缩包"
+                        @change="onZipFileChange"
+                      />
+                      <label for="zip-file" class="file-label">
+                        <svg class="file-label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                        </svg>
+                        <span class="file-label-text">{{ backupForm.zipFile ? backupForm.zipFile.name : "选择 zip 文件" }}</span>
+                      </label>
+                    </div>
+                    <button
+                      class="btn btn-danger restore-btn"
+                      :disabled="restoreLoading || !backupForm.zipFile"
+                      type="button"
+                      @click="handleRestoreAttachments"
+                    >
+                      <svg v-if="restoreLoading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                      </svg>
+                      {{ restoreLoading ? "恢复中…" : "恢复" }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <Transition name="msg-fade">
+                <div v-if="restoreMessage.text" :class="['msg-banner', restoreMessage.type || 'info']" role="alert">
+                  <svg class="msg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ restoreMessage.text }}
+                </div>
+              </Transition>
             </div>
           </div>
         </div>
@@ -2294,5 +2534,231 @@ watch([userSearch, userRoleFilter], () => {
   .msg-fade-leave-active {
     transition: opacity 100ms ease !important;
   }
+}
+
+/* ── Backup Panel ──────────────────────────────────────── */
+.backup-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.backup-icon {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--success);
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.12);
+}
+
+.restore-icon {
+  background: rgba(192, 57, 43, 0.09);
+  color: var(--danger);
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.1);
+}
+
+.backup-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+.backup-card-body,
+.restore-card-body {
+  gap: 14px;
+}
+
+.backup-two-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backup-btn {
+  gap: 7px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.btn-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Restore card */
+.restore-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(192, 57, 43, 0.07);
+  border: 1px solid rgba(192, 57, 43, 0.15);
+  font-size: 12.5px;
+  color: var(--danger);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.warning-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.restore-two-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.restore-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.restore-item + .restore-item {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.restore-item-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+.restore-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.restore-btn {
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.restore-item-row .file-input-wrap {
+  flex: 1;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+/* File Input */
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.file-input-wrap {
+  position: relative;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.file-label:hover {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.file-input:focus + .file-label {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px var(--primary-surface);
+}
+
+.file-label-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.file-label-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Field slide transition */
+.field-slide-enter-active {
+  transition: opacity 260ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.field-slide-leave-active {
+  transition: opacity 180ms ease;
+}
+.field-slide-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.field-slide-leave-to {
+  opacity: 0;
+}
+
+/* btn-danger */
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, #b03020 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(192, 57, 43, 0.3);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 8px 24px rgba(192, 57, 43, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-danger:hover:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.code-inline {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 11.5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(100, 12, 114, 0.07);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.msg-banner.info {
+  background: rgba(100, 12, 114, 0.07);
+  border: 1px solid rgba(100, 12, 114, 0.15);
+  color: var(--primary-dark);
 }
 </style>
