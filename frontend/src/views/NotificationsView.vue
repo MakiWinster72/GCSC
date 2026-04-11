@@ -528,12 +528,12 @@ function closeStudentDetail() {
 /* ── Category Tabs ──────────────────────────────────────── */
 .notif-tabs {
   display: flex;
-  gap: 6px;
-  padding: 4px;
-  border-radius: 16px;
-  background: var(--card);
+  gap: 4px;
+  padding: 5px;
+  margin: 0 20px;
+  border-radius: 18px;
+  background: rgba(100, 12, 114, 0.05);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
   width: fit-content;
   flex-wrap: wrap;
 }
@@ -541,30 +541,33 @@ function closeStudentDetail() {
 .notif-tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: 10px;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: 13px;
   border: none;
   background: transparent;
   color: var(--text-sub);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 160ms ease,
-    color 160ms ease,
+    background 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 120ms ease;
+  white-space: nowrap;
 }
 
 .notif-tab:hover:not(.active) {
-  background: rgba(100, 12, 114, 0.06);
+  background: rgba(100, 12, 114, 0.08);
   color: var(--primary);
 }
 
 .notif-tab.active {
-  background: var(--primary);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(100, 12, 114, 0.3);
+  background: var(--card);
+  color: var(--primary-dark);
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(100, 12, 114, 0.15), 0 1px 3px rgba(100, 12, 114, 0.1);
 }
 
 .notif-tab:active {
@@ -586,7 +589,7 @@ function closeStudentDetail() {
 }
 
 .notif-tab.active .notif-tab-count {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(100, 12, 114, 0.14);
 }
 
 /* ── Empty State ─────────────────────────────────────────── */
@@ -1428,13 +1431,16 @@ function closeStudentDetail() {
 
 @media (max-width: 600px) {
   .notif-tabs {
-    width: 100%;
+    width: calc(100% - 40px);
+    margin: 0 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
-
+  .notif-tabs::-webkit-scrollbar { display: none; }
   .notif-tab {
     flex: 1;
     justify-content: center;
-    padding: 7px 8px;
+    padding: 9px 14px;
     font-size: 13px;
   }
 
