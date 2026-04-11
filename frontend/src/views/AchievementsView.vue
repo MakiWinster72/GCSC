@@ -572,6 +572,13 @@
                   >
                     预览
                   </button>
+                  <button
+                    v-else-if="isAllowedImage(file)"
+                    class="attachment-link"
+                    @click="showPreview([file.url], 0)"
+                  >
+                    预览
+                  </button>
                   <a
                     v-else-if="!isPptxFile(file)"
                     class="attachment-link"
