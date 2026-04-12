@@ -265,7 +265,7 @@
 .toast {
   position: fixed;
   right: 24px;
-  bottom: 72px;
+  top: 20px;
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.35);
