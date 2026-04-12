@@ -206,13 +206,27 @@
 
 /* ── Info Card ──────────────────────────────────────────── */
 .info-card {
-  padding: 18px 18px 18px;
+  /* CSS var overrides: flat section card (no glass, no full border) */
+  --card-radius: 0;
+  --card-shadow: none;
+  --card-padding: 18px;
+
+  /* Remove card base border/shadow, use section divider only */
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  /* Layout */
   display: grid;
   gap: 12px;
-  border-bottom: 1px solid var(--line);
   width: 100%;
   max-width: 100%;
   min-width: 0;
+
+  /* Section divider: bottom border between cards */
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
 }
 
 .info-card:last-child {

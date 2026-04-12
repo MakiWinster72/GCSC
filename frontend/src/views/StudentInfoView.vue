@@ -5,7 +5,7 @@
     </header>
 
     <section class="info-shell student-right-stack">
-      <section v-show="!gridFullscreen" class="info-card student-filter-card">
+      <section v-show="!gridFullscreen" class="card student-filter-card">
         <div class="student-filter-toolbar">
           <div class="student-filter-intro">
             <div class="info-section-title">搜索与筛选</div>
@@ -173,7 +173,7 @@
         </div>
       </section>
 
-      <section class="info-card student-results-card">
+      <section class="card student-results-card">
         <div v-if="!gridViewOpen" class="student-results-header">
           <div class="info-section-title">筛选结果</div>
           <div class="student-results-actions">
@@ -2166,11 +2166,11 @@ function loadUser() {
 
 <style scoped>
 .student-filter-card {
+  --card-padding: 0;
   gap: 16px;
   position: relative;
   z-index: 40;
-  padding: 0 0 18px;
-  border-bottom: none;
+  padding-bottom: 18px;
   min-height: 0;
 }
 
@@ -2186,10 +2186,8 @@ function loadUser() {
   align-items: center;
   gap: 20px;
   padding: 16px 18px 14px;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  box-shadow: var(--shadow-sm);
+  /* Border/shadow handled by parent .card */
+  border-radius: inherit;
 }
 
 .student-filter-intro {
@@ -2677,6 +2675,7 @@ function loadUser() {
 }
 
 .student-results-card {
+  --card-padding: 16px;
   gap: 16px;
   position: relative;
   z-index: 1;

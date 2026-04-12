@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">学籍信息</div>
           <div class="info-form-grid">
             <label class="field-card">
@@ -187,7 +187,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">个人证件与联系方式</div>
           <div class="info-form-grid">
             <label class="field-card">
@@ -351,7 +351,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">住宿信息</div>
           <div class="info-form-grid">
             <div class="field-card field-full">
@@ -494,7 +494,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">团组织与入党信息</div>
           <div class="info-form-grid three">
             <div class="field-card field-full">
@@ -708,7 +708,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">教育经历</div>
           <div class="info-hint">从小学开始填</div>
           <div ref="educationTableWrap" class="education-table-wrap">
@@ -819,7 +819,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">学生干部经历</div>
           <div ref="cadreTableWrap" class="education-table-wrap">
             <transition-group
@@ -929,7 +929,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <!-- TODO: 单亲/离异等待现场演示求助 -->
           <div class="info-section-title">
             家庭信息
@@ -1072,7 +1072,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="card info-card">
           <div class="info-section-title">紧急联系人（除亲戚外）</div>
           <div class="info-form-grid">
             <label class="field-card">

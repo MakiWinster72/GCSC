@@ -341,7 +341,7 @@ watch([userSearch, userRoleFilter], () => {
         <!-- Upload Section -->
         <div v-if="activeSection === 'upload'" class="admin-panel-grid">
           <!-- Form Card -->
-          <div class="admin-card">
+          <div class="card admin-card">
             <div class="card-header">
               <div class="card-header-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -509,7 +509,7 @@ watch([userSearch, userRoleFilter], () => {
           </div>
 
           <!-- Preview Card -->
-          <div class="admin-card preview-card">
+          <div class="card admin-card preview-card">
             <div class="card-header">
               <div class="card-header-icon preview-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -564,7 +564,7 @@ watch([userSearch, userRoleFilter], () => {
 
         <!-- Review Section -->
         <div v-else-if="activeSection === 'review'" class="admin-panel-single">
-          <div class="admin-card">
+          <div class="card admin-card">
             <div class="card-header">
               <div class="card-header-icon shield-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -707,7 +707,7 @@ watch([userSearch, userRoleFilter], () => {
 
         <!-- Users Section -->
         <div v-else-if="activeSection === 'users'" class="admin-panel-single">
-          <div class="admin-card users-card">
+          <div class="card admin-card users-card">
             <!-- Card Header -->
             <div class="users-card-header">
               <div class="users-card-meta">
@@ -1045,11 +1045,10 @@ watch([userSearch, userRoleFilter], () => {
 
 /* ── Cards ─────────────────────────────────────────────── */
 .admin-card {
-  border-radius: 24px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  /* Card base (.card) handles: border-radius, border, background, backdrop-filter,
+     box-shadow, overflow, padding. Admin card overrides: */
+  --card-padding: 0;        /* header/body handle their own padding */
+  --card-radius: 24px;     /* slightly larger for admin context */
   animation: cardEnter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -2274,6 +2273,7 @@ watch([userSearch, userRoleFilter], () => {
 
 /* ── Reduced Motion ────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+  .card,
   .admin-card,
   .admin-tab,
   .btn,

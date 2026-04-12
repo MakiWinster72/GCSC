@@ -206,11 +206,12 @@
   opacity: 0;
   filter: blur(6px);
   pointer-events: none;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  border: 1px solid var(--line);
   background: var(--card);
   box-shadow: 0 28px 70px rgba(100, 12, 114, 0.22);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
   z-index: 50;
   transition:
     transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
@@ -853,11 +854,14 @@
   grid-template-columns: 180px minmax(0, 1fr);
   gap: 14px;
   align-items: stretch;
-  border-radius: 18px;
+  /* Canonical card values: 20px radius, var(--shadow), backdrop-filter */
+  border-radius: 20px;
   border: 1px solid var(--line);
   background: var(--card);
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+  box-shadow: var(--shadow);
   padding: 12px;
-  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition:
     box-shadow 220ms ease,

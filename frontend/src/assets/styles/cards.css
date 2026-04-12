@@ -2,30 +2,59 @@
  * Card Styles - 卡片组件样式
  *
  * 包含内容:
- * - Card Base: menu-card, composer-card, panel-card 共同基础样式
+ * - Card Base: canonical .card base + menu-card, composer-card, panel-card
  * - Menu Card: 菜单卡片、导航列表
  * - Notification Menu: 通知菜单相关样式
  * - Menu Transitions: 菜单面板过渡动画
+ *
+ * ═══════════════════════════════════════════════════════════
+ * CANONICAL CARD SYSTEM
+ * ═══════════════════════════════════════════════════════════
+ *
+ * All card components share a common visual foundation:
+ *   border-radius: 20px
+ *   border: 1px solid var(--line)
+ *   background: var(--card)  (glass, rgba with backdrop-filter)
+ *   backdrop-filter: blur(12px) saturate(115%)
+ *   box-shadow: var(--shadow)
+ *
+ * This is defined in the .card {} base below.
+ *
+ * Card types use this base and add specific overrides:
+ *   .menu-card      — sidebar navigation (padding, grid layout, shadow: none)
+ *   .composer-card  — content composer (padding override)
+ *   .panel-card     — content panel (padding override)
+ *   .achievement-card — achievement feed (grid layout, padding)
+ *
+ * Solid-background cards (info-shell, settings-card) intentionally
+ * deviate: they use rgba() backgrounds without backdrop-filter
+ * for a cleaner, flatter aesthetic appropriate for form UIs.
  */
 
 /* ── Card Base ─────────────────────────────────────────── */
-.menu-card,
-.composer-card,
-.panel-card {
-  border-radius: 20px;
+/**
+ * Canonical card base — all card types extend this.
+ * Shared properties: glass morphism, border, shadow, border-radius.
+ * Override --card-padding and --card-radius for variant-specific values.
+ */
+.card {
+  /* Customizable via --card-* vars */
+  --card-padding: 16px;
+  --card-radius: 20px;
+  --card-shadow: var(--shadow);
+
+  border-radius: var(--card-radius);
   border: 1px solid var(--line);
   background: var(--card);
   backdrop-filter: blur(12px) saturate(115%);
   -webkit-backdrop-filter: blur(12px) saturate(115%);
-  align-self: start;
+  box-shadow: var(--card-shadow);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  padding: var(--card-padding);
 }
 
-.menu-card::before,
-.composer-card::before,
-.panel-card::before {
+.card::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -34,6 +63,14 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Glass card variants — extend .card base */
+.menu-card,
+.composer-card,
+.panel-card {
+  align-self: start;
+  /* Rest inherits from .card base above (::after inner highlight, etc.) */
 }
 
 /* ── Menu Card ──────────────────────────────────────────── */
