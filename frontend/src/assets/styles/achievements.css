@@ -867,7 +867,7 @@
     box-shadow 220ms ease,
     transform 220ms ease,
     border-color 220ms ease;
-  animation: cardEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardEnter var(--duration-slow) var(--ease-page) both;
 }
 
 .achievement-card:hover {
@@ -1579,17 +1579,8 @@
 }
 
 /* ── Card Entrance Animation ──────────────────────────── */
-@keyframes cardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* cardEnter 已在 _base.css 中统一定义（translateY 20px），此处仅保留错开延迟 */
+/* 组件使用: animation: cardEnter var(--duration-slow) var(--ease-page) both; */
 .achievement-card:nth-child(1) { animation-delay: 0ms; }
 .achievement-card:nth-child(2) { animation-delay: 60ms; }
 .achievement-card:nth-child(3) { animation-delay: 120ms; }

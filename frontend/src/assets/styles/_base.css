@@ -41,6 +41,11 @@ body {
 }
 
 /* ── Keyframe Animations ───────────────────────────────── */
+
+/**
+ * Canonical card entrance — 用于列表卡片进入动画
+ * 使用方式: animation: cardEnter var(--duration-slow) var(--ease-page) both;
+ */
 @keyframes cardEnter {
   from {
     opacity: 0;
@@ -52,6 +57,9 @@ body {
   }
 }
 
+/**
+ * 装饰性浮动球 — 用于 auth 页面背景装饰
+ */
 @keyframes floatOrb {
   0%,
   100% {
@@ -62,11 +70,23 @@ body {
   }
 }
 
+/**
+ * 背景光晕移动 — 用于渐变背景动画
+ */
 @keyframes glowMove {
   0% {
     background-position: 0 50%;
   }
   100% {
     background-position: 100% 50%;
+  }
+}
+
+/**
+ * 加载旋转 — 用于 spinner
+ */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -2922,8 +2922,9 @@ function loadUser() {
 
 <style scoped>
 /* ── Staggered Card Entrance ──────────────────────────── */
+/* cardEnter 已在 _base.css 全局定义，此处仅引用并设置错开延迟 */
 .info-shell > .info-card {
-  animation: cardReveal 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardEnter var(--duration-slow) var(--ease-page) both;
 }
 
 .info-shell > .info-card:nth-child(1) { animation-delay: 40ms; }
@@ -2936,24 +2937,14 @@ function loadUser() {
 .info-shell > .info-card:nth-child(8) { animation-delay: 320ms; }
 .info-shell > .info-card:nth-child(9) { animation-delay: 360ms; }
 
-@keyframes cardReveal {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* ── Info Hero Entrance ────────────────────────────────── */
 .info-shell > .info-hero {
-  animation: cardReveal 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardEnter var(--duration-slow) var(--ease-page) both;
   animation-delay: 0ms;
 }
 
 /* ── Section Title Reveal ─────────────────────────────── */
+/* sectionTitleReveal: 左侧滑入，专用于标题文字 */
 .info-section-title {
   animation: sectionTitleReveal 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }

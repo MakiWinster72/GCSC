@@ -882,10 +882,8 @@ async function handleLogin() {
 .switch-link:hover { color: var(--primary-dark); border-color: var(--primary); }
 
 /* ── Animations ── */
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* cardEnter/spin 已移至 _base.css 全局定义 */
+/* floatOrb/spinRing/pulseOrb 为登录页装饰专属，保留 */
 @keyframes floatOrb {
   0%, 100% { transform: translate3d(0,0,0) scale(1); }
   50% { transform: translate3d(14px,-18px,0) scale(1.04); }
@@ -896,9 +894,6 @@ async function handleLogin() {
 @keyframes pulseOrb {
   0%, 100% { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
   50% { opacity: 0.8; transform: translate(-50%,-50%) scale(1.15); }
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* ── Responsive ── */

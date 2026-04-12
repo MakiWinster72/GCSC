@@ -53,4 +53,12 @@
 
   /* ── Animation ── */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-page: cubic-bezier(0.22, 1, 0.36, 1);   /* 标准页面过渡: 卡片进入、面板滑入 */
+  --ease-dialog: cubic-bezier(0.22, 1, 0.36, 1);   /* 对话框 pop 效果 */
+  --ease-backdrop: ease;                            /* 背景模糊淡入淡出 */
+
+  /* 标准动画时长 */
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
 }

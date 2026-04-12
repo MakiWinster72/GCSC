@@ -1049,16 +1049,11 @@ watch([userSearch, userRoleFilter], () => {
      box-shadow, overflow, padding. Admin card overrides: */
   --card-padding: 0;        /* header/body handle their own padding */
   --card-radius: 24px;     /* slightly larger for admin context */
-  animation: cardEnter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardEnter var(--duration-slow) var(--ease-page) both;
 }
 
 .admin-card:nth-child(2) {
   animation-delay: 60ms;
-}
-
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Card Header ───────────────────────────────────────── */
@@ -1581,10 +1576,7 @@ watch([userSearch, userRoleFilter], () => {
   flex-shrink: 0;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* spin 已移至 _base.css 全局定义 */
 
 @media (max-width: 480px) {
   .card-actions {
