@@ -318,9 +318,9 @@
         </button>
       </Transition>
       <button
+        v-if="hasSelection"
         class="floating-btn floating-btn-export"
         type="button"
-        :disabled="exportDisabled"
         @click="openExportDialog"
       >
         {{ exportLabel }}
@@ -3335,14 +3335,15 @@ function loadUser() {
 /* ── Floating Action Buttons ─────────────────── */
 
 .floating-actions {
-  position: fixed;
+  position: sticky;
   bottom: 24px;
-  right: 24px;
   z-index: 50;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  margin-left: auto;
+  width: fit-content;
   pointer-events: none;
 }
 
@@ -3739,7 +3740,6 @@ function loadUser() {
     bottom: 80px;
     right: 16px;
     gap: 8px;
-    flex-direction: row;
   }
 
   .floating-btn-export {
