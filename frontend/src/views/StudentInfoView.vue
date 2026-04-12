@@ -30,22 +30,6 @@
             >
               清空筛选
             </button>
-            <button
-              class="student-grid-toggle"
-              type="button"
-              @click="toggleGridView"
-              :title="gridViewOpen ? '切换列表视图' : '切换表格视图'"
-            >
-              <span class="grid-toggle-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path
-                    d="M7 7h10v3h2V5H5v5h2V7zm10 10H7v-3H5v5h14v-5h-2v3zM9 10l-3 2 3 2v-4zm6 4 3-2-3-2v4z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-              {{ gridViewOpen ? "切换列表" : "切换表格" }}
-            </button>
           </div>
         </div>
         <div v-if="!gridViewOpen" class="student-filter-body">
@@ -317,17 +301,47 @@
               </option>
             </select>
           </div>
-          <button
-            class="action-button"
-            type="button"
-            :disabled="exportDisabled"
-            @click="openExportDialog"
-          >
-            {{ exportLabel }}
-          </button>
         </div>
       </section>
     </section>
+
+    <!-- Floating action buttons -->
+    <div class="floating-actions">
+      <Transition name="floating-action">
+        <button
+          v-if="hasSelection"
+          class="floating-btn floating-btn-cancel"
+          type="button"
+          @click="cancelSelection"
+        >
+          取消选择
+        </button>
+      </Transition>
+      <button
+        class="floating-btn floating-btn-export"
+        type="button"
+        :disabled="exportDisabled"
+        @click="openExportDialog"
+      >
+        {{ exportLabel }}
+      </button>
+      <button
+        class="floating-btn floating-btn-toggle"
+        type="button"
+        @click="toggleGridView"
+        :title="gridViewOpen ? '切换列表视图' : '切换表格视图'"
+      >
+        <span class="floating-toggle-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path
+              d="M7 7h10v3h2V5H5v5h2V7zm10 10H7v-3H5v5h14v-5h-2v3zM9 10l-3 2 3 2v-4zm6 4 3-2-3-2v4z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+        {{ gridViewOpen ? "切换列表" : "切换表格" }}
+      </button>
+    </div>
 
     <transition name="export-dialog-backdrop">
       <div
@@ -856,10 +870,15 @@ const hasActiveFilters = computed(() => {
 
 const pagedStudents = computed(() => students.value);
 const exportDisabled = computed(() => selectedIds.value.length === 0);
+const hasSelection = computed(() => selectedIds.value.length > 0);
 const exportLabel = computed(() => {
   const count = selectedIds.value.length;
   return count ? `导出(${count})` : "导出";
 });
+
+function cancelSelection() {
+  selectedIds.value = [];
+}
 
 /**
  * Sliding window pagination: always shows current page ± 2,
@@ -3278,6 +3297,173 @@ function loadUser() {
   }
 }
 
+
+@media (prefers-reduced-motion: reduce) {
+  .student-row,
+  .student-grid-tab,
+  .stepper-button,
+  .page-button,
+  .export-preview-tab,
+  .student-filter-reset,
+  .grid-field-dialog,
+  .export-dialog,
+  .student-detail-view,
+  .student-achievements-view,
+  .export-preview-view,
+  .floating-actions,
+  .floating-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .grid-field-dialog,
+  .export-dialog,
+  .student-detail-view,
+  .student-achievements-view,
+  .export-preview-view {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .floating-action-enter-active,
+  .floating-action-leave-active {
+    transition: none !important;
+  }
+}
+
+/* ── Floating Action Buttons ─────────────────── */
+
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.floating-btn {
+  pointer-events: auto;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(100, 12, 114, 0.22);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.18s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.floating-btn:hover {
+  box-shadow: 0 8px 24px rgba(100, 12, 114, 0.28);
+  transform: translateY(-2px);
+}
+
+.floating-btn:active {
+  transform: scale(0.95);
+}
+
+.floating-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Cancel selection */
+.floating-btn-cancel {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--text-sub);
+  padding: 0 16px;
+  height: 40px;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+.floating-btn-cancel:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Export button */
+.floating-btn-export {
+  border: none;
+  background: rgba(100, 12, 114, 0.88);
+  color: #fff;
+  padding: 0 20px;
+  height: 46px;
+  font-size: 14px;
+  min-width: 120px;
+  letter-spacing: 0.3px;
+}
+
+.floating-btn-export:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.15);
+}
+
+/* Grid toggle */
+.floating-btn-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--primary-dark);
+  padding: 0 16px;
+  height: 44px;
+  font-size: 13px;
+}
+
+.floating-btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.floating-toggle-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.floating-toggle-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Floating action transition */
+.floating-action-enter-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.floating-action-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.floating-action-enter-from,
+.floating-action-leave-to {
+  opacity: 0;
+  transform: translateX(10px) scale(0.94);
+}
+
+/* ── Mobile Responsive ─── */
+
 @media (max-width: 640px) {
   .student-right-stack {
     padding-bottom: 88px;
@@ -3285,7 +3471,8 @@ function loadUser() {
   }
 
   .student-filter-card {
-    padding-bottom: 14px;
+    gap: 12px;
+    padding: 14px;
   }
 
   .student-filter-toolbar {
@@ -3405,12 +3592,6 @@ function loadUser() {
     padding: 14px;
   }
 
-  .student-grid-toggle {
-    height: 44px;
-    padding: 0 14px;
-    font-size: 13px;
-  }
-
   .student-grid-tabs {
     gap: 6px;
     flex-wrap: wrap;
@@ -3424,11 +3605,6 @@ function loadUser() {
     height: 44px;
     min-width: 44px;
     font-size: 12px;
-  }
-
-  /* 隐藏 toolbar 里的切换按钮（已移至胶囊） */
-  .student-filter-toolbar .student-grid-toggle {
-    display: none;
   }
 
   .student-grid-tab {
@@ -3557,32 +3733,31 @@ function loadUser() {
   .grid-field-dialog.closing {
     transform: translateY(100%);
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .student-row,
-  .student-grid-tab,
-  .stepper-button,
-  .page-button,
-  .export-preview-tab,
-  .student-filter-reset,
-  .grid-field-dialog,
-  .export-dialog,
-  .student-detail-view,
-  .student-achievements-view,
-  .export-preview-view {
-    transition: none !important;
-    animation: none !important;
+  /* Floating action buttons */
+  .floating-actions {
+    bottom: 80px;
+    right: 16px;
+    gap: 8px;
+    flex-direction: row;
   }
 
-  .grid-field-dialog,
-  .export-dialog,
-  .student-detail-view,
-  .student-achievements-view,
-  .export-preview-view {
-    transform: translate(-50%, 0) scale(1);
-    opacity: 1;
-    pointer-events: auto;
+  .floating-btn-export {
+    height: 42px;
+    padding: 0 16px;
+    font-size: 13px;
+    min-width: 100px;
+  }
+
+  .floating-btn-toggle {
+    height: 40px;
+    font-size: 12px;
+  }
+
+  .floating-btn-cancel {
+    height: 36px;
+    font-size: 12px;
+    padding: 0 14px;
   }
 }
 </style>
