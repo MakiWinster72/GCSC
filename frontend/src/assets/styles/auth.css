@@ -149,85 +149,38 @@
   color: rgba(100, 12, 114, 0.38);
 }
 
-/* ── Ghost Button ──────────────────────────────────────── */
-.ghost-button {
-  border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.55);
-  color: var(--primary);
-  border-radius: 12px;
+/* ── Auth Card Buttons (override canonical button sizes for auth context) */
+/**
+ * Canonical button definitions live in buttons.css.
+ * Auth-specific overrides here ensure full-width, taller (50px) buttons
+ * that match the auth card's visual weight.
+ */
+.auth-card .ghost-button {
   height: 50px;
   padding: 0 24px;
-  font-weight: 700;
   font-size: 15px;
+  font-weight: 700;
   letter-spacing: 0.3px;
-  cursor: pointer;
-  transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    transform 120ms ease,
-    box-shadow 180ms ease;
+  background: rgba(255, 255, 255, 0.55);
 }
 
-.ghost-button:hover {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: var(--primary);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(100, 12, 114, 0.1);
-}
-
-.ghost-button:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.ghost-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* ── Action Button ──────────────────────────────────────── */
-.action-button {
+.auth-card .action-button {
   margin-top: 8px;
-  border: 0;
   width: 100%;
   height: 50px;
-  border-radius: 14px;
-  color: #ffffff;
+  padding: 0 24px;
   font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 14px;
   box-shadow:
     0 4px 16px rgba(100, 12, 114, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    filter 220ms ease;
 }
 
-.action-button:hover {
+.auth-card .action-button:hover {
   transform: translateY(-2px);
   box-shadow:
     0 8px 28px rgba(100, 12, 114, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  filter: brightness(1.05);
-}
-
-.action-button:active {
-  transform: translateY(0px);
-  box-shadow: 0 2px 10px rgba(100, 12, 114, 0.3);
-}
-
-.action-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-  filter: none;
 }
 
 /* ── Feedback Messages ──────────────────────────────────── */

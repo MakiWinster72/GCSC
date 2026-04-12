@@ -1703,61 +1703,6 @@
   background: var(--card);
 }
 
-/* ── Ghost + Action Buttons ────────────────────────────── */
-.ghost-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line-strong);
-  background: var(--card);
-  border-radius: 12px;
-  height: 40px;
-  padding: 0 20px;
-  cursor: pointer;
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 180ms ease;
-}
-
-.ghost-button:hover {
-  background: var(--card-hover);
-  border-color: var(--primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.ghost-button:active {
-  transform: translateY(0);
-}
-
-.action-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  border-radius: 12px;
-  height: 40px;
-  padding: 0 20px;
-  cursor: pointer;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 4px 14px rgba(100, 12, 114, 0.3);
-  transition: all 180ms ease;
-}
-
-.action-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(100, 12, 114, 0.4);
-}
-
-.action-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(100, 12, 114, 0.3);
-}
-
 /* ── Publisher Backdrop Transition ─────────────────────── */
 .publisher-backdrop-enter-active,
 .publisher-backdrop-leave-active {
