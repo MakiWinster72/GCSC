@@ -890,7 +890,7 @@
                     :class="{ 'viewer-doc-full': previewType === 'pdf' }"
                   >
                     <div v-if="previewLoading" class="viewer-loading">
-                      <div class="viewer-spinner"></div>
+                      <div class="spinner spinner-lg"></div>
                       <span>加载中...</span>
                     </div>
                     <div v-else class="viewer-content-wrapper">

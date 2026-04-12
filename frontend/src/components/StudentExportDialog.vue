@@ -392,7 +392,7 @@ async function handleConfirm() {
         :disabled="exporting"
         @click="handleConfirm"
       >
-        <span v-if="exporting" class="btn-spinner" aria-hidden="true"></span>
+        <span v-if="exporting" class="spinner spinner-sm" aria-hidden="true"></span>
         {{ exporting ? "导出中..." : `确认导出${exportFormat === 'pdf' ? ' PDF' : ''}` }}
       </button>
     </footer>
@@ -417,7 +417,7 @@ async function handleConfirm() {
 
     <div class="export-preview-body">
       <div v-if="previewLoading" class="export-preview-loading" role="status" aria-live="polite">
-        <div class="preview-spinner" aria-hidden="true"></div>
+        <div class="spinner spinner-sm" style="border-color: var(--line); border-top-color: var(--primary);" aria-hidden="true"></div>
         <span>加载预览中...</span>
       </div>
       <div v-else-if="!previewSheets.length" class="export-preview-empty">
@@ -734,22 +734,6 @@ async function handleConfirm() {
   max-width: 140px;
 }
 
-.btn-spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: btn-spin 0.7s linear infinite;
-  margin-right: 6px;
-  vertical-align: -2px;
-}
-
-@keyframes btn-spin {
-  to { transform: rotate(360deg); }
-}
-
 /* ── Preview Panel ─────────────────────── */
 .export-preview-panel {
   position: fixed;
@@ -836,15 +820,6 @@ async function handleConfirm() {
   flex: 1;
   font-size: 13px;
   color: var(--text-sub);
-}
-
-.preview-spinner {
-  width: 22px;
-  height: 22px;
-  border: 2.5px solid var(--line);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: btn-spin 0.7s linear infinite;
 }
 
 .export-preview-content {
@@ -1011,9 +986,7 @@ async function handleConfirm() {
   .export-dialog.closing,
   .export-preview-panel,
   .export-preview-panel.open,
-  .export-preview-panel.closing,
-  .btn-spinner,
-  .preview-spinner {
+  .export-preview-panel.closing {
     transition: none;
     animation: none;
   }

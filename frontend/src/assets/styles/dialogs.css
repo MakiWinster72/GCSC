@@ -277,7 +277,75 @@
   z-index: 90;
 }
 
-/* ── Sheet Overlay & Modal ──────────────────────────────── */
+/* ── Loading States ────────────────────────────────────── */
+/**
+ * Unified spinner system
+ * Usage: <span class="spinner"></span>  (default 20px)
+ *        <span class="spinner spinner-sm"></span>  (14px, for buttons)
+ *        <span class="spinner spinner-lg"></span>  (32px, for page-level)
+ *        <span class="spinner spinner-white"></span> (white color, for dark bg)
+ */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+}
+
+.spinner-lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  border-color: rgba(100, 12, 114, 0.15);
+  border-top-color: var(--primary);
+}
+
+/* Loading container for page/section level loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+/* Inline text loading indicator */
+.loading-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* Spinner + text inline combo (for buttons) */
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 6px;
+  vertical-align: -2px;
+  flex-shrink: 0;
+}
+
+/* Sheet Overlay & Modal ──────────────────────────────── */
 .sheet-overlay {
   position: fixed;
   inset: 0;
