@@ -221,6 +221,19 @@ function handleClose() {
   line-height: 1.3;
 }
 
+.overlay-custom-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.overlay-custom-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary-dark, #4a084f);
+}
+
 .overlay-close {
   display: inline-flex;
   align-items: center;

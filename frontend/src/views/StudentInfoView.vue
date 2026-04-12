@@ -252,20 +252,17 @@
       </button>
     </div>
 
-    <transition name="export-dialog-backdrop">
-      <div
-        v-if="gridFieldDialogOpen"
-        class="grid-field-dialog-backdrop"
-        @click="closeGridFieldDialog"
-      ></div>
-    </transition>
-    <section
-      class="grid-field-dialog"
-      :class="{ open: gridFieldDialogOpen, closing: gridFieldDialogClosing }"
+    <OverlayPanel
+      :open="gridFieldDialogOpen"
+      :closing="gridFieldDialogClosing"
+      title="选择显示字段"
+      aria-label="选择显示字段"
+      size="wide"
+      @close="closeGridFieldDialog"
     >
-      <header class="export-dialog-header">
-        <div class="export-dialog-title">
-          选择显示字段
+      <template #header>
+        <div class="overlay-custom-header">
+          <span class="overlay-custom-title">选择显示字段</span>
           <label class="export-all-toggle">
             <input
               type="checkbox"
@@ -275,14 +272,7 @@
             <span>全选</span>
           </label>
         </div>
-        <button
-          class="ghost-button"
-          type="button"
-          @click="closeGridFieldDialog"
-        >
-          关闭
-        </button>
-      </header>
+      </template>
       <div class="export-dialog-body">
         <div v-for="group in exportGroups" :key="group.id" class="export-group">
           <label class="export-group-title">
@@ -326,7 +316,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </OverlayPanel>
 
     <transition name="publisher-backdrop">
       <div
@@ -462,6 +452,7 @@ import StudentExportDialog from "../components/StudentExportDialog.vue";
 import StudentProfileEditor from "../components/StudentProfileEditor.vue";
 import PaginationBar from "../components/PaginationBar.vue";
 import StepperInput from "../components/StepperInput.vue";
+import OverlayPanel from "../components/OverlayPanel.vue";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
 import { useToast } from "../composables/useToast";
