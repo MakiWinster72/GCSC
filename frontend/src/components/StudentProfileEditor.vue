@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { regionData, codeToText } from "element-china-area-data";
 import ExportPdfButton from "./ExportPdfButton.vue";
 import { uploadMedia } from "../api/upload";
+import { useToast } from "../composables/useToast";
 
 const props = defineProps({
   student: {
@@ -28,6 +29,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["saved", "openAchievements"]);
+const { success: toastSuccess, error: toastError } = useToast();
 
 const FIXED_COLLEGE = "大数据与人工智能学院";
 
@@ -1382,6 +1384,8 @@ function applyProfileResponse(data) {
           :get-student="buildPdfStudentSnapshot"
           :resolve-media-url="resolveMediaUrl"
           button-class="ghost-button"
+          @export-complete="toastSuccess('PDF 导出成功！')"
+          @export-error="toastError('PDF 导出失败')"
         />
         <button
           v-if="canEdit && !isEditing"

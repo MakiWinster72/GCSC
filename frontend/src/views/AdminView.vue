@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, shallowRef, watch } from "vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
 import { getUserList, updateUser, deleteUser, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments } from "../api/admin";
+import { useToast } from "../composables/useToast";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -21,6 +22,7 @@ const backupForm = reactive({
 });
 const backupLoading = shallowRef(false);
 const restoreLoading = shallowRef(false);
+const { success, error } = useToast();
 
 async function handleBackupDb() {
   backupLoading.value = true;
@@ -28,7 +30,7 @@ async function handleBackupDb() {
     const res = await downloadBackupDb();
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      window.$toast.error(errData.message || "备份失败");
+      error(errData.message || "备份失败");
       return;
     }
     const blob = await res.blob();
@@ -39,9 +41,9 @@ async function handleBackupDb() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    window.$toast.success("SQL 文件已下载");
+    success("SQL 文件已下载");
   } catch (e) {
-    window.$toast.error("备份失败，请检查服务端 mysqldump 是否可用");
+    error("备份失败，请检查服务端 mysqldump 是否可用");
   } finally {
     backupLoading.value = false;
   }
@@ -53,7 +55,7 @@ async function handleBackupZip() {
     const res = await downloadBackupAttachments();
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      window.$toast.error(errData.message || "打包失败");
+      error(errData.message || "打包失败");
       return;
     }
     const blob = await res.blob();
@@ -64,9 +66,9 @@ async function handleBackupZip() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    window.$toast.success("ZIP 文件已下载");
+    success("ZIP 文件已下载");
   } catch (e) {
-    window.$toast.error("打包失败，请稍后重试");
+    error("打包失败，请稍后重试");
   } finally {
     backupLoading.value = false;
   }
@@ -74,7 +76,7 @@ async function handleBackupZip() {
 
 async function handleRestore() {
   if (!backupForm.sqlFile) {
-    window.$toast.error("请先选择 SQL 备份文件");
+    error("请先选择 SQL 备份文件");
     return;
   }
   restoreLoading.value = true;
@@ -82,15 +84,15 @@ async function handleRestore() {
     const res = await restoreBackupDb(backupForm.sqlFile);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      window.$toast.error(data.message || "恢复失败");
+      error(data.message || "恢复失败");
       return;
     }
-    window.$toast.success("数据库恢复成功");
+    success("数据库恢复成功");
     backupForm.sqlFile = null;
     const input = document.getElementById("sql-file");
     if (input) input.value = "";
   } catch (e) {
-    window.$toast.error("恢复失败，请检查服务端 mysql 是否可用");
+    error("恢复失败，请检查服务端 mysql 是否可用");
   } finally {
     restoreLoading.value = false;
   }
@@ -98,7 +100,7 @@ async function handleRestore() {
 
 async function handleRestoreAttachments() {
   if (!backupForm.zipFile) {
-    window.$toast.error("请先选择附件压缩包");
+    error("请先选择附件压缩包");
     return;
   }
   restoreLoading.value = true;
@@ -106,15 +108,15 @@ async function handleRestoreAttachments() {
     const res = await restoreBackupAttachments(backupForm.zipFile);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      window.$toast.error(data.message || "恢复失败");
+      error(data.message || "恢复失败");
       return;
     }
-    window.$toast.success("附件恢复成功");
+    success("附件恢复成功");
     backupForm.zipFile = null;
     const input = document.getElementById("zip-file");
     if (input) input.value = "";
   } catch (e) {
-    window.$toast.error("恢复失败，请稍后重试");
+    error("恢复失败，请稍后重试");
   } finally {
     restoreLoading.value = false;
   }
@@ -124,7 +126,7 @@ function onSqlFileChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
   if (!file.name.endsWith(".sql")) {
-    window.$toast.error("请选择 .sql 格式的备份文件");
+    error("请选择 .sql 格式的备份文件");
     backupForm.sqlFile = null;
     return;
   }
@@ -135,7 +137,7 @@ function onZipFileChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
   if (!file.name.toLowerCase().endsWith(".zip")) {
-    window.$toast.error("请选择 .zip 格式的压缩文件");
+    error("请选择 .zip 格式的压缩文件");
     backupForm.zipFile = null;
     return;
   }
@@ -269,6 +271,7 @@ async function handleSubmit() {
   if (result.success) {
     saveMessage.value = "上传限制已更新，成就页面会同步显示。";
     syncFormFromSettings();
+    success("上传限制设置已保存");
   }
 }
 
@@ -287,6 +290,7 @@ async function handleReviewSubmit() {
   if (result.success) {
     saveMessage.value = "审核设置已更新，前台提交行为会按新规则执行。";
     syncReviewFormFromSettings();
+    success("审核策略设置已保存");
   }
 }
 
@@ -400,6 +404,7 @@ async function handleUpdateUser() {
     }
     await loadUsers(userCurrentPage.value);
     closeEditModal();
+    success("用户信息已更新");
   } catch (e) {
     editModal.error = e?.response?.data?.message || "更新失败";
   } finally {
@@ -414,8 +419,9 @@ async function handleDeleteUser(user) {
   try {
     await deleteUser(user.id);
     await loadUsers();
+    success("用户已删除");
   } catch (e) {
-    alert(e?.response?.data?.message || "删除失败");
+    error(e?.response?.data?.message || "删除失败");
   }
 }
 

@@ -36,6 +36,8 @@
               :get-student="buildPdfStudentSnapshot"
               :resolve-media-url="resolveMediaUrl"
               button-class="ghost-button"
+              @export-complete="toastSuccess('PDF 导出成功！')"
+              @export-error="toastError('PDF 导出失败')"
             />
             <button
               v-if="!isEditing"
@@ -1134,6 +1136,7 @@ import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
 import { useNotifications } from "../composables/useNotifications";
 import { useReviewSettings } from "../composables/useReviewSettings";
+import { useToast } from "../composables/useToast";
 
 const router = useRouter();
 const { openSidebar: openDashboardSidebar } = useDashboardShell();
@@ -1154,6 +1157,7 @@ const originalProfileData = ref(null);
 const savedProfileData = ref(null);
 const { submitProfileReviewRequest, updateReviewRequestStatus, fetchProfileReviewRequests } = useNotifications(profile);
 const { settings: reviewSettings, fetchSettings: fetchReviewSettings } = useReviewSettings();
+const { success: toastSuccess, error: toastError } = useToast();
 
 const info = reactive({
   name: profile.displayName || profile.username || "",

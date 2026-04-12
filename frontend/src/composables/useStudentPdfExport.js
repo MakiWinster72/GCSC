@@ -180,6 +180,7 @@ export function useStudentPdfExport() {
       getOffCampusAddress,
       getEducationExperiences,
       getAchievements,
+      onComplete,
     } = options || {};
 
     if (pdfExporting.value || !student) {
@@ -187,6 +188,7 @@ export function useStudentPdfExport() {
     }
 
     pdfExporting.value = true;
+    let success = false;
     try {
       const studentName =
         (getStudentName && getStudentName(student)) ||
@@ -638,8 +640,16 @@ export function useStudentPdfExport() {
       }
 
       doc.save(`student_resume_${formatTimestamp()}.pdf`);
+      success = true;
+      console.log("[useStudentPdfExport] doc.save() completed, success=", success);
+    } catch (error) {
+      console.error("PDF export failed:", error);
     } finally {
       pdfExporting.value = false;
+      console.log("[useStudentPdfExport] finally block, calling onComplete with success=", success);
+      if (onComplete) {
+        onComplete(success);
+      }
     }
   }
 

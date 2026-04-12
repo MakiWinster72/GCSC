@@ -47,6 +47,10 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  onExportSuccess: {
+    type: Function,
+    default: null,
+  },
 });
 
 const emit = defineEmits(["close"]);
@@ -246,6 +250,9 @@ async function handleConfirm() {
       await exportStudentRowsToExcel(safeRows, selectedKeys, {
         filenamePrefix: props.filenamePrefix,
       });
+    }
+    if (props.onExportSuccess) {
+      props.onExportSuccess();
     }
     requestClose();
   } catch (error) {

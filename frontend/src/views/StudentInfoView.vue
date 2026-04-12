@@ -472,6 +472,7 @@
       empty-message="没有获取到学生详情，请稍后再试。"
       :load-rows="loadExportRows"
       @close="closeExportDialog"
+      @export-success="toastSuccess('学生信息已导出')"
     />
 
     <MobileCapsule @open-sidebar="openDashboardSidebar">
@@ -538,10 +539,12 @@ import StudentExportDialog from "../components/StudentExportDialog.vue";
 import StudentProfileEditor from "../components/StudentProfileEditor.vue";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
+import { useToast } from "../composables/useToast";
 
 const router = useRouter();
 const route = useRoute();
 const { openSidebar: openDashboardSidebar } = useDashboardShell();
+const { success: toastSuccess } = useToast();
 const API_BASE = "http://localhost:8080";
 
 const profile = reactive(loadUser());

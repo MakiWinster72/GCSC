@@ -23,6 +23,7 @@
       <RouterView />
     </div>
 
+    <ToastContainer />
     <div v-if="!isEmbedded" style="margin-top: auto">
       <AppFooter />
     </div>
@@ -35,6 +36,7 @@ import { RouterView, useRoute, useRouter } from "vue-router";
 import BrandHeader from "../components/BrandHeader.vue";
 import DashboardSidebar from "../components/DashboardSidebar.vue";
 import AppFooter from "../components/AppFooter.vue";
+import ToastContainer from "../components/ToastContainer.vue";
 import {
   getActiveMenuFromRoute,
   getMenuLocation,

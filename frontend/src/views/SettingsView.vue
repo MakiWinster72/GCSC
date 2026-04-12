@@ -193,10 +193,12 @@ import { API_BASE } from "../api/request";
 import { changePassword, getLoginHistory } from "../api/auth";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";
+import { useToast } from "../composables/useToast";
 
 const router = useRouter();
 const { openSidebar: openDashboardSidebar } = useDashboardShell();
 const { exportResumePdf } = useStudentPdfExport();
+const { success: toastSuccess } = useToast();
 const profile = reactive(loadUser());
 const activeMenu = ref("my-info");
 const sidebarOpen = ref(false);
@@ -292,6 +294,7 @@ function closeExportDialog() {
 
 function openExcelExportDialog() {
   exportDialogOpen.value = true;
+  toastSuccess("个人信息已准备就绪，请确认导出");
 }
 
 async function loadExportRows() {
@@ -308,6 +311,7 @@ async function handleExportPdf(rows) {
     student,
     resolveMediaUrl,
   });
+  toastSuccess("PDF 导出成功！");
 }
 
 async function handleExportPdfFromSettings() {
@@ -397,6 +401,7 @@ async function handleChangePassword() {
       newPassword: passwordForm.newPassword,
     });
     passwordSuccess.value = "密码修改成功";
+    toastSuccess("密码修改成功");
     setTimeout(() => {
       cancelPasswordChange();
       showPasswordForm.value = false;
