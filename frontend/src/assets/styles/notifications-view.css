@@ -352,12 +352,6 @@
   border-color: var(--primary);
 }
 
-.notif-btn.is-submit {
-  margin-top: 10px;
-  height: 38px;
-  padding: 0 20px;
-}
-
 /* ── Title & Content ─────────────────────────────────────── */
 .notif-title {
   margin: 0;

@@ -1520,31 +1520,6 @@
   text-overflow: ellipsis;
 }
 
-/* Field slide transition */
-.field-slide-enter-active {
-  transition: opacity 260ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.field-slide-leave-active {
-  transition: opacity 180ms ease;
-}
-.field-slide-enter-from {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-.field-slide-leave-to {
-  opacity: 0;
-}
-
-.code-inline {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 11.5px;
-  padding: 1px 5px;
-  border-radius: 5px;
-  background: rgba(100, 12, 114, 0.07);
-  color: var(--primary);
-  font-weight: 600;
-}
-
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 640px) {
   .admin-shell {
