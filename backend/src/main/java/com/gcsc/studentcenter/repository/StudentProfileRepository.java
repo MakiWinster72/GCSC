@@ -41,11 +41,12 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
                 :keyword is null
                 or lower(sp.fullName) like lower(concat('%', :keyword, '%'))
                 or lower(u.displayName) like lower(concat('%', :keyword, '%'))
+                or lower(u.username) like lower(concat('%', :keyword, '%'))
                 or lower(sp.className) like lower(concat('%', :keyword, '%'))
                 or lower(sp.college) like lower(concat('%', :keyword, '%'))
                 or lower(sp.classMajor) like lower(concat('%', :keyword, '%'))
                 or lower(sp.classNo) like lower(concat('%', :keyword, '%'))
-                or lower(sp.studentNo) like lower(concat('%', :keyword, '%'))
+                or lower(coalesce(sp.studentNo, u.studentNo)) like lower(concat('%', :keyword, '%'))
             )
         """)
     Page<StudentSearchItemResponse> searchProfiles(
