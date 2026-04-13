@@ -94,6 +94,16 @@ function formatChangeValue(value) {
   return String(value);
 }
 
+function isAvatarChange(change) {
+  return change?.label === "头像";
+}
+
+function resolveAvatarUrlForChange(value) {
+  const url = formatChangeValue(value);
+  if (!url || url === "-") return null;
+  return resolveMediaUrl(url);
+}
+
 function isStructuredChangeValue(value) {
   const text = formatChangeValue(value);
   return text.includes("第1条\n") || /^第\d+条$/m.test(text);
@@ -359,7 +369,16 @@ function closeStudentDetail() {
                     <div class="notif-change-values">
                       <div class="notif-change-col">
                         <div class="notif-change-cap">修改前</div>
-                        <template v-if="isStructuredChangeValue(change.before)">
+                        <template v-if="isAvatarChange(change)">
+                          <img
+                            v-if="resolveAvatarUrlForChange(change.before)"
+                            class="notif-change-avatar"
+                            :src="resolveAvatarUrlForChange(change.before)"
+                            alt="修改前头像"
+                          />
+                          <div v-else class="notif-change-val">-</div>
+                        </template>
+                        <template v-else-if="isStructuredChangeValue(change.before)">
                           <article
                             v-for="entry in parseStructuredChangeValue(change.before)"
                             :key="entry.title"
@@ -377,7 +396,16 @@ function closeStudentDetail() {
                       </div>
                       <div class="notif-change-col is-next">
                         <div class="notif-change-cap">修改后</div>
-                        <template v-if="isStructuredChangeValue(change.after)">
+                        <template v-if="isAvatarChange(change)">
+                          <img
+                            v-if="resolveAvatarUrlForChange(change.after)"
+                            class="notif-change-avatar"
+                            :src="resolveAvatarUrlForChange(change.after)"
+                            alt="修改后头像"
+                          />
+                          <div v-else class="notif-change-val">-</div>
+                        </template>
+                        <template v-else-if="isStructuredChangeValue(change.after)">
                           <article
                             v-for="entry in parseStructuredChangeValue(change.after)"
                             :key="entry.title"
