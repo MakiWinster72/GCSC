@@ -2,6 +2,7 @@ package com.gcsc.studentcenter.service;
 
 import com.gcsc.studentcenter.dto.AuthResponse;
 import com.gcsc.studentcenter.dto.ChangePasswordRequest;
+import com.gcsc.studentcenter.dto.LastLoginInfo;
 import com.gcsc.studentcenter.dto.LoginRequest;
 import com.gcsc.studentcenter.dto.RegisterRequest;
 import com.gcsc.studentcenter.dto.UserProfileResponse;
@@ -81,7 +82,8 @@ public class AuthService {
             savedUser.getClassName(),
             savedUser.getCollege(),
             resolveAvatarUrl(savedUser),
-            token
+            token,
+            null
         );
     }
 
@@ -104,6 +106,7 @@ public class AuthService {
         String token = jwtService.generateToken(user.getUsername(), user.getDisplayName(), role.name());
         String avatarUrl = resolveAvatarUrl(user);
 
+        LastLoginInfo lastLoginInfo = loginHistoryService.getPreviousLogin(username).orElse(null);
         loginHistoryService.recordLogin(username, ipAddress, userAgent);
 
         return new AuthResponse(
@@ -116,7 +119,8 @@ public class AuthService {
             user.getClassName(),
             user.getCollege(),
             avatarUrl,
-            token
+            token,
+            lastLoginInfo
         );
     }
 

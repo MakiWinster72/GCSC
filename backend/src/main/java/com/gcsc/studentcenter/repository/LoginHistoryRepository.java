@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface LoginHistoryRepository extends JpaRepository<LoginHistory, Long> {
@@ -19,4 +20,8 @@ public interface LoginHistoryRepository extends JpaRepository<LoginHistory, Long
     @Modifying
     @Query("DELETE FROM LoginHistory l WHERE l.loginTime < :cutoff")
     int deleteByLoginTimeBefore(@Param("cutoff") LocalDateTime cutoff);
+
+    Optional<LoginHistory> findFirstByUserIdOrderByLoginTimeDesc(Long userId);
+
+    Optional<LoginHistory> findFirstByUserIdAndIdNotOrderByLoginTimeDesc(Long userId, Long excludeId);
 }

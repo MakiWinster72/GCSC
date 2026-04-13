@@ -242,9 +242,11 @@
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { login } from "../api/auth";
+import { useToast } from "../composables/useToast";
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const form = reactive({
   username: route.query.username ? String(route.query.username) : "",
@@ -278,6 +280,12 @@ async function handleLogin() {
     const { data } = await login(form);
     feedback.text = data.message || "登录成功";
     feedback.type = "success";
+
+    if (data.lastLoginInfo) {
+      const { ipAddress, deviceName, loginTime } = data.lastLoginInfo;
+      const time = loginTime ? new Date(loginTime).toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "未知";
+      toast.info(`上次登录：${deviceName || "未知设备"} · ${ipAddress || "未知IP"} · ${time}`);
+    }
 
     localStorage.setItem(
       "gcsc_user",
