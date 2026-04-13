@@ -285,6 +285,8 @@ async function handleLogin() {
       const { ipAddress, deviceName, loginTime } = data.lastLoginInfo;
       const time = loginTime ? new Date(loginTime).toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "未知";
       toast.info(`上次登录：${deviceName || "未知设备"} · ${ipAddress || "未知IP"} · ${time}`);
+    } else {
+      toast.info("欢迎使用！请先去「个人信息」填写你的个人资料～");
     }
 
     localStorage.setItem(
