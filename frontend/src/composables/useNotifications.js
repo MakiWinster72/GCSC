@@ -619,12 +619,19 @@ export function useNotifications(userSource) {
     return counts;
   });
 
+  const hasPendingProfileReviewRequest = computed(() =>
+    visibleReviewRequests.value.some(
+      (item) => item.resourceType === "profile" && item.status === "pending",
+    ),
+  );
+
   return {
     inboxEntries,
     pendingCount,
     categoryCounts,
     reviewRequests: visibleReviewRequests,
     notifications: visibleNotifications,
+    hasPendingProfileReviewRequest,
     fetchAchievementReviewRequests,
     fetchProfileReviewRequests,
     submitAchievementReviewRequest,

@@ -1015,7 +1015,7 @@ const workUnitHintOpen = ref(false);
 const today = getTodayString();
 const originalProfileData = ref(null);
 const savedProfileData = ref(null);
-const { submitProfileReviewRequest, updateReviewRequestStatus, fetchProfileReviewRequests } = useNotifications(profile);
+const { submitProfileReviewRequest, updateReviewRequestStatus, fetchProfileReviewRequests, hasPendingProfileReviewRequest } = useNotifications(profile);
 const { settings: reviewSettings, fetchSettings: fetchReviewSettings } = useReviewSettings();
 const { success: toastSuccess, error: toastError } = useToast();
 
@@ -1750,6 +1750,10 @@ async function onAvatarChange(event) {
 }
 
 function enterEdit() {
+  if (hasPendingProfileReviewRequest.value) {
+    toastError("个人信息正在审核，请等待审核结果或前往通知页取消申请");
+    return;
+  }
   originalProfileData.value = buildCurrentProfileState();
   isEditing.value = true;
 }
