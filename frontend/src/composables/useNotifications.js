@@ -256,8 +256,14 @@ function buildNotificationEntry(notification) {
 }
 
 export function classifyNotificationCategory({ status, createdAt, source }) {
-  if (status === "approved" || status === "rejected" || source === "notification") {
-    return "processed";
+  if (source === "notification") {
+    return "system";
+  }
+  if (status === "approved") {
+    return "approved";
+  }
+  if (status === "rejected") {
+    return "rejected";
   }
   const createdTime = new Date(createdAt).getTime();
   if (!Number.isNaN(createdTime) && Date.now() - createdTime >= DELAYED_THRESHOLD_MS) {
@@ -601,10 +607,11 @@ export function useNotifications(userSource) {
     const counts = {
       pending: 0,
       delayed: 0,
-      processed: 0,
+      approved: 0,
+      rejected: 0,
     };
     inboxEntries.value.forEach((entry) => {
-      const key = entry.categoryKey || "processed";
+      const key = entry.categoryKey || "pending";
       if (counts[key] !== undefined) {
         counts[key] += 1;
       }
