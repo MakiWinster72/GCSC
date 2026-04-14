@@ -15,7 +15,6 @@ import {
 } from "../api/profileReviewRequests";
 
 const STORAGE_KEY = "gcsc_notification_center";
-const REVIEWER_ROLES = ["TEACHER", "ADMIN"];
 const DELAYED_THRESHOLD_MS = 3 * 24 * 60 * 60 * 1000;
 const CATEGORY_LABELS = {
   contest: "学科竞赛、文体艺术",
@@ -31,7 +30,6 @@ const CATEGORY_LABELS = {
 
 const store = reactive({
   loaded: false,
-  reviewRequests: [],
   notifications: [],
   achievementReviewRequests: [],
   achievementReviewFetched: false,
@@ -49,15 +47,11 @@ function ensureLoaded() {
   store.loaded = true;
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-    store.reviewRequests = Array.isArray(raw.reviewRequests)
-      ? raw.reviewRequests
-      : [];
     store.notifications = Array.isArray(raw.notifications)
       ? raw.notifications
       : [];
     store.processedReadIds = new Set(Array.isArray(raw.processedReadIds) ? raw.processedReadIds : []);
   } catch {
-    store.reviewRequests = [];
     store.notifications = [];
     store.processedReadIds = new Set();
   }
@@ -70,7 +64,6 @@ function persistStore() {
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
-      reviewRequests: store.reviewRequests,
       notifications: store.notifications,
       processedReadIds: [...store.processedReadIds],
     }),
@@ -134,10 +127,6 @@ function isReviewVisibleForUser(request, user) {
     return true;
   }
   return Array.isArray(request.targetRoles) && request.targetRoles.includes(user.role);
-}
-
-function isRemoteAchievementReview(request) {
-  return request?.resourceType === "achievement";
 }
 
 function upsertAchievementReviewRequest(nextRequest) {
@@ -356,44 +345,6 @@ async function fetchProfileReviewRequests(force = false) {
   }
 }
 
-function createReviewRequest({
-  actor,
-  resourceType,
-  action,
-  title,
-  summary,
-  payloadSnapshot = null,
-  changes = [],
-  extra = {},
-}) {
-  ensureLoaded();
-  const now = new Date().toISOString();
-  const request = {
-    id: generateId("review"),
-    resourceType,
-    action,
-    title,
-    summary,
-    status: "pending",
-    requester: {
-      username: actor?.username || "",
-      displayName: actor?.displayName || "",
-      role: actor?.role || "STUDENT",
-      studentNo: actor?.studentNo || "",
-    },
-    targetRoles: [...REVIEWER_ROLES],
-    createdAt: now,
-    updatedAt: now,
-    rejectionReason: "",
-    payloadSnapshot,
-    changes,
-    ...extra,
-  };
-  store.reviewRequests.unshift(request);
-  persistStore();
-  return request;
-}
-
 async function submitAchievementReviewRequest({
   actor,
   action,
@@ -435,97 +386,45 @@ async function submitProfileReviewRequest({
 }
 
 async function updateReviewRequestStatus({ requestId, status, reviewer, reason = "" }) {
-  ensureLoaded();
+  const isAchievement = store.achievementReviewRequests.find(
+    (item) => String(item.id) === String(requestId),
+  );
+  const isProfile = !isAchievement && store.profileReviewRequests.find(
+    (item) => String(item.id) === String(requestId),
+  );
 
-  // Check by resourceType explicitly to avoid routing to wrong API
-  const requestType = store.achievementReviewRequests.find(
-    (item) => String(item.id) === String(requestId) && item.resourceType === "achievement",
-  ) ? "achievement" : null;
-
-  const profileType = store.profileReviewRequests.find(
-    (item) => String(item.id) === String(requestId) && item.resourceType === "profile",
-  ) ? "profile" : null;
-
-  if (requestType === "achievement") {
+  if (isAchievement || isProfile) {
+    const isAch = Boolean(isAchievement);
     if (status === "rejected" && !String(reason || "").trim()) {
       throw new Error("驳回时必须填写理由");
     }
-    const response =
-      status === "approved"
-        ? await approveAchievementReviewRequest(requestId)
-        : await rejectAchievementReviewRequest(requestId, {
-            reason: String(reason || "").trim(),
-          });
-    upsertAchievementReviewRequest(response.data);
-    return response.data;
-  }
-
-  if (profileType === "profile") {
-    if (status === "rejected" && !String(reason || "").trim()) {
-      throw new Error("驳回时必须填写理由");
+    const response = isAch
+      ? (status === "approved"
+          ? await approveAchievementReviewRequest(requestId)
+          : await rejectAchievementReviewRequest(requestId, { reason: String(reason || "").trim() }))
+      : (status === "approved"
+          ? await approveProfileReviewRequest(requestId)
+          : await rejectProfileReviewRequest(requestId, { reason: String(reason || "").trim() }));
+    if (isAch) {
+      upsertAchievementReviewRequest(response.data);
+    } else {
+      upsertProfileReviewRequest(response.data);
     }
-    const response =
-      status === "approved"
-        ? await approveProfileReviewRequest(requestId)
-        : await rejectProfileReviewRequest(requestId, {
-            reason: String(reason || "").trim(),
-          });
-    upsertProfileReviewRequest(response.data);
     return response.data;
   }
 
-  const request = store.reviewRequests.find((item) => item.id === requestId);
-  if (!request) {
-    throw new Error("审核请求不存在");
-  }
-  if (status === "rejected" && !String(reason || "").trim()) {
-    throw new Error("驳回时必须填写理由");
-  }
-  request.status = status;
-  request.rejectionReason = status === "rejected" ? String(reason).trim() : "";
-  request.reviewer = reviewer
-    ? {
-        username: reviewer.username || "",
-        displayName: reviewer.displayName || "",
-        role: reviewer.role || "",
-      }
-    : null;
-  request.updatedAt = new Date().toISOString();
-  persistStore();
-
-  if (request.requester?.username) {
-    addNotification({
-      usernames: [request.requester.username],
-      title:
-        status === "approved"
-          ? `${request.title}已通过`
-          : `${request.title}已驳回`,
-      content:
-        status === "approved"
-          ? `${request.title}已处理完成。`
-          : `${request.title}未通过，请根据驳回理由修改后重新提交。`,
-      badgeText: status === "approved" ? "已通过" : "已驳回",
-      badgeClass: status === "approved" ? "is-approved" : "is-rejected",
-      meta: "审核结果",
-      reason: status === "rejected" ? String(reason).trim() : "",
-    });
-  }
-
-  return request;
+  throw new Error("审核请求不存在");
 }
 
 async function cancelReviewRequest({ requestId }) {
-  ensureLoaded();
+  const isAchievement = store.achievementReviewRequests.find(
+    (item) => String(item.id) === String(requestId),
+  );
+  const isProfile = !isAchievement && store.profileReviewRequests.find(
+    (item) => String(item.id) === String(requestId),
+  );
 
-  const requestType = store.achievementReviewRequests.find(
-    (item) => String(item.id) === String(requestId) && item.resourceType === "achievement",
-  ) ? "achievement" : null;
-
-  const profileType = store.profileReviewRequests.find(
-    (item) => String(item.id) === String(requestId) && item.resourceType === "profile",
-  ) ? "profile" : null;
-
-  if (requestType === "achievement") {
+  if (isAchievement) {
     await cancelAchievementReviewRequest(requestId);
     store.achievementReviewRequests = store.achievementReviewRequests.filter(
       (item) => String(item.id) !== String(requestId),
@@ -533,7 +432,7 @@ async function cancelReviewRequest({ requestId }) {
     return;
   }
 
-  if (profileType === "profile") {
+  if (isProfile) {
     await cancelProfileReviewRequest(requestId);
     store.profileReviewRequests = store.profileReviewRequests.filter(
       (item) => String(item.id) !== String(requestId),
@@ -541,19 +440,7 @@ async function cancelReviewRequest({ requestId }) {
     return;
   }
 
-  // Local request (fallback for backwards compatibility)
-  const request = store.reviewRequests.find((item) => item.id === requestId);
-  if (!request) {
-    throw new Error("审核请求不存在");
-  }
-  if (request.requester?.username !== userSource?.username) {
-    throw new Error("只能取消自己的申请");
-  }
-  if (request.status !== "pending") {
-    throw new Error("只能取消待审核的申请");
-  }
-  store.reviewRequests = store.reviewRequests.filter((item) => item.id !== requestId);
-  persistStore();
+  throw new Error("审核请求不存在");
 }
 
 export function useNotifications(userSource) {
@@ -566,44 +453,38 @@ export function useNotifications(userSource) {
   });
 
   const currentUser = computed(() => userSource || {});
-  const localProfileReviewRequests = computed(() =>
-    store.reviewRequests.filter(
-      (item) => item.resourceType === "profile" && isReviewVisibleForUser(item, currentUser.value),
-    ),
-  );
-  const remoteProfileReviewRequests = computed(() =>
-    store.profileReviewRequests.filter((item) =>
-      isReviewVisibleForUser(item, currentUser.value),
-    ),
-  );
-  const visibleAchievementReviewRequests = computed(() =>
-    store.achievementReviewRequests.filter((item) =>
-      isReviewVisibleForUser(item, currentUser.value),
-    ),
-  );
   const visibleReviewRequests = computed(() =>
     [
-      ...visibleAchievementReviewRequests.value,
-      ...localProfileReviewRequests.value,
-      ...remoteProfileReviewRequests.value,
-    ],
+      ...store.achievementReviewRequests,
+      ...store.profileReviewRequests,
+    ].filter((item) => isReviewVisibleForUser(item, currentUser.value)),
   );
   const visibleNotifications = computed(() =>
     store.notifications.filter((item) =>
       matchesNotificationAudience(item, currentUser.value),
     ),
   );
-  const inboxEntries = computed(() =>
-    [
+  const inboxEntries = computed(() => {
+    const entries = [
       ...visibleReviewRequests.value.map((item) =>
         buildReviewEntry(item, currentUser.value),
       ),
       ...visibleNotifications.value.map((item) => buildNotificationEntry(item)),
-    ].sort(
-      (left, right) =>
-        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-    ),
-  );
+    ];
+    // Defensive dedup by id to prevent duplicate-key Vue warnings
+    const seen = new Set();
+    return entries
+      .filter((entry) => {
+        const key = String(entry.id);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort(
+        (left, right) =>
+          new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+      );
+  });
   const pendingCount = computed(() =>
     visibleReviewRequests.value.filter((item) => item.status === "pending").length,
   );
