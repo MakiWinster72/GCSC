@@ -926,7 +926,6 @@ function resetForm() {
 }
 
 async function saveAchievement() {
-  toastInfo("已提交审核，请等待审核成功后显示");
   const config = activeFormConfig.value;
   if (!config) {
     errorMessage.value = "请先选择成就分类";
@@ -962,7 +961,9 @@ async function saveAchievement() {
     existingItem,
   });
   try {
-    if (profile.role === "STUDENT" && reviewSettings.achievementReviewEnabled) {
+    // ADMIN bypasses review; only STUDENT role follows the review flow
+    if (profile.role !== "ADMIN" && reviewSettings.achievementReviewEnabled) {
+      toastInfo("已提交审核，请等待审核成功后显示");
       const reviewRequest = await submitAchievementReviewRequest({
         actor: profile,
         action: editId.value ? "update" : "create",
@@ -1008,6 +1009,7 @@ async function saveAchievement() {
         ...achievements.value,
       ]);
     }
+    toastInfo("保存成功");
     resetForm();
     closeEditor();
     errorMessage.value = "";
