@@ -371,7 +371,7 @@ export const categoryFieldMap = {
     ],
   },
   works: {
-    titleKey: "workTitle",
+    titleKey: "workName",
     dateKey: "publishDate",
     fields: [
       {
@@ -387,7 +387,7 @@ export const categoryFieldMap = {
         placeholder: "请输入学生姓名",
       },
       {
-        key: "workTitle",
+        key: "workName",
         label: "作品名称",
         kind: "input",
         placeholder: "请输入作品名称",
