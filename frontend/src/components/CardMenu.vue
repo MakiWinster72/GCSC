@@ -57,12 +57,6 @@
           >
             <span class="menu-item-header">
               <span class="menu-item-label">{{ item.label }}</span>
-              <span
-                v-if="item.key === 'notifications' && pendingCount > 0"
-                class="menu-item-count"
-              >
-                {{ pendingCount }}
-              </span>
             </span>
             <span class="menu-item-meta">{{ menuMeta[item.key] }}</span>
           </button>
@@ -101,17 +95,19 @@ const emit = defineEmits([
   "achievement-entry-click",
 ]);
 
-const { pendingCount } = useNotifications(props.profile);
+const { pendingCount, processedUnreadCount } = useNotifications(props.profile);
 
 const menuItems = computed(() => filterMenuItemsByRole(props.profile.role));
 
-const menuMeta = {
-  notifications: "待处理请求与结果通知",
+const menuMeta = computed(() => ({
+  notifications: processedUnreadCount.value > 0
+    ? `待处理 ${pendingCount.value} | 已处理 ${processedUnreadCount.value}`
+    : `待处理 ${pendingCount.value}`,
   achievements: "查看与维护成果",
   "my-info": "编辑个人档案",
   "student-info": "检索学生资料",
   admin: "开关与系统设置",
-};
+}));
 
 const currentPanel = ref(
   props.activeMenu === "achievements" ? "achievements" : "menu",

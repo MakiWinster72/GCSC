@@ -39,6 +39,7 @@ const store = reactive({
   profileReviewRequests: [],
   profileReviewFetched: false,
   profileReviewLoading: false,
+  processedReadIds: new Set(),
 });
 
 function ensureLoaded() {
@@ -54,9 +55,11 @@ function ensureLoaded() {
     store.notifications = Array.isArray(raw.notifications)
       ? raw.notifications
       : [];
+    store.processedReadIds = new Set(Array.isArray(raw.processedReadIds) ? raw.processedReadIds : []);
   } catch {
     store.reviewRequests = [];
     store.notifications = [];
+    store.processedReadIds = new Set();
   }
 }
 
@@ -69,6 +72,7 @@ function persistStore() {
     JSON.stringify({
       reviewRequests: store.reviewRequests,
       notifications: store.notifications,
+      processedReadIds: [...store.processedReadIds],
     }),
   );
 }
@@ -625,10 +629,24 @@ export function useNotifications(userSource) {
     ),
   );
 
+  const processedUnreadCount = computed(() =>
+    inboxEntries.value.filter(
+      (entry) =>
+        (entry.categoryKey === "approved" || entry.categoryKey === "rejected") &&
+        !store.processedReadIds.has(entry.id),
+    ).length,
+  );
+
+  function markProcessedEntryRead(entryId) {
+    store.processedReadIds.add(entryId);
+    persistStore();
+  }
+
   return {
     inboxEntries,
     pendingCount,
     categoryCounts,
+    processedUnreadCount,
     reviewRequests: visibleReviewRequests,
     notifications: visibleNotifications,
     hasPendingProfileReviewRequest,
@@ -639,5 +657,6 @@ export function useNotifications(userSource) {
     addNotification,
     updateReviewRequestStatus,
     cancelReviewRequest,
+    markProcessedEntryRead,
   };
 }

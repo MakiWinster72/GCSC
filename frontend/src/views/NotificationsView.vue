@@ -12,7 +12,7 @@ import { loadUser } from "../utils/userStorage";
 const route = useRoute();
 const router = useRouter();
 const profile = reactive(loadUser());
-const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest } = useNotifications(profile);
+const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest, markProcessedEntryRead } = useNotifications(profile);
 
 const rejectEditorOpen = ref(false);
 const rejectReason = ref(localStorage.getItem("gcsc_reject_draft") || "");
@@ -86,6 +86,13 @@ watch(selectedId, () => {
   actionError.value = "";
   cancelConfirmOpen.value = false;
   closeStudentDetail();
+});
+
+watch(selectedEntry, (entry) => {
+  if (!entry) return;
+  if (entry.categoryKey === "approved" || entry.categoryKey === "rejected") {
+    markProcessedEntryRead(entry.id);
+  }
 });
 
 function formatChangeValue(value) {
