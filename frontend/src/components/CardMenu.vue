@@ -1,23 +1,42 @@
 <template>
   <section class="menu-card">
-    <div class="menu-card-header">
-      <Transition name="menu-back-fade">
+    <!-- Header: title row + sticky notification tabs -->
+    <div class="menu-card-header" :class="{ 'has-notif-tabs': currentPanel === 'notifications' }">
+      <div class="menu-card-header-top">
+        <Transition name="menu-back-fade">
+          <button
+            v-if="isSubPanelVisible"
+            class="menu-card-back"
+            type="button"
+            @click="closeSubPanel"
+          >
+            &lt;返回
+          </button>
+        </Transition>
+        <Transition :name="titleTransitionName" mode="out-in">
+          <div :key="currentPanel" class="menu-card-title">
+            {{ panelTitle }}
+          </div>
+        </Transition>
+      </div>
+
+      <!-- Notification Tabs (sticky at top, only when in notifications panel) -->
+      <nav v-if="currentPanel === 'notifications'" class="admin-tabs" role="tablist">
         <button
-          v-if="isSubPanelVisible"
-          class="menu-card-back"
+          v-for="cat in notificationCategories"
+          :key="cat.key"
+          class="admin-tab"
+          :class="{ active: notificationActiveCategory === cat.key }"
+          role="tab"
           type="button"
-          @click="closeSubPanel"
+          @click="selectNotificationCategory(cat.key)"
         >
-          &lt;返回
+          {{ cat.label }}
         </button>
-      </Transition>
-      <Transition :name="titleTransitionName" mode="out-in">
-        <div :key="currentPanel" class="menu-card-title">
-          {{ panelTitle }}
-        </div>
-      </Transition>
+      </nav>
     </div>
 
+    <!-- Scrollable body -->
     <div
       ref="menuBodyRef"
       class="menu-card-body"
@@ -50,42 +69,25 @@
         <div
           v-else-if="currentPanel === 'notifications'"
           key="notifications-panel"
-          class="menu-panel menu-notification-panel"
+          class="menu-panel menu-notification-list"
         >
-          <!-- Tabs -->
-          <div class="menu-notification-tabs">
-            <button
-              v-for="cat in notificationCategories"
-              :key="cat.key"
-              class="menu-notification-tab"
-              :class="{ active: notificationActiveCategory === cat.key }"
-              type="button"
-              @click="selectNotificationCategory(cat.key)"
-            >
-              {{ cat.label }}
-            </button>
-          </div>
-
-          <!-- List -->
-          <div class="menu-notification-list">
-            <button
-              v-for="entry in filteredNotificationEntries"
-              :key="entry.id"
-              class="menu-notification-item"
-              :class="{ active: String(notificationActiveEntry) === String(entry.id) }"
-              type="button"
-              @click="selectNotificationEntry(entry.id)"
-            >
-              <div class="menu-notification-head">
-                <span class="menu-notification-badge" :class="entry.badgeClass">{{ entry.badgeText }}</span>
-                <time class="menu-notification-time">{{ entry.timeText }}</time>
-              </div>
-              <p class="menu-notification-title">{{ entry.title }}</p>
-              <p class="menu-notification-content">{{ entry.content }}</p>
-            </button>
-            <div v-if="!filteredNotificationEntries.length" class="menu-notification-empty">
-              暂无通知
+          <button
+            v-for="entry in filteredNotificationEntries"
+            :key="entry.id"
+            class="menu-notification-item"
+            :class="{ active: String(notificationActiveEntry) === String(entry.id) }"
+            type="button"
+            @click="selectNotificationEntry(entry.id)"
+          >
+            <div class="menu-notification-head">
+              <span class="menu-notification-badge" :class="entry.badgeClass">{{ entry.badgeText }}</span>
+              <time class="menu-notification-time">{{ entry.timeText }}</time>
             </div>
+            <p class="menu-notification-title">{{ entry.title }}</p>
+            <p class="menu-notification-content">{{ entry.content }}</p>
+          </button>
+          <div v-if="!filteredNotificationEntries.length" class="menu-notification-empty">
+            暂无通知
           </div>
         </div>
 

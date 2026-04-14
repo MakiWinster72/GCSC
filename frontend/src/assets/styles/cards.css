@@ -93,11 +93,28 @@
   overflow: hidden;
   position: relative;
   justify-content: center;
+  flex-direction: column;
+}
+
+.menu-card-header.has-notif-tabs {
+  gap: 0;
+}
+
+.menu-card-header-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+  min-height: 26px;
+  position: relative;
 }
 
 .menu-card-back {
   position: absolute;
   left: 0;
+  top: 50%;
+  transform: translateY(-50%);
   min-height: 24px;
   padding: 0 9px;
   border: 1px solid var(--line);
@@ -723,11 +740,82 @@
 
 /* itemActivePop 已在首次定义处统一（line 274），此处不再重复 */
 
+/* ── Admin Tabs (reused in CardMenu notifications panel) ── */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 18px;
+  background: rgba(100, 12, 114, 0.05);
+  border: 1px solid var(--line);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.menu-card-header.has-notif-tabs .admin-tabs {
+  margin-top: 8px;
+}
+
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 13px;
+  border: none;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  justify-content: center;
+  transition:
+    background 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 120ms ease;
+  white-space: nowrap;
+}
+
+.tab-icon {
+  width: 15px;
+  height: 15px;
+  opacity: 0.75;
+  transition: opacity 200ms ease;
+}
+
+.admin-tab:hover:not(.active) {
+  background: rgba(100, 12, 114, 0.08);
+  color: var(--primary);
+}
+
+.admin-tab:hover:not(.active) .tab-icon {
+  opacity: 1;
+}
+
+.admin-tab.active {
+  background: var(--card);
+  color: var(--primary-dark);
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(100, 12, 114, 0.15), 0 1px 3px rgba(100, 12, 114, 0.1);
+}
+
+.admin-tab.active .tab-icon {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.admin-tab:active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .menu-item,
   .menu-subitem,
   .menu-notification-tab,
   .menu-notification-item,
+  .admin-tab,
   .menu-panel-forward-enter-active,
   .menu-panel-forward-leave-active,
   .menu-panel-back-enter-active,
