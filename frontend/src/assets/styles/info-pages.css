@@ -21,6 +21,8 @@
   gap: 18px;
   padding: 18px;
   border-radius: 24px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .info-shell-editing {
