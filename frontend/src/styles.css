@@ -1192,6 +1192,19 @@ body {
   transform: translateX(-8px);
 }
 
+.tabs-slide-enter-active,
+.tabs-slide-leave-active {
+  transition:
+    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tabs-slide-enter-from,
+.tabs-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .menu-item,
   .menu-subitem,
@@ -1204,7 +1217,9 @@ body {
   .menu-title-back-enter-active,
   .menu-title-back-leave-active,
   .menu-back-fade-enter-active,
-  .menu-back-fade-leave-active {
+  .menu-back-fade-leave-active,
+  .tabs-slide-enter-active,
+  .tabs-slide-leave-active {
     transition: none !important;
     animation: none !important;
   }

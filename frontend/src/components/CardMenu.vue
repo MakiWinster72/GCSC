@@ -21,22 +21,24 @@
       </div>
 
       <!-- Notification Tabs (sticky at top, only when in notifications panel) -->
-      <nav v-if="currentPanel === 'notifications'" class="admin-tabs" role="tablist">
-        <button
-          v-for="cat in notificationCategories"
-          :key="cat.key"
-          class="admin-tab"
-          :class="{ active: notificationActiveCategory === cat.key }"
-          role="tab"
-          type="button"
-          @click="selectNotificationCategory(cat.key)"
-        >
-          {{ cat.label }}
-          <span v-if="inboxEntries.filter(e => e.categoryKey === cat.key).length" class="tab-count">
-            {{ inboxEntries.filter(e => e.categoryKey === cat.key).length }}
-          </span>
-        </button>
-      </nav>
+      <Transition name="tabs-slide">
+        <nav v-if="currentPanel === 'notifications'" class="admin-tabs" role="tablist">
+          <button
+            v-for="cat in notificationCategories"
+            :key="cat.key"
+            class="admin-tab"
+            :class="{ active: notificationActiveCategory === cat.key }"
+            role="tab"
+            type="button"
+            @click="selectNotificationCategory(cat.key)"
+          >
+            {{ cat.label }}
+            <span v-if="inboxEntries.filter(e => e.categoryKey === cat.key).length" class="tab-count">
+              {{ inboxEntries.filter(e => e.categoryKey === cat.key).length }}
+            </span>
+          </button>
+        </nav>
+      </Transition>
     </div>
 
     <!-- Scrollable body -->
