@@ -189,12 +189,19 @@ async function selectAllFiltered() {
 
 async function handleDeleteSelectedUsers() {
   if (selectedUserIds.value.size === 0) return;
+  const selectedUsers = users.value.filter(u => selectedUserIds.value.has(u.id));
+  const selfIncluded = selectedUsers.some(u => u.username === profile.username);
+  if (selfIncluded) {
+    error("不能删除自己的账号");
+    return;
+  }
   if (!confirm(`确定要删除选中的 ${selectedUserIds.value.size} 个用户吗？此操作不可恢复。`)) return;
   try {
     for (const id of selectedUserIds.value) {
       await deleteUser(id);
     }
     selectedUserIds.value = new Set();
+    allFilteredSelected.value = false;
     await loadUsers(userCurrentPage.value);
     success("已删除选中的用户");
   } catch (e) {
@@ -520,6 +527,10 @@ async function handleUpdateUser() {
 }
 
 async function handleDeleteUser(user) {
+  if (user.username === profile.username) {
+    error("不能删除自己的账号");
+    return;
+  }
   if (!confirm(`确定要删除用户「${user.displayName}」吗？此操作不可恢复。`)) {
     return;
   }
