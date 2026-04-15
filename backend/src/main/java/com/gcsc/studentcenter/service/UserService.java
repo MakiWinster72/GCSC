@@ -81,6 +81,32 @@ public class UserService {
         );
     }
 
+    public List<Long> listAllUserIds(String search, String role, String className) {
+        Specification<AppUser> spec = (root, query, cb) -> {
+            List<Predicate> preds = new ArrayList<>();
+            if (search != null && !search.isBlank()) {
+                String pattern = "%" + search.trim().toLowerCase() + "%";
+                preds.add(cb.or(
+                        cb.like(cb.lower(root.get("username")), pattern),
+                        cb.like(cb.lower(root.get("displayName")), pattern),
+                        cb.like(cb.lower(root.get("studentNo")), pattern),
+                        cb.like(cb.lower(root.get("className")), pattern)
+                ));
+            }
+            if (role != null && !role.isBlank()) {
+                preds.add(cb.equal(root.get("role"), role));
+            }
+            if (className != null && !className.isBlank()) {
+                preds.add(cb.like(cb.lower(root.get("className")), "%" + className.trim().toLowerCase() + "%"));
+            }
+            return cb.and(preds.toArray(new Predicate[0]));
+        };
+        return userRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"))
+                .stream()
+                .map(AppUser::getId)
+                .collect(Collectors.toList());
+    }
+
     public AppUser updateUser(Long userId, UpdateUserRequest request) {
         AppUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));

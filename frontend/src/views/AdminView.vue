@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, shallowRef, watch } from "vue";
 import PaginationBar from "../components/PaginationBar.vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
-import { getUserList, updateUser, deleteUser, createUser, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments } from "../api/admin";
+import { getUserList, updateUser, deleteUser, createUser, getAllUserIds, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments } from "../api/admin";
 import { useToast } from "../composables/useToast";
 import { loadUser } from "../utils/userStorage";
 
@@ -156,6 +156,51 @@ const userCurrentPage = shallowRef(1);
 const userPageSize = shallowRef(20);
 const userTotal = shallowRef(0);
 const userPages = computed(() => Math.ceil(userTotal.value / userPageSize.value));
+const selectedUserIds = shallowRef(new Set());
+const allFilteredSelected = shallowRef(false);
+const someSelected = computed(() => selectedUserIds.value.size > 0);
+const allPageSelected = computed(() => users.value.length > 0 && selectedUserIds.value.size === users.value.length);
+
+function toggleUserSelect(id) {
+  const s = new Set(selectedUserIds.value);
+  if (s.has(id)) s.delete(id);
+  else s.add(id);
+  selectedUserIds.value = s;
+  allFilteredSelected.value = false;
+}
+
+function selectAllPage() {
+  selectedUserIds.value = new Set(users.value.map(u => u.id));
+  allFilteredSelected.value = false;
+}
+
+async function selectAllFiltered() {
+  try {
+    const res = await getAllUserIds({
+      search: userSearch.value.trim() || undefined,
+      role: userRoleFilter.value || undefined,
+    });
+    selectedUserIds.value = new Set(res.data || []);
+    allFilteredSelected.value = true;
+  } catch (e) {
+    error("获取用户列表失败");
+  }
+}
+
+async function handleDeleteSelectedUsers() {
+  if (selectedUserIds.value.size === 0) return;
+  if (!confirm(`确定要删除选中的 ${selectedUserIds.value.size} 个用户吗？此操作不可恢复。`)) return;
+  try {
+    for (const id of selectedUserIds.value) {
+      await deleteUser(id);
+    }
+    selectedUserIds.value = new Set();
+    await loadUsers(userCurrentPage.value);
+    success("已删除选中的用户");
+  } catch (e) {
+    error(e?.response?.data?.message || "删除失败");
+  }
+}
 const {
   settings,
   loading: uploadLoading,
@@ -320,6 +365,8 @@ function getRoleLabel(role) {
 async function loadUsers(page = userCurrentPage.value) {
   usersLoading.value = true;
   usersError.value = "";
+  selectedUserIds.value = new Set();
+  allFilteredSelected.value = false;
   try {
     const res = await getUserList({
       page,
@@ -952,6 +999,28 @@ watch([userSearch, userRoleFilter], () => {
               </select>
             </div>
 
+            <!-- Selection Actions -->
+            <Transition name="msg-fade">
+              <div v-show="someSelected" class="users-selection-bar">
+                <span class="selection-count">已选择 {{ selectedUserIds.size }} 个用户</span>
+                <button class="btn btn-ghost" type="button" @click="selectAllPage">
+                  本页
+                </button>
+                <button class="btn btn-ghost" type="button" @click="selectAllFiltered">
+                  全部
+                </button>
+                <button class="btn btn-ghost" type="button" @click="selectedUserIds = new Set()">
+                  取消
+                </button>
+                <button class="btn btn-danger-ghost" type="button" @click="handleDeleteSelectedUsers">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  删除
+                </button>
+              </div>
+            </Transition>
+
             <!-- Table or States -->
             <div class="users-content">
               <div v-if="usersLoading" class="users-center-state">
@@ -976,6 +1045,15 @@ watch([userSearch, userRoleFilter], () => {
                 <table class="users-table" aria-label="用户列表">
                   <thead>
                     <tr>
+                      <th scope="col" class="col-checkbox">
+                        <input
+                          type="checkbox"
+                          :checked="allFilteredSelected"
+                          :indeterminate="someSelected && !allFilteredSelected"
+                          aria-label="全选"
+                          @change="selectAllPage"
+                        />
+                      </th>
                       <th scope="col">用户名</th>
                       <th scope="col">显示名称</th>
                       <th scope="col">角色</th>
@@ -986,6 +1064,14 @@ watch([userSearch, userRoleFilter], () => {
                   </thead>
                   <tbody>
                     <tr v-for="user in users" :key="user.id" class="user-row">
+                      <td class="col-checkbox">
+                        <input
+                          type="checkbox"
+                          :checked="selectedUserIds.has(user.id)"
+                          :aria-label="`选择 ${user.displayName}`"
+                          @change="toggleUserSelect(user.id)"
+                        />
+                      </td>
                       <td class="td-mono">{{ user.username }}</td>
                       <td>{{ user.displayName }}</td>
                       <td>

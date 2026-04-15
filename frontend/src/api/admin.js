@@ -8,6 +8,14 @@ export function getUserList({ page = 1, size = 20, search = '', role = '', class
   return request.get('/api/admin/users', { params })
 }
 
+export function getAllUserIds({ search = '', role = '', className = '' } = {}) {
+  const params = {}
+  if (search) params.search = search
+  if (role) params.role = role
+  if (className) params.className = className
+  return request.get('/api/admin/users/ids', { params })
+}
+
 export function updateUser(id, data) {
   return request.put(`/api/admin/users/${id}`, data)
 }

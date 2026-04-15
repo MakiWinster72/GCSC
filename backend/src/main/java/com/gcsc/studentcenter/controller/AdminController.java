@@ -77,6 +77,19 @@ public class AdminController {
         return ResponseEntity.ok(userService.listUsersPaginated(page, size, search, role, className));
     }
 
+    @GetMapping("/users/ids")
+    public ResponseEntity<?> listAllUserIds(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String className
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(userService.listAllUserIds(search, role, className));
+    }
+
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,

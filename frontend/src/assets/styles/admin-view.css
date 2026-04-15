@@ -1036,6 +1036,37 @@
   color: var(--danger);
 }
 
+/* Selection Bar */
+.users-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  background: var(--primary-surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.selection-count {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Checkbox */
+.col-checkbox {
+  width: 36px;
+  padding: 11px 8px 11px 16px !important;
+  text-align: center;
+}
+
+.col-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
 /* Table */
 .table-wrap {
   overflow: auto;
