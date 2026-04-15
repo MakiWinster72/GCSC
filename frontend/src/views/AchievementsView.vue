@@ -288,6 +288,20 @@
                 :type="field.type || 'text'"
                 :placeholder="field.placeholder || ''"
               />
+              <div v-else-if="field.kind === 'radio'" class="radio-group">
+                <label
+                  v-for="opt in field.options"
+                  :key="opt.value"
+                  class="radio-label"
+                >
+                  <input
+                    type="radio"
+                    :value="opt.value"
+                    v-model="form.fields[field.key]"
+                  />
+                  {{ opt.label }}
+                </label>
+              </div>
               <textarea
                 v-else
                 v-model="form.fields[field.key]"
