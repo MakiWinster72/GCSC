@@ -214,8 +214,8 @@
   padding-top: 12px !important;
 }
 
-.VPSidebarNav {
-  padding-top: 24px;
+#VPSidebarNav {
+  padding-top: 48px;
 }
 
 /* First sidebar group needs top margin to avoid overlapping nav */
