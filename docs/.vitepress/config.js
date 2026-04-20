@@ -42,7 +42,6 @@ export default defineConfig({
       {
         text: "指南",
         items: [
-          { text: "介绍", link: "/guide/" },
           { text: "快速开始", link: "/guide/getting-started" },
         ],
       },
@@ -104,8 +103,8 @@ export default defineConfig({
         {
           text: "指南",
           items: [
-            { text: "介绍", link: "/guide/" },
             { text: "快速开始", link: "/guide/getting-started" },
+            { text: "详细设计概述", link: "/design/" },
           ],
         },
       ],

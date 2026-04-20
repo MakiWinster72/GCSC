@@ -1,6 +1,6 @@
 # API 参考
 
-GCSC Student Center REST API。Base URL 为 `http://localhost:8080`，所有请求默认 `Content-Type: application/json`，除非注明为 `multipart/form-data`。
+BDAI-SC Student Center REST API。Base URL 为 `http://localhost:8080`，所有请求默认 `Content-Type: application/json`，除非注明为 `multipart/form-data`。
 
 认证方式为 JWT Bearer Token，登录成功后返回的 `token` 字段放在请求头 `Authorization: Bearer <token>` 中。
 

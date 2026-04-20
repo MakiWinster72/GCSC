@@ -5,7 +5,7 @@
 - **时长**: 15 分钟
 - **等级**: 进阶
 
-GCSC 前端采用单文件 Vue Router 配置，通过单一的 beforeEach 守卫强制执行三种不同的导航策略。
+BDAI-SC 前端采用单文件 Vue Router 配置，通过单一的 beforeEach 守卫强制执行三种不同的导航策略。
 
 ## 路由架构概述
 

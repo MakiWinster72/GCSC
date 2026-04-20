@@ -2,7 +2,7 @@
 
 ## 概述
 
-GCSC 后端暴露了一个基于 Spring Boot 构建的无状态 REST API，作为 Vue 前端的唯一集成接口。
+BDAI-SC 后端暴露了一个基于 Spring Boot 构建的无状态 REST API，作为 Vue 前端的唯一集成接口。
 
 ## 控制器架构概述
 

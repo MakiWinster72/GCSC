@@ -1,4 +1,4 @@
-# GCSC 学生中心（注册/登录）
+# BDAI-SC 学生中心（注册/登录）
 
 当前实现：
 - `backend/`：Java 21 + Spring Boot + Maven + MySQL

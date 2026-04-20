@@ -5,7 +5,7 @@
 - **时长**: 16 分钟
 - **等级**: 进阶
 
-`useAchievementEditor` 是驱动 GCSC 中成就创建与编辑体验的核心状态机。
+`useAchievementEditor` 是驱动 BDAI-SC 中成就创建与编辑体验的核心状态机。
 
 ## 架构概览
 

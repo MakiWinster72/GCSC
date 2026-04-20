@@ -5,7 +5,7 @@
 - **时长**: 23 分钟
 - **等级**: 进阶
 
-GCSC 采用分层动画系统，涵盖从可复用的 CSS token 原语到 Vue `<Transition>` 类，再到组件级 composable 编排。
+BDAI-SC 采用分层动画系统，涵盖从可复用的 CSS token 原语到 Vue `<Transition>` 类，再到组件级 composable 编排。
 
 ## 动画 Token 架构
 

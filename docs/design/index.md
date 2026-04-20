@@ -1,11 +1,11 @@
 ---
 title: 详细设计
-description: GCSC Student Center 详细设计文档
+description: BDAI-SC Student Center 详细设计文档
 ---
 
 # 详细设计
 
-本部分包含 GCSC Student Center 的详细设计文档，涵盖架构、认证、数据模型、API 设计等核心主题。
+本部分包含 BDAI-SC Student Center 的详细设计文档，涵盖架构、认证、数据模型、API 设计等核心主题。
 
 ## 后端核心
 

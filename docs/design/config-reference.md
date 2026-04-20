@@ -5,7 +5,7 @@
 - **时长**: 12 分钟
 - **等级**: 进阶
 
-GCSC 的配置分为四个独立的层级：application.yml 静态属性、编译后的 @Configuration 类、前端环境变量，以及运行时数据库托管设置。
+BDAI-SC 的配置分为四个独立的层级：application.yml 静态属性、编译后的 @Configuration 类、前端环境变量，以及运行时数据库托管设置。
 
 ## 后端：application.yml
 

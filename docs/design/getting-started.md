@@ -5,11 +5,11 @@
 - **时长**: 15 分钟
 - **等级**: 入门
 
-本指南将引导你完成 GCSC Student Center 的配置与运行，从全新克隆到搭建出完整的本地开发环境。
+本指南将引导你完成 BDAI-SC Student Center 的配置与运行，从全新克隆到搭建出完整的本地开发环境。
 
 ## 架构概览
 
-GCSC 是一个经典的双服务架构：Spring Boot REST API 与 Vue 3 单页应用通过 HTTP 进行通信。MySQL 数据库负责持久化所有数据，JWT 令牌则在无服务端会话的情况下处理身份验证。
+BDAI-SC 是一个经典的双服务架构：Spring Boot REST API 与 Vue 3 单页应用通过 HTTP 进行通信。MySQL 数据库负责持久化所有数据，JWT 令牌则在无服务端会话的情况下处理身份验证。
 
 理解这三个端口是本地开发中最重要的一项调试洞察：
 
@@ -38,8 +38,8 @@ JDK 21 不可妥协。`pom.xml` 中声明了 `21`。如果你的 `java -version`
 ## 步骤 1 — 克隆代码仓库
 
 ```bash
-git clone https://github.com/MakiWinster72/GCSC.git
-cd GCSC
+git clone https://github.com/MakiWinster72/BDAI-SC.git
+cd BDAI-SC
 ```
 
 验证克隆：

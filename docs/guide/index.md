@@ -1,11 +1,11 @@
 ---
-title: 指南
-description: GCSC Student Center 使用指南
+title: 介绍
+description: BDAI-SC Student Center 使用指南
 ---
 
-# 指南
+# 介绍
 
-欢迎使用 GCSC 学生信息管理中心文档。本节将帮助你快速上手并了解系统的核心功能。
+欢迎使用 **BDAI-SC 学生信息管理中心** 文档，为大数据与人工智能学院量身打造。
 
 ## 技术栈
 

@@ -10,11 +10,8 @@ hero:
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
-      text: 技术架构
-      link: /design/architecture
-    - theme: alt
-      text: API 参考
-      link: /api/
+      text: 详细设计
+      link: /design/
 
 features:
   - icon:
