@@ -15,7 +15,7 @@ import {
 } from "../api/profileReviewRequests";
 
 const STORAGE_KEY = "bdai_sc_notification_center";
-const DELAYED_THRESHOLD_MS = 3 * 24 * 60 * 60 * 1000;
+const DELAYED_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
 const CATEGORY_LABELS = {
   contest: "学科竞赛、文体艺术",
   paper: "发表学术论文",
@@ -258,7 +258,15 @@ export function classifyNotificationCategory({ status, createdAt, source }) {
   if (status === "rejected") {
     return "rejected";
   }
-  const createdTime = new Date(createdAt).getTime();
+  /// Handle LocalDateTime strings without timezone (e.g., "2026-04-26T14:27:30.527344")
+  // JavaScript parses these as UTC, but Java LocalDateTime is local time (CST/UTC+8)
+  // Subtract 8 hours to convert local-time string to proper UTC milliseconds
+  let createdTime;
+  if (typeof createdAt === "string" && createdAt.includes("T") && !createdAt.endsWith("Z") && !createdAt.includes("+")) {
+    createdTime = new Date(createdAt).getTime() - 8 * 60 * 60 * 1000;
+  } else {
+    createdTime = new Date(createdAt).getTime();
+  }
   if (!Number.isNaN(createdTime) && Date.now() - createdTime >= DELAYED_THRESHOLD_MS) {
     return "delayed";
   }
@@ -465,17 +473,24 @@ export function useNotifications(userSource) {
     ),
   );
   const inboxEntries = computed(() => {
+    const requests = [
+      ...store.achievementReviewRequests,
+      ...store.profileReviewRequests,
+    ];
+
+    const visible = requests.filter((item) => isReviewVisibleForUser(item, currentUser.value));
+
     const entries = [
       ...visibleReviewRequests.value.map((item) =>
         buildReviewEntry(item, currentUser.value),
       ),
       ...visibleNotifications.value.map((item) => buildNotificationEntry(item)),
     ];
-    // Defensive dedup by id to prevent duplicate-key Vue warnings
+    // Defensive dedup by sourceId+resourceType to prevent duplicate-key Vue warnings
     const seen = new Set();
     return entries
       .filter((entry) => {
-        const key = String(entry.id);
+        const key = `${entry.sourceId}-${entry.resourceType}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;

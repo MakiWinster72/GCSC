@@ -180,6 +180,7 @@ const menuMeta = computed(() => ({
 
 const notificationCategories = [
   { key: "pending", label: "待处理" },
+  { key: "delayed", label: "已滞后" },
   { key: "approved", label: "已通过" },
   { key: "rejected", label: "已驳回" },
 ];
