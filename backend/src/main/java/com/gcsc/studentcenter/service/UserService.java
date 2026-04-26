@@ -62,7 +62,7 @@ public class UserService {
                 if (role.contains(",")) {
                     String[] roles = role.split(",");
                     jakarta.persistence.criteria.Path<Object> rolePath = root.get("role");
-                    jakarta.persistence.criteria.In<Object> inClause = cb.in(rolePath);
+                    var inClause = cb.in(rolePath);
                     for (String r : roles) {
                         String trimmed = r.trim();
                         if (!trimmed.isEmpty()) {
@@ -117,7 +117,7 @@ public class UserService {
                 if (role.contains(",")) {
                     String[] roles = role.split(",");
                     jakarta.persistence.criteria.Path<Object> rolePath = root.get("role");
-                    jakarta.persistence.criteria.In<Object> inClause = cb.in(rolePath);
+                    var inClause = cb.in(rolePath);
                     for (String r : roles) {
                         String trimmed = r.trim();
                         if (!trimmed.isEmpty()) {
@@ -173,5 +173,66 @@ public class UserService {
             throw new RuntimeException("用户不存在");
         }
         userRepository.deleteById(userId);
+    }
+
+    public List<String> getDistinctStudentClasses() {
+        return userRepository.findDistinctClassNamesByRole(UserRole.STUDENT);
+    }
+
+    public AppUser setTeacherAssignedClasses(Long userId, String assignedClasses) {
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        if (user.getRole() != UserRole.TEACHER && user.getRole() != UserRole.ADMIN) {
+            throw new RuntimeException("只有教师或管理员可以设置负责班级");
+        }
+        user.setAssignedClasses(assignedClasses);
+        return userRepository.save(user);
+    }
+
+    public String getTeacherAssignedClasses(Long userId) {
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        return user.getAssignedClasses();
+    }
+
+    public boolean isStudentInTeacherAssignedClass(AppUser teacher, AppUser student) {
+        if (teacher.getRole() != UserRole.TEACHER) {
+            return true; // non-teacher can see all
+        }
+        String assigned = teacher.getAssignedClasses();
+        if (assigned == null || assigned.isBlank()) {
+            return false; // teacher with no assigned classes sees nothing
+        }
+        String studentClass = student.getClassName();
+        if (studentClass == null || studentClass.isBlank()) {
+            return false;
+        }
+        String[] classes = assigned.split(",");
+        for (String c : classes) {
+            if (c.trim().equals(studentClass.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isStudentInTeacherAssignedClassByClassName(AppUser teacher, String className) {
+        if (teacher.getRole() != UserRole.TEACHER) {
+            return true;
+        }
+        String assigned = teacher.getAssignedClasses();
+        if (assigned == null || assigned.isBlank()) {
+            return false;
+        }
+        if (className == null || className.isBlank()) {
+            return false;
+        }
+        String[] classes = assigned.split(",");
+        for (String c : classes) {
+            if (c.trim().equals(className.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

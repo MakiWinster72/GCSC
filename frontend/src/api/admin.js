@@ -75,3 +75,18 @@ export function restoreBackupAttachments(file) {
     body: formData
   })
 }
+
+// Get all available student class names for teacher assignment
+export function getAvailableClasses() {
+  return request.get('/api/admin/classes')
+}
+
+// Get teacher's assigned classes
+export function getTeacherAssignedClasses(teacherId) {
+  return request.get(`/api/admin/teachers/${teacherId}/assigned-classes`)
+}
+
+// Update teacher's assigned classes
+export function updateTeacherAssignedClasses(teacherId, assignedClasses) {
+  return request.put(`/api/admin/teachers/${teacherId}/assigned-classes`, { assignedClasses })
+}

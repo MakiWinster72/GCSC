@@ -3,9 +3,10 @@ import { computed, onMounted, reactive, ref, shallowRef, watch } from "vue";
 import PaginationBar from "../components/PaginationBar.vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
-import { getUserList, updateUser, deleteUser, createUser, getAllUserIds, getSystemSettings, updateSystemSettings, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments } from "../api/admin";
+import { getUserList, updateUser, deleteUser, createUser, getAllUserIds, getSystemSettings, updateSystemSettings, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments, updateTeacherAssignedClasses } from "../api/admin";
 import { useToast } from "../composables/useToast";
 import { loadUser } from "../utils/userStorage";
+import { buildClassName } from "../utils/profile";
 
 const ATTACHMENT_TYPE_OPTIONS = [
   { key: "document", label: "文档", icon: "/assets/icons/doc.svg" },
@@ -381,12 +382,39 @@ const ROLE_OPTIONS = [
   { value: "STUDENT", label: "学生" },
   { value: "TEACHER", label: "教师" },
   { value: "ADMIN", label: "管理员" },
-  { value: "TEACHER,ADMIN", label: "教师和管理员" },
 ];
+
+const STUDENT_CATEGORY_OPTIONS = ["本科生", "研究生"];
+const MAJOR_OPTIONS_BY_CATEGORY = {
+  本科生: [
+    "计算机科学与技术",
+    "计算机科学与技术（实验区）",
+    "计算机科学与技术(中外联合培养项目班)",
+    "2025计算机科学与技术（中外联合培养项目班未赴国外学习）",
+    "软件工程",
+    "人工智能",
+    "电子商务",
+    "电子商务（大数据决策分析）",
+    "大数据管理与应用",
+    "大数据管理与应用（佛山校区全学段）",
+    "大数据管理与应用（数字治理）",
+  ],
+  研究生: [
+    "管理科学与工程",
+    "技术经济及管理",
+    "智能科学与技术",
+    "计算机技术",
+    "图书情报",
+  ],
+};
 
 function getRoleLabel(role) {
   return ROLE_LABELS[role] || role;
 }
+
+const currentMajorOptions = computed(() => {
+  return MAJOR_OPTIONS_BY_CATEGORY[editModal.form.newClassCategory] || [];
+});
 
 async function loadUsers(page = userCurrentPage.value) {
   usersLoading.value = true;
@@ -420,6 +448,13 @@ const editModal = reactive({
     username: "",
     password: "",
     role: "",
+    // Teacher assigned classes: list of full class name strings
+    assignedClasses: [],
+    // New class entry fields
+    newClassYear: "",
+    newClassCategory: "本科生",
+    newClassMajor: "",
+    newClassNo: 1,
   },
 });
 
@@ -498,11 +533,20 @@ async function handleImportFile(e) {
   e.target.value = "";
 }
 
-function openEditModal(user) {
+async function openEditModal(user) {
   editModal.user = user;
   editModal.form.username = user.username;
   editModal.form.password = "";
   editModal.form.role = user.role;
+  // Load existing assigned classes for teachers
+  const existingAssigned = user.assignedClasses
+    ? user.assignedClasses.split(",").map(c => c.trim()).filter(Boolean)
+    : [];
+  editModal.form.assignedClasses = existingAssigned;
+  editModal.form.newClassYear = "";
+  editModal.form.newClassCategory = "本科生";
+  editModal.form.newClassMajor = "";
+  editModal.form.newClassNo = 1;
   editModal.error = "";
   editModal.visible = true;
 }
@@ -510,6 +554,32 @@ function openEditModal(user) {
 function closeEditModal() {
   editModal.visible = false;
   editModal.user = null;
+}
+
+function addTeacherAssignedClass() {
+  const { newClassYear, newClassMajor, newClassNo } = editModal.form;
+  if (!newClassYear || !newClassMajor) {
+    editModal.error = "请填写完整的班级信息";
+    return;
+  }
+  const className = buildClassName(newClassYear, newClassMajor, newClassNo, "");
+  if (!className) {
+    editModal.error = "班级信息不完整";
+    return;
+  }
+  if (editModal.form.assignedClasses.includes(className)) {
+    editModal.error = "该班级已在列表中";
+    return;
+  }
+  editModal.form.assignedClasses.push(className);
+  editModal.form.newClassYear = "";
+  editModal.form.newClassMajor = "";
+  editModal.form.newClassNo = 1;
+  editModal.error = "";
+}
+
+function removeTeacherAssignedClass(className) {
+  editModal.form.assignedClasses = editModal.form.assignedClasses.filter(c => c !== className);
 }
 
 async function handleUpdateUser() {
@@ -526,14 +596,18 @@ async function handleUpdateUser() {
     if (editModal.form.role !== editModal.user.role) {
       data.role = editModal.form.role;
     }
-    if (Object.keys(data).length === 0) {
-      closeEditModal();
-      return;
+    if (Object.keys(data).length > 0) {
+      const res = await updateUser(editModal.user.id, data);
+      if (res.data.success === false) {
+        editModal.error = res.data.message || "更新失败";
+        return;
+      }
     }
-    const res = await updateUser(editModal.user.id, data);
-    if (res.data.success === false) {
-      editModal.error = res.data.message || "更新失败";
-      return;
+    // Update teacher assigned classes if role is TEACHER
+    const currentRole = editModal.form.role || editModal.user.role;
+    if (currentRole === "TEACHER") {
+      const assignedClassesStr = editModal.form.assignedClasses.join(",");
+      await updateTeacherAssignedClasses(editModal.user.id, assignedClassesStr);
     }
     await loadUsers(userCurrentPage.value);
     closeEditModal();
@@ -1382,6 +1456,46 @@ watch([userSearch, userRoleFilter], () => {
               </select>
             </div>
             <Transition name="msg-fade">
+              <div v-if="editModal.form.role === 'TEACHER'" class="modal-field">
+                <label class="modal-label">负责班级</label>
+                <div class="class-select-hint">添加该教师负责的班级</div>
+                <!-- Assigned classes list -->
+                <div v-if="editModal.form.assignedClasses.length > 0" class="assigned-classes-list">
+                  <div v-for="cls in editModal.form.assignedClasses" :key="cls" class="assigned-class-item">
+                    <span>{{ cls }}</span>
+                    <button type="button" class="remove-class-btn" @click="removeTeacherAssignedClass(cls)">×</button>
+                  </div>
+                </div>
+                <!-- Add new class form -->
+                <div class="add-class-form">
+                  <input
+                    v-model.number="editModal.form.newClassYear"
+                    class="modal-input class-year-input"
+                    type="number"
+                    min="2000"
+                    max="2100"
+                    placeholder="年级"
+                  />
+                  <select v-model="editModal.form.newClassCategory" class="modal-select class-category-select">
+                    <option v-for="cat in STUDENT_CATEGORY_OPTIONS" :key="cat" :value="cat">{{ cat }}</option>
+                  </select>
+                  <select v-model="editModal.form.newClassMajor" class="modal-select class-major-select">
+                    <option value="">选择专业</option>
+                    <option v-for="major in currentMajorOptions" :key="major" :value="major">{{ major }}</option>
+                  </select>
+                  <input
+                    v-model.number="editModal.form.newClassNo"
+                    class="modal-input class-no-input"
+                    type="number"
+                    min="1"
+                    max="20"
+                    placeholder="班号"
+                  />
+                  <button type="button" class="add-class-btn" @click="addTeacherAssignedClass">添加</button>
+                </div>
+              </div>
+            </Transition>
+            <Transition name="msg-fade">
               <div v-if="editModal.error" class="msg-banner error modal-error" role="alert">{{ editModal.error }}</div>
             </Transition>
           </div>
@@ -1536,5 +1650,81 @@ watch([userSearch, userRoleFilter], () => {
   border-radius: 8px;
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+}
+
+.class-select-hint {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+.assigned-classes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.assigned-class-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.remove-class-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-sub);
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.remove-class-btn:hover {
+  color: var(--danger);
+}
+
+.add-class-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.class-year-input {
+  width: 90px;
+}
+
+.class-category-select {
+  width: 100px;
+}
+
+.class-major-select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.class-no-input {
+  width: 70px;
+}
+
+.add-class-btn {
+  padding: 6px 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.add-class-btn:hover {
+  opacity: 0.9;
 }
 </style>

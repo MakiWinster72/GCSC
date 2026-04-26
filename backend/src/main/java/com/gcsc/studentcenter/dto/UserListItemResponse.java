@@ -16,6 +16,7 @@ public class UserListItemResponse {
     private String college;
     private String avatarUrl;
     private LocalDateTime createdAt;
+    private String assignedClasses;
 
     public UserListItemResponse() {}
 
@@ -29,6 +30,7 @@ public class UserListItemResponse {
         this.college = user.getCollege();
         this.avatarUrl = user.getAvatarUrl();
         this.createdAt = user.getCreatedAt();
+        this.assignedClasses = user.getAssignedClasses();
     }
 
     public Long getId() {
@@ -65,5 +67,9 @@ public class UserListItemResponse {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getAssignedClasses() {
+        return assignedClasses;
     }
 }

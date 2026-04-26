@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -132,6 +133,51 @@ public class AdminController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok(Map.of("success", true));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/classes")
+    public ResponseEntity<?> listClasses(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<String> classes = userService.getDistinctStudentClasses();
+        return ResponseEntity.ok(Map.of("data", classes));
+    }
+
+    @PutMapping("/teachers/{id}/assigned-classes")
+    public ResponseEntity<?> updateTeacherAssignedClasses(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            String assignedClasses = request.get("assignedClasses");
+            var user = userService.setTeacherAssignedClasses(id, assignedClasses);
+            return ResponseEntity.ok(Map.of("success", true, "assignedClasses", user.getAssignedClasses()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/teachers/{id}/assigned-classes")
+    public ResponseEntity<?> getTeacherAssignedClasses(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            @PathVariable Long id
+    ) {
+        if (!isAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            String assignedClasses = userService.getTeacherAssignedClasses(id);
+            return ResponseEntity.ok(Map.of("assignedClasses", assignedClasses));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }

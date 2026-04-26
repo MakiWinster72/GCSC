@@ -25,6 +25,7 @@ public class AchievementReviewRequestService {
     private final AppUserRepository appUserRepository;
     private final AchievementService achievementService;
     private final ReviewSettingsService reviewSettingsService;
+    private final UserService userService;
     private final ObjectMapper objectMapper;
 
     public AchievementReviewRequestService(
@@ -32,12 +33,14 @@ public class AchievementReviewRequestService {
         AppUserRepository appUserRepository,
         AchievementService achievementService,
         ReviewSettingsService reviewSettingsService,
+        UserService userService,
         ObjectMapper objectMapper
     ) {
         this.achievementReviewRequestRepository = achievementReviewRequestRepository;
         this.appUserRepository = appUserRepository;
         this.achievementService = achievementService;
         this.reviewSettingsService = reviewSettingsService;
+        this.userService = userService;
         this.objectMapper = objectMapper;
     }
 
@@ -51,7 +54,12 @@ public class AchievementReviewRequestService {
             .filter(r -> {
                 if ("pending".equals(r.getStatus())) {
                     // pending: only reviewers (TEACHER/ADMIN) can see, not regular students
-                    return isReviewer(user);
+                    if (!isReviewer(user)) return false;
+                    // ADMIN can see all pending, TEACHER can only see their assigned class students
+                    if (user.getRole() == UserRole.TEACHER) {
+                        return userService.isStudentInTeacherAssignedClass(user, r.getRequester());
+                    }
+                    return true;
                 }
                 // processed: only requester or reviewer can see
                 return r.getRequester().getUsername().equals(username)
