@@ -1401,67 +1401,85 @@ watch([userSearch, userRoleFilter], () => {
     <!-- Add User Modal -->
     <Teleport to="body">
       <div :class="['sheet-overlay', { open: addUserModal.visible }]" @click.self="closeAddUserModal" role="dialog" aria-modal="true" aria-label="添加用户">
-        <div class="sheet-modal user-edit-modal" @click.stop>
-          <div class="modal-top-bar">
-            <div class="modal-title-group">
-              <h3 class="modal-title">添加用户</h3>
-              <p class="modal-subtitle">默认角色为学生</p>
-            </div>
-            <button class="modal-close-btn" type="button" aria-label="关闭" @click="closeAddUserModal">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="modal-body">
-            <div class="modal-field">
-              <label class="modal-label" for="add-users-textarea">用户信息</label>
-              <textarea
-                id="add-users-textarea"
-                v-model="addUserModal.textarea"
-                class="modal-textarea"
-                rows="8"
-                placeholder="每行一个用户：显示名称,学号(用于登录),密码&#10;示例：&#10;张三,2024001,password123&#10;李四,2024002,password456"
-              ></textarea>
-              <div class="field-hint" style="margin-top: 8px;">
-                <strong>注意：使用英文逗号，前后不要有空格</strong>
+        <div class="add-user-layout" @click.stop>
+          <div class="sheet-modal user-edit-modal add-user-modal">
+            <div class="modal-top-bar">
+              <div class="modal-title-group">
+                <h3 class="modal-title">添加用户</h3>
+                <p class="modal-subtitle">默认角色为学生</p>
               </div>
-              <div class="modal-field" style="margin-top: 12px;">
-                <input
-                  id="import-file"
-                  ref="importFileRef"
-                  type="file"
-                  accept=".xlsx,.xls,.csv,.txt"
-                  class="file-input"
-                  style="display: none;"
-                  @change="handleImportFile"
-                />
-                <button
-                  class="btn btn-ghost"
-                  type="button"
-                  @click="importFileRef.click()"
-                >
-                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  从文件导入
-                </button>
-                <span class="field-hint" style="margin-left: 8px;">支持格式：xlsx、csv、txt</span>
-                <span class="field-hint" style="margin-left: 8px; margin-top: 4px;">xlsx：三列无表头（姓名、学号、密码）· csv/txt：每行用英文逗号分隔（姓名,学号,密码）</span>
-              </div>
-            </div>
-            <Transition name="msg-fade">
-              <div v-if="addUserModal.error" class="msg-banner error modal-error" role="alert">{{ addUserModal.error }}</div>
-            </Transition>
-          </div>
-
-          <div class="modal-footer">
-            <div class="modal-footer-btns" style="margin-left: auto;">
-              <button class="btn btn-ghost" type="button" @click="closeAddUserModal">取消</button>
-              <button class="btn btn-primary" type="button" :disabled="addUserModal.saving" @click="handleCreateUser">
-                {{ addUserModal.saving ? "创建中…" : "创建用户" }}
+              <button class="modal-close-btn" type="button" aria-label="关闭" @click="closeAddUserModal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
               </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="modal-field">
+                <label class="modal-label" for="add-users-textarea">用户信息</label>
+                <textarea
+                  id="add-users-textarea"
+                  v-model="addUserModal.textarea"
+                  class="modal-textarea"
+                  rows="8"
+                  placeholder="每行一个用户：显示名称,学号(用于登录),密码&#10;示例：&#10;张三,2024001,password123&#10;李四,2024002,password456"
+                ></textarea>
+                <div class="field-hint" style="margin-top: 8px;">
+                  <strong>注意：使用英文逗号，前后不要有空格</strong>
+                </div>
+                <div class="modal-field" style="margin-top: 12px;">
+                  <input
+                    id="import-file"
+                    ref="importFileRef"
+                    type="file"
+                    accept=".xlsx,.xls,.csv,.txt"
+                    class="file-input"
+                    style="display: none;"
+                    @change="handleImportFile"
+                  />
+                  <button
+                    class="btn btn-ghost"
+                    type="button"
+                    @click="importFileRef.click()"
+                  >
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    从文件导入
+                  </button>
+                  <span class="field-hint" style="margin-left: 8px;">支持格式：xlsx、csv、txt</span>
+                </div>
+              </div>
+              <Transition name="msg-fade">
+                <div v-if="addUserModal.error" class="msg-banner error modal-error" role="alert">{{ addUserModal.error }}</div>
+              </Transition>
+            </div>
+
+            <div class="modal-footer">
+              <div class="modal-footer-btns" style="margin-left: auto;">
+                <button class="btn btn-ghost" type="button" @click="closeAddUserModal">取消</button>
+                <button class="btn btn-primary" type="button" :disabled="addUserModal.saving" @click="handleCreateUser">
+                  {{ addUserModal.saving ? "创建中…" : "创建用户" }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="add-user-example-panel">
+            <div class="example-image-item">
+              <span class="example-image-label">xlsx 格式示例</span>
+              <img
+                src="https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-04-26%2FMiniMax-M2.7%2F2035402385077047958%2F19dc31f5b60a75cfc31c26d9326c4ae3e983b11abf35e53eec1b66827cb9f233..png?Expires=1777278678&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=s73CeKoLgCEsSamacaRtMvhFGa0%3D"
+                alt="xlsx 格式示例"
+              />
+            </div>
+            <div class="example-image-item">
+              <span class="example-image-label">csv/txt 格式示例</span>
+              <img
+                src="https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-04-26%2FMiniMax-M2.7%2F2035402385077047958%2F8eed82b4e7e942cbb4a0f56e3ba15ac98e97fca84dcba98f7cbb41bc6a448ccd..png?Expires=1777278679&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=YYfccG4eUdYEQyiFclPCu7VrXCQ%3D"
+                alt="csv/txt 格式示例"
+              />
             </div>
           </div>
         </div>
@@ -1472,4 +1490,50 @@ watch([userSearch, userRoleFilter], () => {
 
 <style scoped>
 @import '../assets/styles/admin-view.css';
+
+.add-user-layout {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  z-index: 1011;
+}
+
+.add-user-modal {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  width: 480px;
+}
+
+.add-user-example-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 280px;
+  padding-top: 4px;
+}
+
+.example-image-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.example-image-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.example-image-item img {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
 </style>
