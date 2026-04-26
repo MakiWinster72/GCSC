@@ -8,6 +8,9 @@ import { useNotifications } from "../composables/useNotifications";
 import { searchStudentProfiles, getStudentProfileById } from "../api/profile";
 import { resolveMediaUrl } from "../utils/media";
 import { loadUser } from "../utils/userStorage";
+import { useToast } from "../composables/useToast";
+
+const { error: toastError } = useToast();
 
 const route = useRoute();
 const router = useRouter();
@@ -165,7 +168,7 @@ async function approveSelectedRequest() {
     await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "approved", reviewer: profile, resourceType: selectedEntry.value.resourceType });
     router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "处理失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 
@@ -179,7 +182,7 @@ async function rejectSelectedRequest() {
     localStorage.removeItem("bdai_sc_reject_draft");
     router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "处理失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 
@@ -194,11 +197,11 @@ function closeCancelConfirm() { cancelConfirmOpen.value = false; }
 async function confirmCancelRequest() {
   if (!selectedEntry.value) return;
   try {
-    await cancelReviewRequest({ requestId: selectedEntry.value.id });
+    await cancelReviewRequest({ requestId: selectedEntry.value.id, resourceType: selectedEntry.value.resourceType });
     cancelConfirmOpen.value = false;
     router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "取消失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 

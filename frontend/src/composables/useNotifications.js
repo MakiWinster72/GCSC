@@ -429,15 +429,13 @@ async function updateReviewRequestStatus({ requestId, status, reviewer, reason =
   return response.data;
 }
 
-async function cancelReviewRequest({ requestId }) {
-  const isAchievement = store.achievementReviewRequests.find(
-    (item) => String(item.id) === String(requestId),
-  );
-  const isProfile = !isAchievement && store.profileReviewRequests.find(
-    (item) => String(item.id) === String(requestId),
-  );
+async function cancelReviewRequest({ requestId, resourceType }) {
+  const isAch = resourceType === "achievement";
+  if (!isAch && resourceType !== "profile") {
+    throw new Error("审核请求类型无效");
+  }
 
-  if (isAchievement) {
+  if (isAch) {
     await cancelAchievementReviewRequest(requestId);
     store.achievementReviewRequests = store.achievementReviewRequests.filter(
       (item) => String(item.id) !== String(requestId),
@@ -445,15 +443,10 @@ async function cancelReviewRequest({ requestId }) {
     return;
   }
 
-  if (isProfile) {
-    await cancelProfileReviewRequest(requestId);
-    store.profileReviewRequests = store.profileReviewRequests.filter(
-      (item) => String(item.id) !== String(requestId),
-    );
-    return;
-  }
-
-  throw new Error("审核请求不存在");
+  await cancelProfileReviewRequest(requestId);
+  store.profileReviewRequests = store.profileReviewRequests.filter(
+    (item) => String(item.id) !== String(requestId),
+  );
 }
 
 export function useNotifications(userSource) {

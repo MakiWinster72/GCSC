@@ -128,9 +128,11 @@ public class ProfileReviewRequestService {
         AppUser reviewer = loadReviewer(reviewerUsername);
         ProfileReviewRequest request = loadRequest(requestId);
         if ("approved".equals(request.getStatus())) {
-            return toResponse(request);
+            throw new IllegalArgumentException("该审核请求已被其他人处理");
         }
-        ensurePending(request);
+        if (!"pending".equals(request.getStatus())) {
+            throw new IllegalArgumentException("该审核请求已处理");
+        }
         ensureReviewerCanAccessRequest(reviewer, request);
         return toResponse(applyApprovedRequest(request, reviewer));
     }
@@ -140,9 +142,11 @@ public class ProfileReviewRequestService {
         AppUser reviewer = loadReviewer(reviewerUsername);
         ProfileReviewRequest request = loadRequest(requestId);
         if ("rejected".equals(request.getStatus())) {
-            return toResponse(request);
+            throw new IllegalArgumentException("该审核请求已被驳回");
         }
-        ensurePending(request);
+        if (!"pending".equals(request.getStatus())) {
+            throw new IllegalArgumentException("该审核请求已处理");
+        }
         ensureReviewerCanAccessRequest(reviewer, request);
         String reason = trimToNull(decisionRequest.getReason());
         if (reason == null || reason.isEmpty()) {
