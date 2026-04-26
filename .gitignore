@@ -6,8 +6,9 @@ backend/.settings/
 backend/uploads/
 
 # frontend
-frontend/node_modules/
-frontend/dist/
+**/node_modules/
+**/dist/
+**/cache/
 
 # ide
 .idea/
@@ -17,6 +18,12 @@ AGENTS.md
 
 # os
 .DS_Store
+
+# env
+.env
+backend/.env
+frontend/.env
+!.env.example
 
 # python
 __pycache__/

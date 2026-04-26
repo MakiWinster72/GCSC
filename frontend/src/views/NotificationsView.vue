@@ -8,34 +8,40 @@ import { useNotifications } from "../composables/useNotifications";
 import { searchStudentProfiles, getStudentProfileById } from "../api/profile";
 import { resolveMediaUrl } from "../utils/media";
 import { loadUser } from "../utils/userStorage";
+import { useToast } from "../composables/useToast";
+
+const { error: toastError } = useToast();
 
 const route = useRoute();
 const router = useRouter();
 const profile = reactive(loadUser());
-const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest, markProcessedEntryRead } = useNotifications(profile);
+const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest, markProcessedEntryRead, classReviewEntries } = useNotifications(profile);
 
 const rejectEditorOpen = ref(false);
-const rejectReason = ref(localStorage.getItem("gcsc_reject_draft") || "");
+const rejectReason = ref(localStorage.getItem("bdai_sc_reject_draft") || "");
 watch(rejectReason, (val) => {
-  if (val) localStorage.setItem("gcsc_reject_draft", val);
+  if (val) localStorage.setItem("bdai_sc_reject_draft", val);
 });
 const actionError = ref("");
+
+const isClassReviewsMode = computed(() => route.query.panel === "class-reviews");
 
 const activeCategory = computed(() => {
   const raw = route.query.category;
   return typeof raw === "string" && raw ? raw : "pending";
 });
+const entriesSource = computed(() => isClassReviewsMode.value ? classReviewEntries.value : inboxEntries.value);
 const filteredEntries = computed(() =>
-  inboxEntries.value.filter((entry) => entry.categoryKey === activeCategory.value),
+  entriesSource.value.filter((entry) => entry.categoryKey === activeCategory.value),
 );
 const selectedEntry = computed(
   () =>
-    inboxEntries.value.find((entry) => String(entry.id) === String(route.query.entry)) || null,
+    entriesSource.value.find((entry) => String(entry.id) === String(route.query.entry)) || null,
 );
 const canProcessSelected = computed(() => {
   if (!selectedEntry.value || selectedEntry.value.source !== "review-request") return false;
   if (selectedEntry.value.status !== "pending") return false;
-  if (!["TEACHER", "ADMIN"].includes(profile.role)) return false;
+  if (!["TEACHER", "ADMIN", "CADRE"].includes(profile.role)) return false;
   return selectedEntry.value.requester?.username !== profile.username;
 });
 const canCancelSelected = computed(() => {
@@ -45,7 +51,7 @@ const canCancelSelected = computed(() => {
 });
 const canViewStudentInfo = computed(() => {
   if (!selectedEntry.value) return false;
-  if (!["TEACHER", "ADMIN"].includes(profile.role)) return false;
+  if (!["TEACHER", "ADMIN", "CADRE"].includes(profile.role)) return false;
   return Boolean(selectedEntry.value.requester?.username);
 });
 
@@ -162,10 +168,10 @@ async function approveSelectedRequest() {
   if (!selectedEntry.value) return;
   actionError.value = "";
   try {
-    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "approved", reviewer: profile });
-    router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
+    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "approved", reviewer: profile, resourceType: selectedEntry.value.resourceType });
+    router.replace({ path: "/notifications", query: { ...(isClassReviewsMode.value ? { panel: "class-reviews" } : {}), category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "处理失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 
@@ -173,13 +179,13 @@ async function rejectSelectedRequest() {
   if (!selectedEntry.value) return;
   actionError.value = "";
   try {
-    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "rejected", reviewer: profile, reason: rejectReason.value });
+    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "rejected", reviewer: profile, reason: rejectReason.value, resourceType: selectedEntry.value.resourceType });
     rejectEditorOpen.value = false;
     rejectReason.value = "";
-    localStorage.removeItem("gcsc_reject_draft");
-    router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
+    localStorage.removeItem("bdai_sc_reject_draft");
+    router.replace({ path: "/notifications", query: { ...(isClassReviewsMode.value ? { panel: "class-reviews" } : {}), category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "处理失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 
@@ -194,11 +200,11 @@ function closeCancelConfirm() { cancelConfirmOpen.value = false; }
 async function confirmCancelRequest() {
   if (!selectedEntry.value) return;
   try {
-    await cancelReviewRequest({ requestId: selectedEntry.value.id });
+    await cancelReviewRequest({ requestId: selectedEntry.value.id, resourceType: selectedEntry.value.resourceType });
     cancelConfirmOpen.value = false;
-    router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
+    router.replace({ path: "/notifications", query: { ...(isClassReviewsMode.value ? { panel: "class-reviews" } : {}), category: activeCategory.value, entry: "" } });
   } catch (error) {
-    actionError.value = error?.message || "取消失败，请稍后重试";
+    toastError("请尝试刷新页面,当前请求可能已经被他人更改");
   }
 }
 
@@ -229,7 +235,7 @@ function closeStudentDetail() {
 <template>
   <main class="dashboard-right notif-view">
     <header class="feed-header">
-      <h1 class="feed-title">通知详情</h1>
+      <h1 class="feed-title">{{ isClassReviewsMode ? '班级审核' : '通知详情' }}</h1>
     </header>
 
     <!-- Empty State: no entry selected -->
@@ -239,8 +245,8 @@ function closeStudentDetail() {
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-10.999 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
       </div>
-      <p class="notif-empty-title">暂无通知</p>
-      <p class="notif-empty-sub">从左侧选择一条通知查看详情</p>
+      <p class="notif-empty-title">{{ isClassReviewsMode ? '暂无待审' : '暂无通知' }}</p>
+      <p class="notif-empty-sub">{{ isClassReviewsMode ? '从左侧选择一条申请查看详情' : '从左侧选择一条通知查看详情' }}</p>
     </div>
 
     <!-- Detail Panel -->

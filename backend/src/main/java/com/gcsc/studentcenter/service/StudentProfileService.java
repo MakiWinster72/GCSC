@@ -165,7 +165,8 @@ public class StudentProfileService {
         String studentCategory,
         String keyword,
         int page,
-        int size
+        int size,
+        List<String> allowedClassNames
     ) {
         int pageIndex = Math.max(page - 1, 0);
         int pageSize = Math.max(size, 1);
@@ -178,6 +179,7 @@ public class StudentProfileService {
             specialStudent,
             normalize(studentCategory),
             normalize(keyword),
+            allowedClassNames,
             PageRequest.of(pageIndex, pageSize)
         );
         return new StudentSearchResponse(

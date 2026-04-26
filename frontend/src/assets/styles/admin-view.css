@@ -1036,6 +1036,37 @@
   color: var(--danger);
 }
 
+/* Selection Bar */
+.users-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  background: var(--primary-surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.selection-count {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Checkbox */
+.col-checkbox {
+  width: 36px;
+  padding: 11px 8px 11px 16px !important;
+  text-align: center;
+}
+
+.col-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
 /* Table */
 .table-wrap {
   overflow: auto;
@@ -1341,6 +1372,26 @@
 
 .modal-error {
   margin: 0;
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.modal-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-surface);
 }
 
 /* ── Modal Footer ──────────────────────────────────────── */

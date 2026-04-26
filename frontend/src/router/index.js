@@ -7,6 +7,7 @@ import NotificationsView from '../views/NotificationsView.vue'
 import StudentInfoView from '../views/StudentInfoView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import AdminView from '../views/AdminView.vue'
+import ClassReviewsView from '../views/ClassReviewsView.vue'
 import DashboardLayout from '../layouts/DashboardLayout.vue'
 
 const router = createRouter({
@@ -42,6 +43,12 @@ const router = createRouter({
           name: 'admin',
           component: AdminView,
           meta: { allowedRoles: ['ADMIN'] }
+        },
+        {
+          path: 'class-reviews',
+          name: 'class-reviews',
+          component: ClassReviewsView,
+          meta: { allowedRoles: ['CADRE'] }
         }
       ]
     },
@@ -51,7 +58,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const isLoggedIn = Boolean(localStorage.getItem('gcsc_token'))
+  const isLoggedIn = Boolean(localStorage.getItem('bdai_sc_token'))
   if (to.meta.requiresAuth && !isLoggedIn) {
     return '/login'
   }
@@ -59,10 +66,16 @@ router.beforeEach((to) => {
     return '/myinfos'
   }
   if (to.meta.allowedRoles) {
-    const raw = JSON.parse(localStorage.getItem('gcsc_user') || '{}')
+    const raw = JSON.parse(localStorage.getItem('bdai_sc_user') || '{}')
     const role = raw.role || 'STUDENT'
     if (!to.meta.allowedRoles.includes(role)) {
       return '/myinfos'
+    }
+  }
+  if (to.path === '/register') {
+    const allowReg = localStorage.getItem('gcsc_allowRegistration')
+    if (allowReg === '0') {
+      return '/login'
     }
   }
   return true

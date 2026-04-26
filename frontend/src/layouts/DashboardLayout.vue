@@ -17,9 +17,14 @@
         :show-achievements-drawer="showAchievementsDrawer"
         :notification-active-category="notificationActiveCategory"
         :notification-active-entry="notificationActiveEntry"
+        :class-reviews-active-category="classReviewsActiveCategory"
+        :class-reviews-active-entry="classReviewsActiveEntry"
+        :class-review-entries="classReviewEntries"
         @menu-click="handleMenuClick"
         @achievement-entry-click="handleAchievementEntry"
         @notification-entry-click="handleNotificationEntry"
+        @class-reviews-entry-click="handleClassReviewsEntry"
+        @class-reviews-category-change="handleClassReviewsCategory"
         @settings-click="goToSettings"
       />
 
@@ -82,6 +87,17 @@ const isEmbedded = computed(() => {
   return value === "1" || value === "true";
 });
 
+const classReviewsActiveCategory = computed(() => {
+  if (route.name !== "notifications" || route.query.panel !== "class-reviews") return "pending";
+  const raw = route.query.category;
+  return typeof raw === "string" && raw ? raw : "pending";
+});
+const classReviewsActiveEntry = computed(() => {
+  if (route.name !== "notifications" || route.query.panel !== "class-reviews") return "";
+  return typeof route.query.entry === "string" ? route.query.entry : "";
+});
+const classReviewEntries = computed(() => []); // Not used in layout, CardMenu gets it directly from useNotifications
+
 provide(dashboardShellKey, {
   openSidebar,
   closeSidebar,
@@ -119,6 +135,22 @@ function handleNotificationEntry({ category, entryId }) {
   navigateWithViewTransition(router, {
     path: "/notifications",
     query: { category, entry: entryId || "" },
+  });
+}
+
+function handleClassReviewsEntry({ entry }) {
+  closeSidebar();
+  navigateWithViewTransition(router, {
+    path: "/notifications",
+    query: { panel: "class-reviews", category: "pending", entry: String(entry.id) },
+  });
+}
+
+function handleClassReviewsCategory(category) {
+  closeSidebar();
+  navigateWithViewTransition(router, {
+    path: "/notifications",
+    query: { panel: "class-reviews", category },
   });
 }
 

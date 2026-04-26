@@ -37,6 +37,9 @@ public class AppUser {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
 
+    @Column(name = "assigned_classes", length = 500)
+    private String assignedClasses;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -114,5 +117,13 @@ public class AppUser {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getAssignedClasses() {
+        return assignedClasses;
+    }
+
+    public void setAssignedClasses(String assignedClasses) {
+        this.assignedClasses = assignedClasses;
     }
 }
