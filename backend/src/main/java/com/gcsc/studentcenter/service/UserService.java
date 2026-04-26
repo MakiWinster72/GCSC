@@ -59,7 +59,20 @@ public class UserService {
                 ));
             }
             if (role != null && !role.isBlank()) {
-                preds.add(cb.equal(root.get("role"), role));
+                if (role.contains(",")) {
+                    String[] roles = role.split(",");
+                    jakarta.persistence.criteria.Path<Object> rolePath = root.get("role");
+                    jakarta.persistence.criteria.In<Object> inClause = cb.in(rolePath);
+                    for (String r : roles) {
+                        String trimmed = r.trim();
+                        if (!trimmed.isEmpty()) {
+                            inClause.value(trimmed);
+                        }
+                    }
+                    preds.add(inClause);
+                } else {
+                    preds.add(cb.equal(root.get("role"), role));
+                }
             }
             if (className != null && !className.isBlank()) {
                 preds.add(cb.like(cb.lower(root.get("className")), "%" + className.trim().toLowerCase() + "%"));
@@ -101,7 +114,20 @@ public class UserService {
                 ));
             }
             if (role != null && !role.isBlank()) {
-                preds.add(cb.equal(root.get("role"), role));
+                if (role.contains(",")) {
+                    String[] roles = role.split(",");
+                    jakarta.persistence.criteria.Path<Object> rolePath = root.get("role");
+                    jakarta.persistence.criteria.In<Object> inClause = cb.in(rolePath);
+                    for (String r : roles) {
+                        String trimmed = r.trim();
+                        if (!trimmed.isEmpty()) {
+                            inClause.value(trimmed);
+                        }
+                    }
+                    preds.add(inClause);
+                } else {
+                    preds.add(cb.equal(root.get("role"), role));
+                }
             }
             if (className != null && !className.isBlank()) {
                 preds.add(cb.like(cb.lower(root.get("className")), "%" + className.trim().toLowerCase() + "%"));

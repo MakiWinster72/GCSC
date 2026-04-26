@@ -381,6 +381,7 @@ const ROLE_OPTIONS = [
   { value: "STUDENT", label: "学生" },
   { value: "TEACHER", label: "教师" },
   { value: "ADMIN", label: "管理员" },
+  { value: "TEACHER,ADMIN", label: "教师和管理员" },
 ];
 
 function getRoleLabel(role) {
