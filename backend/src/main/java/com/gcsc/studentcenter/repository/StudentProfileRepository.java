@@ -1,5 +1,6 @@
 package com.gcsc.studentcenter.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,6 +38,7 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
             and (:hkMoTw is null or sp.hkMoTw = :hkMoTw)
             and (:specialStudent is null or sp.specialStudent = :specialStudent)
             and (:studentCategory is null or sp.studentCategory = :studentCategory)
+            and (:allowedClassNames is null or sp.className in :allowedClassNames)
             and (
                 :keyword is null
                 or lower(sp.fullName) like lower(concat('%', :keyword, '%'))
@@ -58,6 +60,7 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
         @Param("specialStudent") Boolean specialStudent,
         @Param("studentCategory") String studentCategory,
         @Param("keyword") String keyword,
+        @Param("allowedClassNames") List<String> allowedClassNames,
         Pageable pageable
     );
 }
