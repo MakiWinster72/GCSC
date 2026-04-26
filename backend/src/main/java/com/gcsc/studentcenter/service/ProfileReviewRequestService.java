@@ -195,7 +195,8 @@ public class ProfileReviewRequestService {
             user.getUsername(),
             user.getDisplayName(),
             user.getRole() == null ? "" : user.getRole().name(),
-            user.getStudentNo()
+            user.getStudentNo(),
+            user.getClassName()
         );
     }
 

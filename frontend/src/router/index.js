@@ -7,6 +7,7 @@ import NotificationsView from '../views/NotificationsView.vue'
 import StudentInfoView from '../views/StudentInfoView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import AdminView from '../views/AdminView.vue'
+import ClassReviewsView from '../views/ClassReviewsView.vue'
 import DashboardLayout from '../layouts/DashboardLayout.vue'
 
 const router = createRouter({
@@ -42,6 +43,12 @@ const router = createRouter({
           name: 'admin',
           component: AdminView,
           meta: { allowedRoles: ['ADMIN'] }
+        },
+        {
+          path: 'class-reviews',
+          name: 'class-reviews',
+          component: ClassReviewsView,
+          meta: { allowedRoles: ['CADRE', 'ADMIN'] }
         }
       ]
     },

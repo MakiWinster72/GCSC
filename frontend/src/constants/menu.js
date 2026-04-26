@@ -2,6 +2,7 @@ export const MENU_ITEMS = [
   { key: "my-info", label: "我的信息" },
   { key: "achievements", label: "个人成就" },
   { key: "student-info", label: "学生信息" },
+  { key: "class-reviews", label: "班级审核" },
   { key: "notifications", label: "通知" },
   { key: "admin", label: "后台管理" },
 ];
@@ -11,6 +12,7 @@ export const MENU_ROUTE_MAP = {
   achievements: { path: "/achievements", query: { category: "all" } },
   "my-info": { path: "/myinfos" },
   "student-info": { path: "/student-info" },
+  "class-reviews": { path: "/class-reviews" },
   admin: { path: "/admin" },
 };
 
@@ -19,11 +21,13 @@ const ENABLED_MENU_KEYS = new Set([
   "achievements",
   "my-info",
   "student-info",
+  "class-reviews",
   "admin",
 ]);
 
 const ROLE_MENU_VISIBILITY = {
   "student-info": new Set(["TEACHER", "ADMIN"]),
+  "class-reviews": new Set(["CADRE", "ADMIN"]),
   "admin": new Set(["ADMIN"]),
 };
 
@@ -59,6 +63,9 @@ export function getActiveMenuFromRoute(route) {
   }
   if (routeName === "admin") {
     return "admin";
+  }
+  if (routeName === "class-reviews") {
+    return "class-reviews";
   }
   if (routeName === "settings") {
     return "";
