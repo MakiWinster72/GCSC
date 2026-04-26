@@ -42,6 +42,7 @@ public class SystemSettingsService {
                 .orElseGet(LinkedHashMap::new);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("allowRegistration", booleanValue(raw.get("allowRegistration"), true));
+        result.put("delayedThresholdDays", intValue(raw.get("delayedThresholdDays"), 2));
         return result;
     }
 
@@ -104,6 +105,20 @@ public class SystemSettingsService {
         }
         if (value instanceof String stringValue) {
             return Boolean.parseBoolean(stringValue);
+        }
+        return fallback;
+    }
+
+    private int intValue(Object value, int fallback) {
+        if (value instanceof Number numberValue) {
+            return numberValue.intValue();
+        }
+        if (value instanceof String stringValue) {
+            try {
+                return Integer.parseInt(stringValue);
+            } catch (NumberFormatException e) {
+                return fallback;
+            }
         }
         return fallback;
     }

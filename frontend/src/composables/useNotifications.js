@@ -1,4 +1,5 @@
 import { computed, reactive } from "vue";
+import { getSystemSettings } from "../api/admin";
 import {
   approveAchievementReviewRequest,
   cancelAchievementReviewRequest,
@@ -15,7 +16,7 @@ import {
 } from "../api/profileReviewRequests";
 
 const STORAGE_KEY = "bdai_sc_notification_center";
-const DELAYED_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
+const DEFAULT_DELAYED_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
 const CATEGORY_LABELS = {
   contest: "学科竞赛、文体艺术",
   paper: "发表学术论文",
@@ -38,6 +39,7 @@ const store = reactive({
   profileReviewFetched: false,
   profileReviewLoading: false,
   processedReadIds: new Set(),
+  delayedThresholdMs: DEFAULT_DELAYED_THRESHOLD_MS,
 });
 
 function ensureLoaded() {
@@ -68,6 +70,17 @@ function persistStore() {
       processedReadIds: [...store.processedReadIds],
     }),
   );
+}
+
+async function fetchDelayedThreshold() {
+  if (typeof window === "undefined") return;
+  try {
+    const res = await getSystemSettings();
+    const days = res.data?.delayedThresholdDays;
+    if (days && days >= 1) {
+      store.delayedThresholdMs = days * 24 * 60 * 60 * 1000;
+    }
+  } catch { /* ignore */ }
 }
 
 function generateId(prefix) {
@@ -267,7 +280,7 @@ export function classifyNotificationCategory({ status, createdAt, source }) {
   } else {
     createdTime = new Date(createdAt).getTime();
   }
-  if (!Number.isNaN(createdTime) && Date.now() - createdTime >= DELAYED_THRESHOLD_MS) {
+  if (!Number.isNaN(createdTime) && Date.now() - createdTime >= store.delayedThresholdMs) {
     return "delayed";
   }
   return "pending";
@@ -453,6 +466,7 @@ async function cancelReviewRequest({ requestId }) {
 
 export function useNotifications(userSource) {
   ensureLoaded();
+  fetchDelayedThreshold();
   fetchAchievementReviewRequests().catch(() => {
     store.achievementReviewFetched = true;
   });

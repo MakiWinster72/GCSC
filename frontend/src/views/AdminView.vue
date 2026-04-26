@@ -161,13 +161,14 @@ const allFilteredSelected = shallowRef(false);
 const someSelected = computed(() => selectedUserIds.value.size > 0);
 const allPageSelected = computed(() => users.value.length > 0 && selectedUserIds.value.size === users.value.length);
 
-const systemSettings = reactive({ allowRegistration: true });
+const systemSettings = reactive({ allowRegistration: true, delayedThresholdDays: 2 });
 const systemSettingsMsg = shallowRef("");
 
 async function fetchSystemSettings() {
   try {
     const res = await getSystemSettings();
     systemSettings.allowRegistration = res.data.allowRegistration !== false;
+    systemSettings.delayedThresholdDays = res.data.delayedThresholdDays || 2;
   } catch (e) {
     // ignore
   }
@@ -176,7 +177,7 @@ async function fetchSystemSettings() {
 async function handleSaveSystemSettings() {
   systemSettingsMsg.value = "";
   try {
-    await updateSystemSettings({ allowRegistration: systemSettings.allowRegistration });
+    await updateSystemSettings({ allowRegistration: systemSettings.allowRegistration, delayedThresholdDays: Number(systemSettings.delayedThresholdDays) });
     systemSettingsMsg.value = "设置已保存";
     setTimeout(() => { systemSettingsMsg.value = ""; }, 2000);
   } catch (e) {
@@ -1306,6 +1307,24 @@ watch([userSearch, userRoleFilter], () => {
                       <span class="toggle-thumb"></span>
                     </span>
                   </label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-copy">
+                    <span class="toggle-title">待处理自动滞后</span>
+                    <span class="toggle-hint">超过指定天数未处理的请求自动移入已滞后标签</span>
+                  </div>
+                  <div class="input-wrap" style="width: 80px;">
+                    <input
+                      v-model.number="systemSettings.delayedThresholdDays"
+                      class="text-input"
+                      type="number"
+                      min="1"
+                      max="30"
+                      aria-label="待处理自动滞后天数"
+                      @change="handleSaveSystemSettings"
+                    />
+                    <span class="input-unit">天</span>
+                  </div>
                 </div>
               </div>
               <Transition name="msg-fade">
