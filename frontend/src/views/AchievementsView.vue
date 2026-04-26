@@ -843,7 +843,7 @@ function getCurrentStudentNo() {
     return studentNo;
   }
   try {
-    const raw = JSON.parse(localStorage.getItem("gcsc_user") || "{}");
+    const raw = JSON.parse(localStorage.getItem("bdai_sc_user") || "{}");
     return raw.studentNo || profile.studentNo || "";
   } catch {
     return profile.studentNo || "";
