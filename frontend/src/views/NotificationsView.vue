@@ -162,7 +162,7 @@ async function approveSelectedRequest() {
   if (!selectedEntry.value) return;
   actionError.value = "";
   try {
-    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "approved", reviewer: profile });
+    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "approved", reviewer: profile, resourceType: selectedEntry.value.resourceType });
     router.replace({ path: "/notifications", query: { category: activeCategory.value, entry: "" } });
   } catch (error) {
     actionError.value = error?.message || "处理失败，请稍后重试";
@@ -173,7 +173,7 @@ async function rejectSelectedRequest() {
   if (!selectedEntry.value) return;
   actionError.value = "";
   try {
-    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "rejected", reviewer: profile, reason: rejectReason.value });
+    await updateReviewRequestStatus({ requestId: selectedEntry.value.id, status: "rejected", reviewer: profile, reason: rejectReason.value, resourceType: selectedEntry.value.resourceType });
     rejectEditorOpen.value = false;
     rejectReason.value = "";
     localStorage.removeItem("bdai_sc_reject_draft");

@@ -406,35 +406,27 @@ async function submitProfileReviewRequest({
   return data;
 }
 
-async function updateReviewRequestStatus({ requestId, status, reviewer, reason = "" }) {
-  const isAchievement = store.achievementReviewRequests.find(
-    (item) => String(item.id) === String(requestId),
-  );
-  const isProfile = !isAchievement && store.profileReviewRequests.find(
-    (item) => String(item.id) === String(requestId),
-  );
-
-  if (isAchievement || isProfile) {
-    const isAch = Boolean(isAchievement);
-    if (status === "rejected" && !String(reason || "").trim()) {
-      throw new Error("驳回时必须填写理由");
-    }
-    const response = isAch
-      ? (status === "approved"
-          ? await approveAchievementReviewRequest(requestId)
-          : await rejectAchievementReviewRequest(requestId, { reason: String(reason || "").trim() }))
-      : (status === "approved"
-          ? await approveProfileReviewRequest(requestId)
-          : await rejectProfileReviewRequest(requestId, { reason: String(reason || "").trim() }));
-    if (isAch) {
-      upsertAchievementReviewRequest(response.data);
-    } else {
-      upsertProfileReviewRequest(response.data);
-    }
-    return response.data;
+async function updateReviewRequestStatus({ requestId, status, reviewer, reason = "", resourceType }) {
+  const isAch = resourceType === "achievement";
+  if (!isAch && resourceType !== "profile") {
+    throw new Error("审核请求类型无效");
   }
-
-  throw new Error("审核请求不存在");
+  if (status === "rejected" && !String(reason || "").trim()) {
+    throw new Error("驳回时必须填写理由");
+  }
+  const response = isAch
+    ? (status === "approved"
+        ? await approveAchievementReviewRequest(requestId)
+        : await rejectAchievementReviewRequest(requestId, { reason: String(reason || "").trim() }))
+    : (status === "approved"
+        ? await approveProfileReviewRequest(requestId)
+        : await rejectProfileReviewRequest(requestId, { reason: String(reason || "").trim() }));
+  if (isAch) {
+    upsertAchievementReviewRequest(response.data);
+  } else {
+    upsertProfileReviewRequest(response.data);
+  }
+  return response.data;
 }
 
 async function cancelReviewRequest({ requestId }) {

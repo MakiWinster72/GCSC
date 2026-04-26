@@ -127,6 +127,9 @@ public class ProfileReviewRequestService {
     public ProfileReviewRequestResponse approve(Long requestId, String reviewerUsername) {
         AppUser reviewer = loadReviewer(reviewerUsername);
         ProfileReviewRequest request = loadRequest(requestId);
+        if ("approved".equals(request.getStatus())) {
+            return toResponse(request);
+        }
         ensurePending(request);
         ensureReviewerCanAccessRequest(reviewer, request);
         return toResponse(applyApprovedRequest(request, reviewer));
@@ -136,6 +139,9 @@ public class ProfileReviewRequestService {
     public ProfileReviewRequestResponse reject(Long requestId, String reviewerUsername, ProfileReviewDecisionRequest decisionRequest) {
         AppUser reviewer = loadReviewer(reviewerUsername);
         ProfileReviewRequest request = loadRequest(requestId);
+        if ("rejected".equals(request.getStatus())) {
+            return toResponse(request);
+        }
         ensurePending(request);
         ensureReviewerCanAccessRequest(reviewer, request);
         String reason = trimToNull(decisionRequest.getReason());

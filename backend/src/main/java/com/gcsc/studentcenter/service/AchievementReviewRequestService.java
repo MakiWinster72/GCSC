@@ -140,6 +140,9 @@ public class AchievementReviewRequestService {
     public AchievementReviewRequestResponse approve(Long requestId, String reviewerUsername) {
         AppUser reviewer = loadReviewer(reviewerUsername);
         AchievementReviewRequest request = loadRequest(requestId);
+        if ("approved".equals(request.getStatus())) {
+            return toResponse(request);
+        }
         ensurePending(request);
         ensureReviewerCanAccessRequest(reviewer, request);
         return toResponse(applyApprovedRequest(request, reviewer));
@@ -149,6 +152,9 @@ public class AchievementReviewRequestService {
     public AchievementReviewRequestResponse reject(Long requestId, String reviewerUsername, String reason) {
         AppUser reviewer = loadReviewer(reviewerUsername);
         AchievementReviewRequest request = loadRequest(requestId);
+        if ("rejected".equals(request.getStatus())) {
+            return toResponse(request);
+        }
         ensurePending(request);
         ensureReviewerCanAccessRequest(reviewer, request);
         String safeReason = requireText(reason, "驳回时必须填写理由");
