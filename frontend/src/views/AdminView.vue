@@ -1227,12 +1227,12 @@ watch([userSearch, userRoleFilter], () => {
                           @change="selectAllPage"
                         />
                       </th>
-                      <th scope="col" style="width: 110px;">用户名</th>
+                      <th scope="col" style="width: 130px;">用户名</th>
                       <th scope="col" style="width: 100px;">显示名称</th>
                       <th scope="col" style="width: 80px;">角色</th>
                       <th scope="col" style="width: 120px;">学号</th>
                       <th scope="col">班级</th>
-                      <th scope="col" style="width: 100px;">备注</th>
+                      <th scope="col" style="width: 120px;">备注</th>
                       <th scope="col" class="col-action"></th>
                     </tr>
                   </thead>

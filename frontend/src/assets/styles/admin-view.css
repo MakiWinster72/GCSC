@@ -1074,15 +1074,13 @@
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  margin: 0 -1px; /* Align with card edges */
 }
 
 .users-table {
   width: 100%;
-  min-width: 680px;
+  min-width: 800px;
   border-collapse: collapse;
   font-size: 13.5px;
-  table-layout: fixed;
 }
 
 .users-table th {
@@ -1095,7 +1093,6 @@
   color: var(--text-sub);
   border-bottom: 1px solid var(--line);
   background: rgba(100, 12, 114, 0.04);
-  white-space: nowrap;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -1110,9 +1107,8 @@
   vertical-align: middle;
   background: transparent;
   transition: background 120ms ease;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .users-table tr + tr td {
@@ -1128,6 +1124,7 @@
   font-size: 12.5px;
   color: var(--primary);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .td-action {
