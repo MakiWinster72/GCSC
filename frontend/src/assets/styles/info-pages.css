@@ -77,7 +77,7 @@
 
 .settings-action {
   border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
   color: var(--primary);
   border-radius: 14px;
   height: 40px;
@@ -85,47 +85,80 @@
   font-weight: 700;
   letter-spacing: 0.2px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition:
     background 180ms ease,
     border-color 180ms ease,
     color 180ms ease,
-    transform 120ms ease;
+    transform 120ms ease,
+    box-shadow 180ms ease;
+}
+
+.settings-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(100, 12, 114, 0.06) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
 .settings-action:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
   border-color: var(--primary);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 12, 114, 0.15);
+}
+
+.settings-action:hover::before {
+  opacity: 1;
 }
 
 .settings-action:active {
   transform: translateY(0);
+  box-shadow: none;
 }
 
 .settings-action.danger {
   border-color: rgba(203, 53, 53, 0.5);
   color: var(--danger);
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.84) 100%);
 }
 
 .settings-action.danger:hover {
   border-color: var(--danger);
+  box-shadow: 0 6px 20px rgba(203, 53, 53, 0.15);
 }
 
 /* ── Info Hero ──────────────────────────────────────────── */
 .info-hero {
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow-sm);
-  padding: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.8);
+  padding: 20px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部装饰线 */
+.info-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(100, 12, 114, 0.25), transparent);
+  border-radius: 0 0 2px 2px;
 }
 
 .avatar-square {
@@ -146,13 +179,24 @@
     background 200ms ease,
     transform 200ms ease,
     box-shadow 200ms ease;
+  position: relative;
+}
+
+.avatar-square::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(100, 12, 114, 0.08) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .avatar-square:hover:not(:disabled) {
   border-color: var(--primary);
+  border-style: solid;
   background: rgba(255, 255, 255, 1);
-  transform: scale(1.02);
-  box-shadow: 0 8px 24px rgba(100, 12, 114, 0.14);
+  transform: scale(1.03);
+  box-shadow: 0 12px 32px rgba(100, 12, 114, 0.18);
 }
 
 .avatar-square:active:not(:disabled) {
@@ -237,7 +281,7 @@
   font-weight: 800;
   color: var(--primary-dark);
   letter-spacing: 0.3px;
-  padding-left: 10px;
+  padding-left: 14px;
   position: relative;
 }
 
@@ -247,7 +291,7 @@
   left: 0;
   top: 50%;
   width: 4px;
-  height: 16px;
+  height: 18px;
   transform: translateY(-50%);
   border-radius: 999px;
   background: linear-gradient(
@@ -255,6 +299,7 @@
     var(--primary) 0%,
     var(--primary-light) 100%
   );
+  box-shadow: 0 2px 8px rgba(100, 12, 114, 0.3);
 }
 
 /* ── Info Form Grid ─────────────────────────────────────── */
@@ -288,9 +333,18 @@
   padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.78);
+  background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.72) 100%);
   min-width: 0;
-  transition: border-color 180ms ease, background 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.field-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(100, 12, 114, 0.1);
 }
 
 .field-full {
@@ -301,7 +355,7 @@
   flex: 1;
   min-width: 0;
   border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.96);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.94) 100%);
   color: var(--primary-dark);
   border-radius: 12px;
   height: 44px;
@@ -310,7 +364,8 @@
   transition:
     border-color 180ms ease,
     background 180ms ease,
-    box-shadow 180ms ease;
+    box-shadow 180ms ease,
+    transform 120ms ease;
 }
 
 .info-input::placeholder {
@@ -320,11 +375,15 @@
 .info-input:focus {
   border-color: var(--primary);
   background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 0 3px var(--primary-surface);
+  box-shadow: 0 0 0 3px var(--primary-surface), 0 4px 12px rgba(100, 12, 114, 0.12);
 }
 
 .info-input:focus-visible {
   outline: none;
+}
+
+.info-input:hover:not(:disabled):not(:focus) {
+  border-color: var(--primary-light);
 }
 
 .info-input:disabled {
@@ -382,18 +441,37 @@
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.86) 100%);
   box-shadow: var(--shadow-sm);
   min-width: 0;
+  position: relative;
+  overflow: hidden;
   transition:
     border-color 200ms ease,
     box-shadow 200ms ease,
     transform 200ms ease;
 }
 
+.record-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100, 12, 114, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
 .record-card:hover {
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow), 0 8px 24px rgba(100, 12, 114, 0.1);
+  transform: translateY(-2px);
+}
+
+.record-card:hover::before {
+  opacity: 1;
 }
 
 .record-grid {
