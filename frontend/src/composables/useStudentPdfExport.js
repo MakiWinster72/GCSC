@@ -617,6 +617,39 @@ export function useStudentPdfExport() {
         currentY += 20;
       }
 
+      const cadreExperiences = student.cadreExperiences || [];
+
+      addSectionTitle("学生干部经历");
+      if (Array.isArray(cadreExperiences) && cadreExperiences.length) {
+        autoTable(doc, {
+          head: [["起始时间", "结束时间", "班级/社团部门", "职位", "职责说明"]],
+          body: cadreExperiences.map((item) => {
+            const start = item.startDate || "";
+            const end = item.isCurrent ? "至今" : item.endDate || "";
+            return [
+              start,
+              end,
+              item.department || "",
+              item.position || "",
+              item.description || "",
+            ];
+          }),
+          startY: currentY + 6,
+          styles: { fontSize: 9, cellPadding: 4, font: PDF_FONT_NAME },
+          headStyles: {
+            font: PDF_FONT_BLACK,
+            fillColor: [31, 79, 87],
+            textColor: 255,
+          },
+          theme: "grid",
+        });
+        currentY = doc.lastAutoTable.finalY + 14;
+      } else {
+        doc.setFontSize(10);
+        doc.text("暂无干部经历", marginX, currentY + 12);
+        currentY += 20;
+      }
+
       if (achievements.length) {
         doc.addPage();
         doc.setFont(PDF_FONT_NAME, "normal");
