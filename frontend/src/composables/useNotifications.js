@@ -39,6 +39,7 @@ const store = reactive({
   profileReviewFetched: false,
   profileReviewLoading: false,
   processedReadIds: new Set(),
+  readIds: new Set(),
   delayedThresholdMs: DEFAULT_DELAYED_THRESHOLD_MS,
 });
 
@@ -53,6 +54,7 @@ function ensureLoaded() {
       ? raw.notifications
       : [];
     store.processedReadIds = new Set(Array.isArray(raw.processedReadIds) ? raw.processedReadIds : []);
+    store.readIds = new Set(Array.isArray(raw.readIds) ? raw.readIds : []);
   } catch {
     store.notifications = [];
     store.processedReadIds = new Set();
@@ -68,6 +70,7 @@ function persistStore() {
     JSON.stringify({
       notifications: store.notifications,
       processedReadIds: [...store.processedReadIds],
+      readIds: [...store.readIds],
     }),
   );
 }
@@ -559,6 +562,29 @@ export function useNotifications(userSource) {
     persistStore();
   }
 
+  function markEntryRead(entryId) {
+    store.readIds.add(String(entryId));
+    persistStore();
+  }
+
+  function markEntryUnread(entryId) {
+    store.readIds.delete(String(entryId));
+    persistStore();
+  }
+
+  function markAllRead() {
+    inboxEntries.value.forEach((e) => store.readIds.add(String(e.id)));
+    persistStore();
+  }
+
+  const totalUnreadCount = computed(() =>
+    inboxEntries.value.filter((e) => !store.readIds.has(String(e.id))).length,
+  );
+
+  const unreadEntries = computed(() =>
+    inboxEntries.value.filter((e) => !store.readIds.has(String(e.id))),
+  );
+
   function findPendingAchievementReview(recordId, category) {
     if (!recordId) return null;
     return store.achievementReviewRequests.find(
@@ -575,7 +601,10 @@ export function useNotifications(userSource) {
     pendingCount,
     categoryCounts,
     processedUnreadCount,
+    totalUnreadCount,
+    unreadEntries,
     processedReadIds: store.processedReadIds,
+    readIds: store.readIds,
     reviewRequests: visibleReviewRequests,
     notifications: visibleNotifications,
     hasPendingProfileReviewRequest,
@@ -588,6 +617,9 @@ export function useNotifications(userSource) {
     updateReviewRequestStatus,
     cancelReviewRequest,
     markProcessedEntryRead,
+    markEntryRead,
+    markEntryUnread,
+    markAllRead,
     classReviewEntries,
   };
 }

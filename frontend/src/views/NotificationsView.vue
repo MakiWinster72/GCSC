@@ -15,7 +15,7 @@ const { error: toastError } = useToast();
 const route = useRoute();
 const router = useRouter();
 const profile = reactive(loadUser());
-const { inboxEntries, updateReviewRequestStatus, cancelReviewRequest, markProcessedEntryRead, classReviewEntries } = useNotifications(profile);
+const { inboxEntries, totalUnreadCount, readIds, unreadEntries, updateReviewRequestStatus, cancelReviewRequest, markProcessedEntryRead, markEntryRead, classReviewEntries } = useNotifications(profile);
 
 const rejectEditorOpen = ref(false);
 const rejectReason = ref(localStorage.getItem("bdai_sc_reject_draft") || "");
@@ -67,6 +67,7 @@ watch(selectedEntry, (entry) => {
   cancelConfirmOpen.value = false;
   closeStudentDetail();
   if (!entry) return;
+  markEntryRead(entry.id);
   if (entry.categoryKey === "approved" || entry.categoryKey === "rejected") {
     markProcessedEntryRead(entry.id);
   }

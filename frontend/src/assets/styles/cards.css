@@ -140,6 +140,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   min-height: 24px;
   padding: 0 10px;
   border-radius: 999px;
@@ -152,6 +153,28 @@
   text-transform: uppercase;
   transform-origin: left center;
   box-shadow: 0 2px 8px rgba(100, 12, 114, 0.06);
+}
+
+.menu-mark-all-read {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(100, 12, 114, 0.12);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.menu-mark-all-read:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
 .menu-card-body {
@@ -533,6 +556,14 @@
   background: #e53e3e;
   flex-shrink: 0;
   box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2);
+}
+
+.menu-notification-item.is-read {
+  opacity: 0.6;
+}
+
+.menu-notification-item.is-read:hover {
+  opacity: 0.85;
 }
 
 .menu-notification-badge {
