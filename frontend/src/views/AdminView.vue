@@ -642,7 +642,7 @@ function addTeacherAssignedClass() {
     return;
   }
   editModal.form.assignedClasses.push(className);
-  editModal.form.newClassYear = "";
+  editModal.form.newClassYear = 2024;
   editModal.form.newClassMajor = "";
   editModal.form.newClassNo = 1;
   editModal.error = "";
