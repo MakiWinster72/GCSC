@@ -609,6 +609,7 @@ import {
 } from "../api/achievements";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { uploadMedia } from "../api/upload";
+import { useUploadProgress } from "../composables/useUploadProgress";
 import { renderDocx } from "../utils/docxRenderer";
 import { renderSheet } from "../utils/sheetRenderer";
 import { renderPdf } from "../utils/pdfRenderer";
@@ -659,6 +660,7 @@ const { submitAchievementReviewRequest, findPendingAchievementReview } =
 const { settings: reviewSettings, fetchSettings: fetchReviewSettings } =
   useReviewSettings();
 const { info: toastInfo } = useToast();
+const { uploadWithProgress } = useUploadProgress();
 const activeMenu = ref("achievements");
 const editorOpen = ref(false);
 const hintCollapsed = ref(false);
@@ -1232,7 +1234,7 @@ async function onImageChange(event) {
       continue;
     }
     try {
-      const { data } = await uploadMedia(file, {
+      const { data } = await uploadWithProgress(file, uploadMedia, {
         context: "achievement-image",
       });
       if (data?.url) {
@@ -1268,7 +1270,7 @@ async function onAttachmentChange(event) {
       continue;
     }
     try {
-      const { data } = await uploadMedia(file, {
+      const { data } = await uploadWithProgress(file, uploadMedia, {
         context: "achievement-attachment",
       });
       if (data?.url) {

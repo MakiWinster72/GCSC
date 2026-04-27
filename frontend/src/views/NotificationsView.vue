@@ -7,12 +7,14 @@ import { API_BASE } from "../api/request";
 import { useNotifications } from "../composables/useNotifications";
 import { searchStudentProfiles, getStudentProfileById } from "../api/profile";
 import { uploadMedia } from "../api/upload";
+import { useUploadProgress } from "../composables/useUploadProgress";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { resolveMediaUrl } from "../utils/media";
 import { loadUser } from "../utils/userStorage";
 import { useToast } from "../composables/useToast";
 
 const { error: toastError } = useToast();
+const { uploadWithProgress } = useUploadProgress();
 const { settings: uploadLimits } = useAchievementUploadSettings();
 
 const route = useRoute();
@@ -273,7 +275,7 @@ async function handleSupportingDocUpload(file) {
   }
   supportingDocsUploading.value = true;
   try {
-    const { data: uploaded } = await uploadMedia(file, { context: "review-supporting" });
+    const { data: uploaded } = await uploadWithProgress(file, uploadMedia, { context: "review-supporting" });
     if (!uploaded?.success || !uploaded?.url) {
       throw new Error("上传失败，请稍后重试");
     }

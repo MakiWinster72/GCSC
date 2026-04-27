@@ -984,6 +984,7 @@ import {
 import { regionData, codeToText } from "element-china-area-data";
 import { getStudentProfile, saveStudentProfile } from "../api/profile";
 import { uploadMedia } from "../api/upload";
+import { useUploadProgress } from "../composables/useUploadProgress";
 import { API_BASE } from "../api/request";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { resolveMediaUrl } from "../utils/media";
@@ -1019,6 +1020,7 @@ const savedProfileData = ref(null);
 const { submitProfileReviewRequest, updateReviewRequestStatus, fetchProfileReviewRequests, hasPendingProfileReviewRequest } = useNotifications(profile);
 const { settings: reviewSettings, fetchSettings: fetchReviewSettings } = useReviewSettings();
 const { success: toastSuccess, error: toastError } = useToast();
+const { uploadWithProgress } = useUploadProgress();
 
 const info = reactive({
   name: profile.displayName || profile.username || "",
@@ -1822,7 +1824,7 @@ async function onAvatarChange(event) {
     return;
   }
   try {
-    const { data } = await uploadMedia(file);
+    const { data } = await uploadWithProgress(file, uploadMedia);
     if (data?.mediaType !== "IMAGE") {
       return;
     }
