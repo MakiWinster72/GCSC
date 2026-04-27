@@ -135,7 +135,9 @@ public class StudentProfileService {
         profile.setFullMemberDeveloping(request.getFullMemberDeveloping());
         profile.setEmergencyPhone(normalize(request.getEmergencyPhone()));
         profile.setEmergencyRelation(normalize(request.getEmergencyRelation()));
-        profile.setHkMoTw(request.getHkMoTw());
+        profile.setIsHk(request.getIsHk());
+        profile.setIsMo(request.getIsMo());
+        profile.setIsTw(request.getIsTw());
         profile.setSpecialStudent(request.getSpecialStudent());
         profile.setFatherName(normalize(request.getFatherName()));
         profile.setFatherPhone(normalize(request.getFatherPhone()));
@@ -162,7 +164,9 @@ public class StudentProfileService {
         String classNo,
         String college,
         String major,
-        Boolean hkMoTw,
+        Boolean isHk,
+        Boolean isMo,
+        Boolean isTw,
         Boolean specialStudent,
         String specialStudentType,
         String studentCategory,
@@ -178,7 +182,9 @@ public class StudentProfileService {
             normalize(classNo),
             normalize(college),
             normalize(major),
-            hkMoTw,
+            isHk,
+            isMo,
+            isTw,
             specialStudent,
             normalize(specialStudentType),
             normalize(studentCategory),
@@ -257,7 +263,9 @@ public class StudentProfileService {
             profile != null ? profile.getFullMemberDeveloping() : null,
             profile != null ? profile.getEmergencyPhone() : null,
             profile != null ? profile.getEmergencyRelation() : null,
-            profile != null ? profile.getHkMoTw() : null,
+            profile != null ? profile.getIsHk() : null,
+            profile != null ? profile.getIsMo() : null,
+            profile != null ? profile.getIsTw() : null,
             profile != null ? profile.getSpecialStudent() : null,
             profile != null ? profile.getFatherName() : null,
             profile != null ? profile.getFatherPhone() : null,

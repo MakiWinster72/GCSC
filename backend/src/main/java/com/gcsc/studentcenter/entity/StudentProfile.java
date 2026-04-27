@@ -161,8 +161,14 @@ public class StudentProfile {
     @Column(name = "emergency_relation", length = 32)
     private String emergencyRelation;
 
-    @Column(name = "is_hk_mo_tw")
-    private Boolean hkMoTw;
+    @Column(name = "is_hk")
+    private Boolean isHk;
+
+    @Column(name = "is_mo")
+    private Boolean isMo;
+
+    @Column(name = "is_tw")
+    private Boolean isTw;
 
     @Column(name = "is_special")
     private Boolean specialStudent;
@@ -574,12 +580,28 @@ public class StudentProfile {
         this.emergencyRelation = emergencyRelation;
     }
 
-    public Boolean getHkMoTw() {
-        return hkMoTw;
+    public Boolean getIsHk() {
+        return isHk;
     }
 
-    public void setHkMoTw(Boolean hkMoTw) {
-        this.hkMoTw = hkMoTw;
+    public void setIsHk(Boolean isHk) {
+        this.isHk = isHk;
+    }
+
+    public Boolean getIsMo() {
+        return isMo;
+    }
+
+    public void setIsMo(Boolean isMo) {
+        this.isMo = isMo;
+    }
+
+    public Boolean getIsTw() {
+        return isTw;
+    }
+
+    public void setIsTw(Boolean isTw) {
+        this.isTw = isTw;
     }
 
     public Boolean getSpecialStudent() {

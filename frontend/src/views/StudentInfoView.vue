@@ -99,8 +99,16 @@
           <div class="student-filter-meta">
             <div class="student-filter-flags">
               <label class="info-choice">
-                <input v-model="filters.isHkMoTw" type="checkbox" />
-                港澳台
+                <input v-model="filters.isHk" type="checkbox" />
+                香港
+              </label>
+              <label class="info-choice">
+                <input v-model="filters.isMo" type="checkbox" />
+                澳门
+              </label>
+              <label class="info-choice">
+                <input v-model="filters.isTw" type="checkbox" />
+                台湾
               </label>
               <div class="student-special-filter">
                 <span class="info-label" style="margin-right: 6px;">特殊学生</span>
@@ -206,6 +214,9 @@
               <div class="student-meta">
                 {{ item.gradeYear }}级 {{ item.major }}{{ item.classNo }}班
                 {{ item.studentNo }}
+              </div>
+              <div v-if="item.isHk || item.isMo || item.isTw" class="student-hkmo-badge">
+                {{ getHkMoTwLabel(item) }}
               </div>
               <div v-if="item.specialStudentType" class="student-special-badge">
                 {{ getSpecialStudentTypeLabel(item.specialStudentType) }}
@@ -622,7 +633,9 @@ const filters = reactive({
   studentCategory: "",
   major: "",
   classNo: "",
-  isHkMoTw: false,
+  isHk: false,
+  isMo: false,
+  isTw: false,
   specialStudentType: "",
   keyword: "",
 });
@@ -708,7 +721,9 @@ const exportGroups = [
       { key: "motherPhone", label: "母亲电话" },
       { key: "motherWorkUnit", label: "母亲工作单位" },
       { key: "motherTitle", label: "母亲职务" },
-      { key: "hkMoTw", label: "港澳台" },
+      { key: "isHk", label: "香港" },
+      { key: "isMo", label: "澳门" },
+      { key: "isTw", label: "台湾" },
       { key: "specialStudent", label: "特殊学生" },
     ],
   },
@@ -789,7 +804,7 @@ const familyRows = computed(() => {
     ["motherName", "motherPhone", "motherWorkUnit", "motherTitle"]
       .map((key) => byKey[key])
       .filter(Boolean),
-    ["hkMoTw", "specialStudent"].map((key) => byKey[key]).filter(Boolean),
+    ["isHk", "isMo", "isTw", "specialStudent"].map((key) => byKey[key]).filter(Boolean),
   ];
 });
 
@@ -806,7 +821,7 @@ const hasActiveFilters = computed(() => {
     filters.studentCategory ||
     filters.major ||
     filters.classNo ||
-    filters.isHkMoTw ||
+    filters.isHk || filters.isMo || filters.isTw ||
     filters.specialStudentType ||
     filters.keyword,
   );
@@ -846,7 +861,9 @@ watch(
     studentCategory: filters.studentCategory,
     major: filters.major,
     classNo: filters.classNo,
-    isHkMoTw: filters.isHkMoTw,
+    isHk: filters.isHk,
+    isMo: filters.isMo,
+    isTw: filters.isTw,
     specialStudentType: filters.specialStudentType,
     keyword: filters.keyword,
   }),
@@ -907,7 +924,9 @@ async function fetchStudents() {
       major: item.classMajor || "",
       classNo: item.classNo || "",
       studentNo: item.studentNo || "",
-      hkMoTw: item.hkMoTw || false,
+      isHk: item.isHk || false,
+      isMo: item.isMo || false,
+      isTw: item.isTw || false,
       specialStudent: item.specialStudent || false,
       specialStudentType: item.specialStudentType || "",
     }));
@@ -1132,6 +1151,14 @@ function getSpecialStudentTypeLabel(type) {
   return specialStudentTypeLabelMap[type] || type || "";
 }
 
+function getHkMoTwLabel(item) {
+  const parts = [];
+  if (item.isHk) parts.push("香港");
+  if (item.isMo) parts.push("澳门");
+  if (item.isTw) parts.push("台湾");
+  return parts.join(" / ");
+}
+
 function handleViewProfileSaved(data) {
   if (!data) {
     return;
@@ -1151,7 +1178,9 @@ function handleViewProfileSaved(data) {
       major: data.classMajor || "",
       classNo: data.classNo || "",
       studentNo: data.studentNo || "",
-      hkMoTw: data.hkMoTw || false,
+      isHk: data.isHk || false,
+      isMo: data.isMo || false,
+      isTw: data.isTw || false,
       specialStudent: data.specialStudent || false,
       specialStudentType: data.specialStudentType || "",
     };
@@ -1210,7 +1239,9 @@ function resetFilters() {
   filters.studentCategory = "";
   filters.major = "";
   filters.classNo = "";
-  filters.isHkMoTw = false;
+  filters.isHk = false;
+  filters.isMo = false;
+  filters.isTw = false;
   filters.specialStudentType = "";
   filters.keyword = "";
 }
@@ -1232,8 +1263,14 @@ function buildSearchParams(page, size) {
   if (filters.classNo) {
     params.classNo = Number(filters.classNo);
   }
-  if (filters.isHkMoTw) {
-    params.hkMoTw = true;
+  if (filters.isHk) {
+    params.isHk = true;
+  }
+  if (filters.isMo) {
+    params.isMo = true;
+  }
+  if (filters.isTw) {
+    params.isTw = true;
   }
   if (filters.specialStudentType) {
     params.specialStudentType = filters.specialStudentType;
@@ -1325,7 +1362,9 @@ const MAIN_FIELD_ORDER = [
   "motherPhone",
   "motherWorkUnit",
   "motherTitle",
-  "hkMoTw",
+  "isHk",
+  "isMo",
+  "isTw",
   "specialStudent",
   "emergencyPhone",
   "emergencyRelation",
@@ -1372,7 +1411,9 @@ const MAIN_FIELD_META = {
     getter: (item) => item.dormBuilding || "",
   },
   dormRoom: { label: "住宿房间", getter: (item) => item.dormRoom || "" },
-  hkMoTw: { label: "港澳台", getter: (item) => (item.hkMoTw ? "是" : "否") },
+  isHk: { label: "香港", getter: (item) => (item.isHk ? "是" : "否") },
+  isMo: { label: "澳门", getter: (item) => (item.isMo ? "是" : "否") },
+  isTw: { label: "台湾", getter: (item) => (item.isTw ? "是" : "否") },
   specialStudent: {
     label: "特殊学生",
     getter: (item) => (item.specialStudent ? "是" : "否"),

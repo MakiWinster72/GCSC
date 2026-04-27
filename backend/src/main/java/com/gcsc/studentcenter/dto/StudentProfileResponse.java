@@ -53,7 +53,9 @@ public class StudentProfileResponse {
     private Boolean fullMemberDeveloping;
     private String emergencyPhone;
     private String emergencyRelation;
-    private Boolean hkMoTw;
+    private Boolean isHk;
+    private Boolean isMo;
+    private Boolean isTw;
     private Boolean specialStudent;
     private String fatherName;
     private String fatherPhone;
@@ -118,7 +120,9 @@ public class StudentProfileResponse {
         Boolean fullMemberDeveloping,
         String emergencyPhone,
         String emergencyRelation,
-        Boolean hkMoTw,
+        Boolean isHk,
+        Boolean isMo,
+        Boolean isTw,
         Boolean specialStudent,
         String fatherName,
         String fatherPhone,
@@ -182,7 +186,9 @@ public class StudentProfileResponse {
         this.fullMemberDeveloping = fullMemberDeveloping;
         this.emergencyPhone = emergencyPhone;
         this.emergencyRelation = emergencyRelation;
-        this.hkMoTw = hkMoTw;
+        this.isHk = isHk;
+        this.isMo = isMo;
+        this.isTw = isTw;
         this.specialStudent = specialStudent;
         this.fatherName = fatherName;
         this.fatherPhone = fatherPhone;
@@ -394,8 +400,16 @@ public class StudentProfileResponse {
         return emergencyRelation;
     }
 
-    public Boolean getHkMoTw() {
-        return hkMoTw;
+    public Boolean getIsHk() {
+        return isHk;
+    }
+
+    public Boolean getIsMo() {
+        return isMo;
+    }
+
+    public Boolean getIsTw() {
+        return isTw;
     }
 
     public Boolean getSpecialStudent() {

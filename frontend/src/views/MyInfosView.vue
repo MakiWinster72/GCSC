@@ -1077,6 +1077,12 @@ const info = reactive({
   fullMemberDeveloping: false,
   emergencyPhone: "",
   emergencyRelation: "",
+  isHk: false,
+  isMo: false,
+  isTw: false,
+  specialStudent: false,
+  specialStudentType: "",
+  specialStudentRemark: "",
   fatherName: "",
   fatherPhone: "",
   fatherWorkUnit: "",
@@ -1123,6 +1129,22 @@ const idTypeOptions = [
 ];
 
 function detectIdType(raw) {
+  if (!raw) return null;
+  const cleaned = raw.toUpperCase().replace(/[^0-9A-Z]/g, "");
+  if (!cleaned) return null;
+  // 港澳居民来往内地通行证: H/M + 8 digits
+  if (/^[HM]\d{8}$/.test(cleaned)) return "港澳居民来往内地通行证";
+  // 普通护照: E + 8 digits
+  if (/^E\d{8}$/.test(cleaned)) return "普通护照";
+  // 18-digit: 居民身份证, 台湾居民居住证(83), 港澳居民居住证(81/82), 外国人永久居留身份证
+  if (/^\d{17}[\dX]$/.test(cleaned)) {
+    if (cleaned.startsWith("83")) return "台湾居民居住证";
+    if (cleaned.startsWith("81") || cleaned.startsWith("82")) return "港澳居民居住证";
+    return "居民身份证";
+  }
+  // 8-digit: 台湾居民来往大陆通行证(台胞证)
+  // Must NOT start with 81/82/83 — those are partial 18-digit residence permits
+  if (/^\d{8}$/.test(cleaned) && !/^8[123]/.test(cleaned)) return "台湾居民来往大陆通行证";
   return null;
 }
 const dormCampusOptions = ["佛山校区", "广州校区"];
@@ -1165,6 +1187,12 @@ const PROFILE_CHANGE_FIELDS = [
   { key: "fullMemberDate", label: "转正时间", section: "党团信息" },
   { key: "emergencyPhone", label: "紧急联系人电话", section: "家庭信息" },
   { key: "emergencyRelation", label: "与紧急联系人关系", section: "家庭信息" },
+  { key: "isHk", label: "香港身份", section: "身份信息" },
+  { key: "isMo", label: "澳门身份", section: "身份信息" },
+  { key: "isTw", label: "台湾身份", section: "身份信息" },
+  { key: "specialStudent", label: "特殊学生", section: "身份信息" },
+  { key: "specialStudentType", label: "特殊学生类型", section: "身份信息" },
+  { key: "specialStudentRemark", label: "特殊学生备注", section: "身份信息" },
   { key: "fatherName", label: "父亲姓名", section: "家庭信息" },
   { key: "fatherPhone", label: "父亲电话", section: "家庭信息" },
   { key: "fatherWorkUnit", label: "父亲工作单位", section: "家庭信息" },
@@ -1922,6 +1950,12 @@ async function confirmEdit() {
     motherPhone: info.motherPhone,
     motherWorkUnit: info.motherWorkUnit,
     motherTitle: info.motherTitle,
+    isHk: info.isHk,
+    isMo: info.isMo,
+    isTw: info.isTw,
+    specialStudent: info.specialStudent,
+    specialStudentType: info.specialStudentType || "",
+    specialStudentRemark: info.specialStudentRemark || "",
     educationExperiences,
     cadreExperiences,
   };
@@ -2116,6 +2150,12 @@ function buildPdfStudentSnapshot() {
     probationaryDeveloping: info.probationaryDeveloping,
     fullMemberDate: info.fullMemberDate,
     fullMemberDeveloping: info.fullMemberDeveloping,
+    isHk: info.isHk,
+    isMo: info.isMo,
+    isTw: info.isTw,
+    specialStudent: info.specialStudent,
+    specialStudentType: info.specialStudentType,
+    specialStudentRemark: info.specialStudentRemark,
     educationExperiences,
     cadreExperiences,
     avatarUrl: info.avatarUrl,
@@ -2195,6 +2235,12 @@ function buildCurrentProfileState() {
     motherPhone: info.motherPhone,
     motherWorkUnit: info.motherWorkUnit,
     motherTitle: info.motherTitle,
+    isHk: info.isHk,
+    isMo: info.isMo,
+    isTw: info.isTw,
+    specialStudent: info.specialStudent,
+    specialStudentType: info.specialStudentType,
+    specialStudentRemark: info.specialStudentRemark,
     educationExperiences: educationItems.map((item) => ({ ...item })),
     cadreExperiences: cadreItems.map((item) => ({ ...item })),
   };
@@ -2384,6 +2430,12 @@ function applyProfileResponse(data, options = {}) {
   info.motherPhone = data.motherPhone || "";
   info.motherWorkUnit = data.motherWorkUnit || "";
   info.motherTitle = data.motherTitle || "";
+  info.isHk = Boolean(data.isHk);
+  info.isMo = Boolean(data.isMo);
+  info.isTw = Boolean(data.isTw);
+  info.specialStudent = Boolean(data.specialStudent);
+  info.specialStudentType = data.specialStudentType || "";
+  info.specialStudentRemark = data.specialStudentRemark || "";
   applyEducationExperiences(data.educationExperiences);
   applyCadreExperiences(data.cadreExperiences);
 
@@ -2684,10 +2736,56 @@ watch(
   },
 );
 
+const TW_ID_TYPES = [
+  "台湾居民来往大陆通行证",
+  "台湾居民居住证",
+];
+const HKMO_ID_TYPES = [
+  "港澳居民来往内地通行证",
+  "港澳居民居住证",
+];
+
+function detectHkMoFromIdNo(idNo) {
+  if (!idNo) return { isHk: false, isMo: false };
+  const cleaned = idNo.toUpperCase().replace(/[^0-9A-Z]/g, "");
+  // 港澳居民来往内地通行证: H=香港, M=澳门
+  if (/^H\d{8}$/.test(cleaned)) return { isHk: true, isMo: false };
+  if (/^M\d{8}$/.test(cleaned)) return { isHk: false, isMo: true };
+  // 港澳居民居住证: 81=香港, 82=澳门
+  if (/^81\d{16}$/.test(cleaned)) return { isHk: true, isMo: false };
+  if (/^82\d{16}$/.test(cleaned)) return { isHk: false, isMo: true };
+  return { isHk: false, isMo: false };
+}
+
 watch(
   () => info.idType,
-  () => {
+  (nextType) => {
     info.idNo = "";
+    if (TW_ID_TYPES.includes(nextType)) {
+      info.isHk = false;
+      info.isMo = false;
+      info.isTw = true;
+    } else if (HKMO_ID_TYPES.includes(nextType)) {
+      info.isTw = false;
+      const detected = detectHkMoFromIdNo(info.idNo);
+      info.isHk = detected.isHk;
+      info.isMo = detected.isMo;
+    } else {
+      info.isHk = false;
+      info.isMo = false;
+      info.isTw = false;
+    }
+  },
+);
+
+watch(
+  () => info.idNo,
+  (nextIdNo) => {
+    if (HKMO_ID_TYPES.includes(info.idType)) {
+      const detected = detectHkMoFromIdNo(nextIdNo);
+      info.isHk = detected.isHk;
+      info.isMo = detected.isMo;
+    }
   },
 );
 

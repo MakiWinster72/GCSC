@@ -390,8 +390,14 @@ export function useStudentPdfExport() {
         ["母亲工作单位", student.motherWorkUnit || ""],
         ["母亲职务", student.motherTitle || ""],
       ];
-      if (student.hkMoTw !== undefined) {
-        familyRows.push(["港澳台", formatYesNo(student.hkMoTw)]);
+      if (student.isHk) {
+        familyRows.push(["香港", "是"]);
+      }
+      if (student.isMo) {
+        familyRows.push(["澳门", "是"]);
+      }
+      if (student.isTw) {
+        familyRows.push(["台湾", "是"]);
       }
       if (student.specialStudent !== undefined) {
         familyRows.push(["特殊学生", formatYesNo(student.specialStudent)]);
