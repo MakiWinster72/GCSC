@@ -411,18 +411,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 22px 12px;
-  border-radius: 14px;
+  padding: 24px 12px;
+  border-radius: 16px;
   border: 2px dashed rgba(100, 12, 114, 0.2);
-  background: var(--primary-surface);
+  background: linear-gradient(180deg, rgba(100, 12, 114, 0.06) 0%, rgba(100, 12, 114, 0.03) 100%);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .media-empty-state:hover {
-  background: rgba(100, 12, 114, 0.12);
+  background: linear-gradient(180deg, rgba(100, 12, 114, 0.12) 0%, rgba(100, 12, 114, 0.06) 100%);
   border-color: rgba(100, 12, 114, 0.35);
   transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.1);
 }
 
 .media-empty-state:active {
@@ -937,12 +938,32 @@
     transform 220ms ease,
     border-color 220ms ease;
   animation: cardEnter var(--duration-slow) var(--ease-page) both;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 卡片顶部装饰线 */
+.achievement-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(100, 12, 114, 0.2), transparent);
+  border-radius: 0 0 2px 2px;
+  opacity: 0;
+  transition: opacity 220ms ease;
 }
 
 .achievement-card:hover {
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 40px rgba(100, 12, 114, 0.18), 0 0 0 1px rgba(100, 12, 114, 0.08);
   transform: translateY(-3px);
-  border-color: var(--line-strong);
+  border-color: rgba(100, 12, 114, 0.25);
+}
+
+.achievement-card:hover::before {
+  opacity: 1;
 }
 
 .achievement-card:active {
@@ -953,11 +974,21 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 14px;
-  background: var(--card);
+  background: linear-gradient(135deg, rgba(100, 12, 114, 0.04) 0%, rgba(255, 255, 255, 0.9) 100%);
   display: grid;
   place-items: center;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.achievement-card-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(100,12,114,0.05);
+  pointer-events: none;
 }
 
 .achievement-card-image img {
@@ -970,6 +1001,9 @@
 .achievement-card-placeholder {
   color: var(--text-sub);
   font-size: 13px;
+  font-weight: 600;
+  padding: 12px;
+  text-align: center;
 }
 
 .achievement-card-body {
@@ -989,8 +1023,10 @@
   margin: 0 0 2px;
   height: auto;
   color: var(--primary-dark);
-  line-height: 1.3;
+  line-height: 1.35;
   font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.1px;
 }
 
 .achievement-award-pill {
@@ -998,12 +1034,12 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.4px;
   color: #ffffff;
   background: linear-gradient(135deg, #ff8f5a, #ff5f8f, #7b6bff);
-  box-shadow: 0 8px 16px rgba(255, 95, 143, 0.28);
+  box-shadow: 0 4px 12px rgba(255, 95, 143, 0.3);
 }
 
 .achievement-card-dates {
@@ -1133,8 +1169,8 @@
   pointer-events: none;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  background: var(--card);
-  box-shadow: 0 28px 70px rgba(100, 12, 114, 0.22);
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 100%);
+  box-shadow: 0 28px 70px rgba(100, 12, 114, 0.22), 0 0 0 1px rgba(100, 12, 114, 0.08);
   backdrop-filter: blur(12px);
   z-index: 50;
   transition:
@@ -1566,20 +1602,46 @@
 
 /* ── Achievement Intro Card ────────────────────────────── */
 .achievement-intro-card {
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid var(--line);
-  background: var(--card);
-  padding: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+  padding: 18px 20px;
   margin-bottom: 0;
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-intro-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(100, 12, 114, 0.2), transparent);
+  border-radius: 0 0 2px 2px;
 }
 
 .info-section-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--text-sub);
+  color: var(--primary);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-section-title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 6px rgba(100, 12, 114, 0.4);
 }
 
 .achievement-intro-text {
@@ -1613,6 +1675,24 @@
     box-shadow 220ms ease;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+/* 光泽扫过效果 */
+.achievement-add::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+}
+
+.achievement-add:hover::before {
+  left: 100%;
 }
 
 .achievement-add:hover {
@@ -1732,10 +1812,28 @@
 
 /* ── Empty Tip ─────────────────────────────────────────── */
 .empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   text-align: center;
-  padding: 48px 24px;
+  padding: 56px 24px;
   color: var(--text-sub);
   font-size: 14px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+  border: 1px dashed var(--line-strong);
+}
+
+.empty-tip::before {
+  content: "";
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b5a94' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='12' y1='11' x2='12' y2='17'/%3E%3Cline x1='9' y1='14' x2='15' y2='14'/%3E%3C/svg%3E") center/28px no-repeat rgba(100, 12, 114, 0.08);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(100, 12, 114, 0.08);
 }
 
 /* ── Form Tip ──────────────────────────────────────────── */
