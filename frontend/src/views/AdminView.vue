@@ -453,7 +453,7 @@ const editModal = reactive({
     // Teacher assigned classes: list of full class name strings
     assignedClasses: [],
     // New class entry fields
-    newClassYear: "",
+    newClassYear: 2024,
     newClassCategory: "本科生",
     newClassMajor: "",
     newClassNo: 1,
@@ -601,17 +601,19 @@ async function handleImportFile(e) {
 }
 
 async function openEditModal(user) {
-  editModal.user = user;
-  editModal.form.username = user.username;
+  // Always get fresh user data from users array to avoid stale reference
+  const freshUser = users.value.find(u => u.id === user.id) || user;
+  editModal.user = freshUser;
+  editModal.form.username = freshUser.username;
   editModal.form.password = "";
-  editModal.form.role = user.role;
-  editModal.form.remark = user.remark || "";
+  editModal.form.role = freshUser.role;
+  editModal.form.remark = freshUser.remark || "";
   // Load existing assigned classes for teachers
-  const existingAssigned = user.assignedClasses
-    ? user.assignedClasses.split(",").map(c => c.trim()).filter(Boolean)
+  const existingAssigned = freshUser.assignedClasses
+    ? freshUser.assignedClasses.split(",").map(c => c.trim()).filter(Boolean)
     : [];
   editModal.form.assignedClasses = existingAssigned;
-  editModal.form.newClassYear = "";
+  editModal.form.newClassYear = 2024;
   editModal.form.newClassCategory = "本科生";
   editModal.form.newClassMajor = "";
   editModal.form.newClassNo = 1;
@@ -667,18 +669,17 @@ async function handleUpdateUser() {
     if (editModal.form.remark !== (editModal.user.remark || "")) {
       data.remark = editModal.form.remark;
     }
+    const currentRole = editModal.form.role || editModal.user.role;
+    if (currentRole === "TEACHER" || currentRole === "ADMIN") {
+      data.assignedClasses = editModal.form.assignedClasses.join(",");
+    }
     if (Object.keys(data).length > 0) {
       const res = await updateUser(editModal.user.id, data);
       if (res.data.success === false) {
         editModal.error = res.data.message || "更新失败";
+        editModal.saving = false;
         return;
       }
-    }
-    // Update teacher assigned classes if role is TEACHER
-    const currentRole = editModal.form.role || editModal.user.role;
-    if (currentRole === "TEACHER") {
-      const assignedClassesStr = editModal.form.assignedClasses.join(",");
-      await updateTeacherAssignedClasses(editModal.user.id, assignedClassesStr);
     }
     await loadUsers(userCurrentPage.value);
     closeEditModal();
