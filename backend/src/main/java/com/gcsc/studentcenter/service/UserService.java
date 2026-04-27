@@ -165,6 +165,10 @@ public class UserService {
             user.setRole(request.getRole());
         }
 
+        if (request.getRemark() != null) {
+            user.setRemark(request.getRemark().trim().isEmpty() ? null : request.getRemark().trim());
+        }
+
         return userRepository.save(user);
     }
 

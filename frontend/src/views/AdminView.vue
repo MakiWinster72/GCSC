@@ -457,6 +457,7 @@ const editModal = reactive({
     newClassCategory: "本科生",
     newClassMajor: "",
     newClassNo: 1,
+    remark: "",
   },
 });
 
@@ -604,6 +605,7 @@ async function openEditModal(user) {
   editModal.form.username = user.username;
   editModal.form.password = "";
   editModal.form.role = user.role;
+  editModal.form.remark = user.remark || "";
   // Load existing assigned classes for teachers
   const existingAssigned = user.assignedClasses
     ? user.assignedClasses.split(",").map(c => c.trim()).filter(Boolean)
@@ -661,6 +663,9 @@ async function handleUpdateUser() {
     }
     if (editModal.form.role !== editModal.user.role) {
       data.role = editModal.form.role;
+    }
+    if (editModal.form.remark !== (editModal.user.remark || "")) {
+      data.remark = editModal.form.remark;
     }
     if (Object.keys(data).length > 0) {
       const res = await updateUser(editModal.user.id, data);
@@ -1221,11 +1226,12 @@ watch([userSearch, userRoleFilter], () => {
                           @change="selectAllPage"
                         />
                       </th>
-                      <th scope="col">用户名</th>
-                      <th scope="col">显示名称</th>
-                      <th scope="col">角色</th>
-                      <th scope="col">学号</th>
+                      <th scope="col" style="width: 110px;">用户名</th>
+                      <th scope="col" style="width: 100px;">显示名称</th>
+                      <th scope="col" style="width: 80px;">角色</th>
+                      <th scope="col" style="width: 120px;">学号</th>
                       <th scope="col">班级</th>
+                      <th scope="col" style="width: 100px;">备注</th>
                       <th scope="col" class="col-action"></th>
                     </tr>
                   </thead>
@@ -1248,6 +1254,7 @@ watch([userSearch, userRoleFilter], () => {
                       </td>
                       <td class="td-mono">{{ user.studentNo || '—' }}</td>
                       <td>{{ user.className || '—' }}</td>
+                      <td class="td-remark">{{ user.remark || '—' }}</td>
                       <td class="td-action">
                         <button class="icon-btn" @click.stop="openEditModal(user)" aria-label="编辑用户">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -1520,6 +1527,16 @@ watch([userSearch, userRoleFilter], () => {
               <select id="edit-role" v-model="editModal.form.role" class="modal-select">
                 <option v-for="opt in ROLE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
               </select>
+            </div>
+            <div class="modal-field">
+              <label class="modal-label" for="edit-remark">备注</label>
+              <input
+                id="edit-remark"
+                v-model="editModal.form.remark"
+                class="modal-input"
+                type="text"
+                placeholder="如：班主任、班长、团支书等"
+              />
             </div>
             <Transition name="msg-fade">
               <div v-if="editModal.form.role === 'TEACHER'" class="modal-field">
