@@ -171,8 +171,11 @@ function lerpHexColor(light, dark, t) {
 
 function updateChip(scrollY) {
   if (!chipRef.value) return;
+
   const safeTop = 'env(safe-area-inset-top, 0px)';
-  const rawTop = Math.max(CHIP_FIXED_TOP, CHIP_BANNER_TOP - scrollY);
+  const bannerTop = isMobile.value ? CHIP_BANNER_TOP : 75;
+  const fixedTop = CHIP_FIXED_TOP;
+  const rawTop = Math.max(fixedTop, bannerTop - scrollY);
   chipRef.value.style.top = `calc(${rawTop}px + ${safeTop})`;
 
   // Color transition: 0 = on dark banner, 1 = on light page
@@ -332,8 +335,8 @@ const roleLabel = computed(() => {
 /* ── Profile Chip ──────────────────────────────────────── */
 .brand-profile-chip {
   position: fixed;
-  /* top set by JS (scroll-driven); fallback for SSR / no-JS */
-  top: calc(106px + env(safe-area-inset-top, 0px));
+  /* top set by JS on mobile; CSS handles desktop */
+  top: calc(20px + env(safe-area-inset-top, 0px));
   right: calc(20px + env(safe-area-inset-right, 0px));
   z-index: 100;
   display: flex;
