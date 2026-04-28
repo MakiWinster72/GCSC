@@ -73,7 +73,7 @@
                 disabled
               />
             </label>
-            <label class="field-card">
+            <div class="field-card">
               <span class="info-label">年级</span>
               <StepperInput
                 v-model="info.classYear"
@@ -82,7 +82,7 @@
                 :disabled="!isEditing"
                 placeholder="今年"
               />
-            </label>
+            </div>
             <label class="field-card">
               <span class="info-label">学生类别</span>
               <select
