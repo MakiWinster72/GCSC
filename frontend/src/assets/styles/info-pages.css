@@ -282,7 +282,7 @@
   flex: 1;
   min-width: 0;
   border: 1px solid var(--line);
-  background: #faf9fb;
+  background-color: #faf9fb;
   color: var(--primary-dark);
   border-radius: 10px;
   height: 42px;
@@ -291,7 +291,7 @@
   outline: none;
   transition:
     border-color 160ms ease,
-    background 160ms ease,
+    background-color 160ms ease,
     box-shadow 160ms ease;
 }
 
@@ -302,7 +302,7 @@
 
 .info-input:focus {
   border-color: var(--primary);
-  background: #fff;
+  background-color: #fff;
   box-shadow: 0 0 0 3px var(--primary-surface);
 }
 
@@ -312,13 +312,30 @@
 
 .info-input:hover:not(:disabled):not(:focus) {
   border-color: var(--line-strong);
-  background: #fff;
+  background-color: #fff;
 }
 
 .info-input:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  background: #f5f3f7;
+  background-color: #f5f3f7;
+}
+
+/* ── Date Input Calendar Icon ─────────────────────────────── */
+input[type="date"].info-input {
+  background-image: url("/assets/icons/calendar.svg");
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px;
+}
+
+/* Hide native webkit picker icon — our calendar icon shows through */
+input[type="date"].info-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 /* ── Info Inline ────────────────────────────────────────── */
