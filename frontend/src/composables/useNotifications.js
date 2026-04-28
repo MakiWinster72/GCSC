@@ -17,7 +17,19 @@ import {
   submitProfileReviewRequestApi,
 } from "../api/profileReviewRequests";
 
-const STORAGE_KEY = "bdai_sc_notification_center";
+const STORAGE_BASE = "bdai_sc_notification_center";
+
+function getStorageKey() {
+  try {
+    const token = localStorage.getItem("bdai_sc_token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const user = payload.sub || payload.username || "unknown";
+      return `${STORAGE_BASE}_${user}`;
+    }
+  } catch { /* fallback */ }
+  return STORAGE_BASE;
+}
 const DEFAULT_DELAYED_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
 const CATEGORY_LABELS = {
   contest: "学科竞赛、文体艺术",
@@ -50,8 +62,9 @@ function ensureLoaded() {
     return;
   }
   store.loaded = true;
+  const key = getStorageKey();
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const raw = JSON.parse(localStorage.getItem(key) || "{}");
     store.notifications = Array.isArray(raw.notifications)
       ? raw.notifications
       : [];
@@ -67,8 +80,9 @@ function persistStore() {
   if (typeof window === "undefined") {
     return;
   }
+  const key = getStorageKey();
   localStorage.setItem(
-    STORAGE_KEY,
+    key,
     JSON.stringify({
       notifications: store.notifications,
       processedReadIds: [...store.processedReadIds],
