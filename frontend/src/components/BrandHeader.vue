@@ -1,17 +1,19 @@
 <template>
-  <header class="brand-header" ref="headerRef">
-    <!-- Left: Logo + Wordmark -->
-    <div class="brand-logo-group">
-      <img src="/assets/icons/xylogo.png" alt="XY" class="brand-logo-icon" />
-      <img
-        src="/assets/icons/xylogo_with_text.png"
-        alt="大数据与人工智能学院"
-        class="brand-logo-text"
-      />
-    </div>
+  <div class="brand-header-wrapper">
+    <header class="brand-header" ref="headerRef">
+      <!-- Left: Logo + Wordmark -->
+      <div class="brand-logo-group">
+        <img src="/assets/icons/xylogo.png" alt="XY" class="brand-logo-icon" />
+        <img
+          src="/assets/icons/xylogo_with_text.png"
+          alt="大数据与人工智能学院"
+          class="brand-logo-text"
+        />
+      </div>
+    </header>
 
-    <!-- Right: User Profile Chip -->
-    <div class="brand-profile-chip">
+    <!-- Right: User Profile Chip (outside header to avoid transform taint) -->
+    <div ref="chipRef" class="brand-profile-chip">
       <!-- Avatar -->
       <div class="chip-avatar">
         <img
@@ -66,7 +68,7 @@
         </button>
       </div>
     </div>
-  </header>
+  </div>
 </template>
 
 <script setup>
@@ -83,34 +85,90 @@ const props = defineProps({
 defineEmits(["settings-click", "menu-click"]);
 
 const headerRef = ref(null);
+const chipRef = ref(null);
 const isHidden = ref(false);
 
+// Chip scroll-driven positioning
+// Natural chip position within banner (banner 180px, padding-bottom 45px, chip 58px):
+//   180 - 45 - 29 = 106px from viewport top
+const CHIP_BANNER_TOP = 106;
+const CHIP_FIXED_TOP = 20;
+const COLOR_START = 40;  // scrollY where chip color starts leaving banner
+const COLOR_END = 140;   // scrollY where chip is fully on light bg
+
 // Scroll-out threshold: 20% of viewport height
-const SCROLL_THRESHOLD = 0.2; // 20vh
+const SCROLL_THRESHOLD = 0.2;
+
+function lerp(a, b, t) {
+  return a + (b - a) * Math.min(1, Math.max(0, t));
+}
+
+function lerpChannel(hexA, hexB, t) {
+  // hexA, hexB like "ff", "2d"
+  return Math.round(lerp(parseInt(hexA, 16), parseInt(hexB, 16), t));
+}
+
+function lerpHexColor(light, dark, t) {
+  // light, dark: hex strings without #, e.g. "ffffff", "2d1a3e"
+  const r = lerpChannel(light.substring(0, 2), dark.substring(0, 2), t);
+  const g = lerpChannel(light.substring(2, 4), dark.substring(2, 4), t);
+  const b = lerpChannel(light.substring(4, 6), dark.substring(4, 6), t);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function updateChip(scrollY) {
+  if (!chipRef.value) return;
+  const safeTop = 'env(safe-area-inset-top, 0px)';
+  const rawTop = Math.max(CHIP_FIXED_TOP, CHIP_BANNER_TOP - scrollY);
+  chipRef.value.style.top = `calc(${rawTop}px + ${safeTop})`;
+
+  // Color transition: 0 = on dark banner, 1 = on light page
+  const cp = (scrollY - COLOR_START) / (COLOR_END - COLOR_START);
+  const t = Math.min(1, Math.max(0, cp));
+
+  const nameColor = lerpHexColor('ffffff', '2d1a3e', t);
+  const subColor = lerpHexColor('ffffff', '5c5266', t);
+  const ghostColor = lerpHexColor('ffffff', '2d1a3e', t);
+  const borderColor = t > 0.5
+    ? `rgba(${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${lerp(0.18, 0.095, t).toFixed(3)})`
+    : `rgba(255, 255, 255, ${lerp(0.18, 0.095, t).toFixed(3)})`;
+  const bgAlpha = lerp(0.10, 0.68, t).toFixed(3);
+  const shadowAlpha = lerp(0.30, 0.08, t).toFixed(3);
+  const dividerAlpha = lerp(0.12, 0.08, t).toFixed(3);
+
+  const el = chipRef.value;
+  el.style.setProperty('--chip-name-color', nameColor);
+  el.style.setProperty('--chip-sub-color', subColor);
+  el.style.setProperty('--chip-ghost-color', ghostColor);
+  el.style.setProperty('--chip-border-color', borderColor);
+  el.style.setProperty('--chip-bg-alpha', bgAlpha);
+  el.style.setProperty('--chip-shadow-alpha', shadowAlpha);
+  el.style.setProperty('--chip-divider-alpha', dividerAlpha);
+
+  // Settings icon: invert(1) = white on banner, invert(0) = dark on light bg
+  el.style.setProperty('--chip-icon-invert', (1 - t).toFixed(3));
+}
 
 function onScroll() {
   const scrollY = window.scrollY;
   const vh = window.innerHeight;
 
-  // Phase 1: scrolling 0 → THRESHOLD — header stays visible (sticky)
-  // Phase 2: scrolling THRESHOLD → 100vh — header slides out proportionally
+  updateChip(scrollY);
+
   const progress =
     Math.min(1, scrollY / vh - SCROLL_THRESHOLD) / (1 - SCROLL_THRESHOLD);
 
   if (!headerRef.value) return;
 
   if (progress >= 1) {
-    // Fully scrolled past — snap to hidden
     headerRef.value.style.transform = "translateY(-100%)";
     headerRef.value.style.opacity = "0";
     isHidden.value = true;
   } else if (progress > 0) {
-    // Scroll-linked slide-out
     headerRef.value.style.transform = `translateY(-${progress * 100}%)`;
     headerRef.value.style.opacity = `${1 - progress}`;
     isHidden.value = false;
   } else {
-    // Initial sticky zone
     headerRef.value.style.transform = "";
     headerRef.value.style.opacity = "";
     isHidden.value = false;
@@ -138,6 +196,11 @@ const roleLabel = computed(() => {
 </script>
 
 <style scoped>
+/* ── Header Wrapper ──────────────────────────────────────── */
+.brand-header-wrapper {
+  margin: -28px -28px 0;
+}
+
 /* ── Header Shell ──────────────────────────────────────── */
 .brand-header {
   display: flex;
@@ -145,7 +208,6 @@ const roleLabel = computed(() => {
   justify-content: space-between;
   padding: 0 30px 45px;
   height: 180px;
-  margin: -28px -28px 0;
   background-image: url("/assets/statics/banner.png");
   background-size: cover;
   background-position: center;
@@ -202,30 +264,35 @@ const roleLabel = computed(() => {
 
 /* ── Profile Chip ──────────────────────────────────────── */
 .brand-profile-chip {
+  position: fixed;
+  /* top set by JS (scroll-driven); fallback for SSR / no-JS */
+  top: calc(106px + env(safe-area-inset-top, 0px));
+  right: calc(20px + env(safe-area-inset-right, 0px));
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 0;
   height: 58px;
   padding: 7px 10px 7px 7px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  /* custom properties override as chip leaves banner */
+  background: rgba(255, 255, 255, var(--chip-bg-alpha, 0.1));
+  border: 1px solid var(--chip-border-color, rgba(255, 255, 255, 0.18));
   border-radius: 999px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 4px 20px rgba(0, 0, 0, var(--chip-shadow-alpha, 0.3)),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  position: relative;
-  z-index: 2;
   transition:
     background 200ms ease,
-    box-shadow 200ms ease;
+    box-shadow 200ms ease,
+    border-color 200ms ease;
 }
 
 .brand-profile-chip:hover {
-  background: rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, calc(var(--chip-bg-alpha, 0.1) + 0.04));
   box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.25),
+    0 6px 20px rgba(0, 0, 0, calc(var(--chip-shadow-alpha, 0.3) * 0.85)),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -268,14 +335,14 @@ const roleLabel = computed(() => {
 .chip-name {
   font-size: 16px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--chip-name-color, rgba(255, 255, 255, 0.95));
   line-height: 1.2;
   letter-spacing: 0.01em;
 }
 
 .chip-role {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--chip-sub-color, rgba(255, 255, 255, 0.5));
   line-height: 1;
 }
 
@@ -283,7 +350,7 @@ const roleLabel = computed(() => {
 .chip-divider {
   width: 1px;
   height: 29px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, var(--chip-divider-alpha, 0.12));
   margin: 0 4px;
   flex-shrink: 0;
 }
@@ -347,18 +414,137 @@ const roleLabel = computed(() => {
   height: 36px;
   padding: 0;
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--chip-ghost-color, rgba(255, 255, 255, 0.6));
 }
 
 .chip-btn--ghost:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--chip-ghost-color, rgba(255, 255, 255, 0.9));
+  opacity: 0.85;
 }
 
 .settings-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  filter: brightness(0) invert(1);
+  /* invert(1)=white on dark banner → invert(0)=dark on light bg */
+  filter: brightness(0) invert(var(--chip-icon-invert, 1));
+}
+
+/* ── Mobile: shrink chip ────────────────────────────── */
+@media (max-width: 720px) {
+  .brand-profile-chip {
+    height: 50px;
+    padding: 5px 9px 5px 5px;
+    right: calc(14px + env(safe-area-inset-right, 0px));
+  }
+
+  .chip-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+
+  .chip-info {
+    padding: 0 10px 0 10px;
+    gap: 1px;
+  }
+
+  .chip-name {
+    font-size: 14px;
+  }
+
+  .chip-role {
+    font-size: 11px;
+  }
+
+  .chip-divider {
+    height: 24px;
+    margin: 0 3px;
+  }
+
+  .chip-btn--primary {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    gap: 5px;
+  }
+
+  .chip-btn--primary svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .chip-btn--ghost {
+    width: 32px;
+    height: 32px;
+  }
+
+  .settings-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .chip-actions {
+    gap: 4px;
+    padding-left: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-profile-chip {
+    height: 44px;
+    padding: 4px 7px 4px 4px;
+    right: calc(10px + env(safe-area-inset-right, 0px));
+  }
+
+  .chip-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .chip-info {
+    padding: 0 7px 0 7px;
+  }
+
+  .chip-name {
+    font-size: 13px;
+  }
+
+  .chip-role {
+    font-size: 10px;
+  }
+
+  .chip-divider {
+    height: 20px;
+  }
+
+  .chip-btn--primary {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .chip-btn--primary svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .chip-btn--ghost {
+    width: 30px;
+    height: 30px;
+  }
+
+  .settings-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .chip-actions {
+    gap: 3px;
+    padding-left: 2px;
+  }
 }
 </style>
