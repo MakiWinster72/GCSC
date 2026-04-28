@@ -241,7 +241,7 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 18px;
-  padding: 8px 18px 96px;
+  padding: 8px 18px 24px;
   overflow: hidden;
   overflow-y: auto;
   flex: 1;
