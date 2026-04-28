@@ -659,7 +659,7 @@ const { submitAchievementReviewRequest, findPendingAchievementReview } =
   useNotifications(profile);
 const { settings: reviewSettings, fetchSettings: fetchReviewSettings } =
   useReviewSettings();
-const { info: toastInfo } = useToast();
+const { info: toastInfo, warn: toastWarn } = useToast();
 const { uploadWithProgress } = useUploadProgress();
 const activeMenu = ref("achievements");
 const editorOpen = ref(false);
@@ -944,14 +944,14 @@ function resetForm() {
 async function saveAchievement() {
   const config = activeFormConfig.value;
   if (!config) {
-    errorMessage.value = "请先选择成果分类";
+    toastWarn("请先选择成果分类");
     return;
   }
   const category =
     form.category ||
     (activeCategory.value === "all" ? "" : activeCategory.value);
   if (!category) {
-    errorMessage.value = "请先选择成果分类";
+    toastWarn("请先选择成果分类");
     return;
   }
   const titleKey = config.titleKey;
