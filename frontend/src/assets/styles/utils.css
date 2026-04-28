@@ -123,6 +123,7 @@
   justify-content: center;
   margin-top: 24px;
   padding: 0 12px 6px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
 }
 
@@ -307,6 +308,7 @@
     bottom: 12px;
     margin-top: 18px;
     padding: 0 6px 4px;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   }
 
   .edit-dock-inner {

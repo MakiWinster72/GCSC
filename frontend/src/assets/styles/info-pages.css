@@ -828,22 +828,93 @@
   .info-inline-date .info-input {
     min-width: 0;
   }
+
+  /* ── Address inline: stack selects on tablet ─────────── */
+  .address-inline {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .address-inline .info-input {
+    width: 100%;
+  }
 }
 
 @media (max-width: 720px) {
   .info-hero {
     grid-template-columns: 1fr;
     grid-template-rows: none;
+    padding: 18px 20px;
+    gap: 14px;
+    justify-items: center;
+    text-align: center;
   }
 
   .avatar-square {
     width: min(120px, 100%);
   }
 
-  .info-actions {
-    flex-direction: column;
+  .info-hero-text {
+    text-align: center;
   }
 
+  .info-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* ── Cards: reduce padding on phones ─────────────── */
+  .info-shell {
+    gap: 18px;
+  }
+
+  .info-card {
+    padding: 18px 20px;
+  }
+
+  /* ── Form grids: single column for dates/selects ─── */
+  .info-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-form-grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  .family-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Inline fields: wrap on phones ──────────────── */
+  .class-inline {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .class-inline .info-input:first-child {
+    flex: 2 0 140px;
+  }
+
+  .class-num {
+    max-width: 80px;
+  }
+
+  .id-type-inline {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .id-type-inline select {
+    flex: 1 0 140px;
+    min-width: 0;
+  }
+
+  .id-type-inline input {
+    flex: 2 0 180px;
+    min-width: 0;
+  }
+
+  /* ── Education / Cadre records ───────────────────── */
   .record-grid-education,
   .record-grid-cadre {
     grid-template-columns: 1fr;
@@ -869,6 +940,12 @@
     padding-bottom: 20px;
   }
 
+  /* ── Section title ───────────────────────────────── */
+  .info-section-title {
+    font-size: 14px;
+  }
+
+  /* ── Dialog: bottom sheet ────────────────────────── */
   .dialog-card {
     width: calc(100vw - 32px);
     padding: 20px;
@@ -878,5 +955,114 @@
     transform: translate(-50%, 0);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-hero {
+    padding: 14px 14px;
+    gap: 12px;
+  }
+
+  .avatar-square {
+    width: min(96px, 100%);
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+
+  .info-hero-title {
+    font-size: 18px;
+  }
+
+  .info-hero-subtitle {
+    font-size: 12px;
+  }
+
+  .info-shell {
+    gap: 14px;
+  }
+
+  .info-card {
+    padding: 14px 14px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+
+  .info-form-grid {
+    gap: 12px;
+  }
+
+  /* ── Touch-friendly inputs ──────────────────────── */
+  .info-input {
+    height: 44px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  select.info-input {
+    font-size: 14px;
+  }
+
+  /* ── Labels on small screens ────────────────────── */
+  .info-label {
+    font-size: 11px;
+  }
+
+  .info-section-title {
+    font-size: 13px;
+    padding-left: 12px;
+  }
+
+  .info-section-title::before {
+    width: 3px;
+    height: 14px;
+  }
+
+  /* ── Record cards ───────────────────────────────── */
+  .record-list {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .record-card {
+    padding: 10px;
+  }
+
+  .record-grid {
+    gap: 10px;
+  }
+
+  .education-controls {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .education-control {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  /* ── Dialog card ────────────────────────────────── */
+  .dialog-card {
+    width: calc(100vw - 24px);
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .dialog-header {
+    font-size: 15px;
+  }
+
+  /* ── Ghost / action buttons in info-actions ─────── */
+  .info-actions .ghost-button,
+  .info-actions .action-button {
+    height: 42px;
+    font-size: 14px;
+  }
+
+  .info-shell-editing {
+    padding-bottom: 16px;
   }
 }

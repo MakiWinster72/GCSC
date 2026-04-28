@@ -88,7 +88,7 @@
 .mobile-capsule {
   position: fixed;
   left: 50%;
-  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   width: min(80vw, 480px);
   padding: 0;
@@ -221,9 +221,13 @@
 }
 
 @media (max-width: 840px) {
+  .dashboard-shell {
+    padding: 20px;
+  }
+
   .dashboard-layout {
     grid-template-columns: 1fr;
-    padding-bottom: 96px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   .dashboard-left {
@@ -232,5 +236,11 @@
 
   .mobile-capsule {
     display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-shell {
+    padding: 14px;
   }
 }
