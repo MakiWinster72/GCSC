@@ -347,7 +347,14 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
 }
 
 .address-inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   width: 100%;
+}
+
+.address-inline > .info-input:last-child {
+  grid-column: 1 / -1;
 }
 
 .address-detail {
@@ -850,12 +857,12 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
 
   /* ── Address inline: stack selects on tablet ─────────── */
   .address-inline {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 8px;
   }
 
-  .address-inline .info-input {
-    width: 100%;
+  .address-inline > .info-input:last-child {
+    grid-column: auto;
   }
 }
 
