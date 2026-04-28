@@ -75,13 +75,50 @@
   grid-template-columns: 1fr !important;
 }
 
-/* ── Mobile Sidebar Backdrop ────────────────────────────── */
+/* ── Mobile Sidebar ─────────────────────────────────────── */
 .mobile-sidebar-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(61, 7, 112, 0.35);
   backdrop-filter: blur(6px);
   z-index: 45;
+  animation: sidebar-backdrop-in 0.28s ease;
+}
+
+@keyframes sidebar-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-sidebar-panel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  max-width: 85vw;
+  z-index: 46;
+  padding: 16px 14px 20px;
+  overflow-y: auto;
+  background: var(--bg, #f7f4fa);
+  animation: sidebar-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-sidebar-panel .dashboard-left {
+  display: block;
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
+.mobile-sidebar-panel .dashboard-menu-scroll {
+  max-height: none;
+  overflow: visible;
+}
+
+@keyframes sidebar-panel-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
 /* ── Mobile Capsule Navigation ───────────────────────────── */

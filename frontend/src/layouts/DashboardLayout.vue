@@ -31,6 +31,30 @@
       <RouterView />
     </div>
 
+    <!-- Mobile sidebar overlay -->
+    <template v-if="sidebarOpen">
+      <div class="mobile-sidebar-backdrop" @click="closeSidebar" />
+      <div class="mobile-sidebar-panel">
+        <DashboardSidebar
+          :profile="profile"
+          :active-menu="activeMenu"
+          :active-achievement="activeAchievement"
+          :show-achievements-drawer="showAchievementsDrawer"
+          :notification-active-category="notificationActiveCategory"
+          :notification-active-entry="notificationActiveEntry"
+          :class-reviews-active-category="classReviewsActiveCategory"
+          :class-reviews-active-entry="classReviewsActiveEntry"
+          :class-review-entries="classReviewEntries"
+          @menu-click="handleMenuClick"
+          @achievement-entry-click="handleAchievementEntry"
+          @notification-entry-click="handleNotificationEntry"
+          @class-reviews-entry-click="handleClassReviewsEntry"
+          @class-reviews-category-change="handleClassReviewsCategory"
+          @settings-click="goToSettings"
+        />
+      </div>
+    </template>
+
     <ToastContainer />
     <div v-if="!isEmbedded" class="dashboard-footer-wrap">
       <AppFooter />
@@ -56,6 +80,7 @@ import { loadUser } from "../utils/userStorage";
 const router = useRouter();
 const route = useRoute();
 const profile = reactive(loadUser());
+const sidebarOpen = ref(false);
 
 const activeMenu = computed(() => getActiveMenuFromRoute(route));
 const activeAchievement = computed(() => {
@@ -112,9 +137,11 @@ watch(
 );
 
 function openSidebar() {
+  sidebarOpen.value = true;
 }
 
 function closeSidebar() {
+  sidebarOpen.value = false;
 }
 
 function handleMenuClick(key) {
