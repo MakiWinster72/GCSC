@@ -335,8 +335,8 @@ const roleLabel = computed(() => {
 /* ── Profile Chip ──────────────────────────────────────── */
 .brand-profile-chip {
   position: fixed;
-  /* top set by JS on mobile; CSS handles desktop */
-  top: calc(20px + env(safe-area-inset-top, 0px));
+  /* top set by JS on scroll; CSS sets initial position before JS runs */
+  top: calc(75px + env(safe-area-inset-top, 0px));
   right: calc(20px + env(safe-area-inset-right, 0px));
   z-index: 100;
   display: flex;
@@ -552,6 +552,10 @@ const roleLabel = computed(() => {
 @media (max-width: 840px) {
   .brand-logo-group {
     display: none;
+  }
+
+  .brand-profile-chip {
+    top: calc(106px + env(safe-area-inset-top, 0px));
   }
 
   .brand-profile-chip:not(.chip-expanded) {
