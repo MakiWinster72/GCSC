@@ -372,69 +372,46 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
   min-width: 180px;
 }
 
-/* ── Education Table ────────────────────────────────────── */
-.education-table-wrap {
-  overflow: visible;
-  border-radius: 12px;
-  background: #faf9fb;
-}
-
-/* ── Record List ────────────────────────────────────────── */
+/* ── Record List (education / cadre) ─────────────────────── */
 .record-list {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 0;
 }
 
-.record-card {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fff;
+/* Flat row: no card border, just a bottom separator */
+.record-row {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
   min-width: 0;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease;
 }
 
-.record-card:hover {
-  border-color: var(--line-strong);
-  box-shadow: 0 2px 12px rgba(100, 12, 114, 0.08);
-  transform: translateY(-1px);
+.record-row:first-child {
+  padding-top: 0;
+}
+
+.record-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .record-grid {
   display: grid;
-  gap: 14px 16px;
+  gap: 12px 14px;
   align-items: start;
 }
 
-.record-grid-education {
+.record-grid-edu {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.record-grid-cadre {
+.record-grid-cdr {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .record-field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-}
-
-.record-field-time .education-period {
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #faf9fb;
-}
-
-.record-field-full {
-  grid-column: 1 / -1;
 }
 
 .record-field-time {
@@ -445,112 +422,93 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
   grid-column: span 2;
 }
 
-.record-field-compact {
+.record-field-level,
+.record-field-witness {
   grid-column: span 1;
 }
 
-.record-field-department {
+.record-field-dept {
   grid-column: span 3;
 }
 
-.record-field-position {
+.record-field-pos {
   grid-column: span 1;
 }
 
-/* ── Education Period ───────────────────────────────────── */
-.education-period {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  min-width: 0;
+.record-field-desc {
+  grid-column: 1 / -1;
 }
 
-.education-period-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+.record-period {
+  display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
-}
-
-.record-current {
-  margin-top: 4px;
-  align-self: flex-start;
-}
-
-.education-period-row .info-input {
-  width: 100%;
+  flex-wrap: wrap;
   min-width: 0;
 }
 
-.education-sep {
+.record-period > .info-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.record-sep {
   color: var(--text-sub);
   font-size: 12px;
   white-space: nowrap;
-  text-align: center;
+  flex-shrink: 0;
 }
 
-.record-card textarea.info-input {
+.record-field textarea.info-input {
   height: auto;
   min-height: 60px;
   padding: 10px 14px;
   line-height: 1.5;
   font-size: 13px;
   resize: vertical;
-}
-
-/* ── Education Controls ─────────────────────────────────── */
-.education-controls-wrap {
-  border-top: 1px solid var(--line);
-  background: #f5f3f7;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-}
-
-.education-controls {
+}.record-controls {
   display: flex;
   justify-content: flex-start;
-  gap: 6px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding-top: 12px;
 }
 
-.education-control {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  border: 1px solid var(--line-strong);
-  background: #fff;
-  color: var(--primary);
-  font-size: 18px;
-  line-height: 1;
+.record-ctl {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
   cursor: pointer;
   transition:
-    transform 140ms ease,
     border-color 140ms ease,
     background 140ms ease,
-    box-shadow 140ms ease;
+    color 140ms ease;
 }
 
-.education-control:hover:not(:disabled) {
-  transform: translateY(-1px);
+.record-ctl:hover:not(:disabled) {
   border-color: var(--primary);
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(100, 12, 114, 0.1);
+  background: var(--primary-surface);
 }
 
-.education-control:active:not(:disabled) {
-  transform: scale(0.92);
+.record-ctl:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
-.education-control:disabled {
-  opacity: 0.4;
+.record-ctl:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
+.record-ctl-clear {
+  margin-left: auto;
+}
 /* ── Info Choice ────────────────────────────────────────── */
 .info-choice {
   display: inline-flex;
@@ -807,44 +765,29 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
     grid-template-columns: 1fr;
   }
 
-  .record-grid-education {
+  .record-grid-edu,
+  .record-grid-cdr {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .record-grid-cadre {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .record-field-full {
-    grid-column: 1 / -1;
   }
 
   .record-field-time,
   .record-field-school,
-  .record-field-department {
+  .record-field-dept {
     grid-column: 1 / -1;
   }
 
-  .record-field-compact,
-  .record-field-position {
+  .record-field-level,
+  .record-field-witness,
+  .record-field-pos {
     grid-column: span 1;
   }
 
-  .record-list {
-    padding: 12px;
+  .record-row {
+    padding: 12px 0;
   }
 
-  .record-card {
-    padding: 14px;
-  }
-
-  .education-period-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .education-sep {
-    justify-self: center;
+  .record-period {
+    flex-wrap: wrap;
   }
 
   .info-inline-date {
@@ -946,25 +889,22 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
   }
 
   /* ── Education / Cadre records ───────────────────── */
-  .record-grid-education,
-  .record-grid-cadre {
+  .record-grid-edu,
+  .record-grid-cdr {
     grid-template-columns: 1fr;
   }
 
   .record-field-time,
   .record-field-school,
-  .record-field-compact,
-  .record-field-department,
-  .record-field-position {
+  .record-field-level,
+  .record-field-witness,
+  .record-field-dept,
+  .record-field-pos {
     grid-column: 1 / -1;
   }
 
-  .record-list {
-    padding: 10px;
-  }
-
-  .record-card {
-    padding: 12px;
+  .record-row {
+    padding: 10px 0;
   }
 
   .info-shell-editing {
@@ -1050,28 +990,22 @@ input[type="date"].info-input::-webkit-calendar-picker-indicator {
   }
 
   /* ── Record cards ───────────────────────────────── */
-  .record-list {
-    padding: 8px;
-    gap: 10px;
-  }
-
-  .record-card {
-    padding: 10px;
+  .record-row {
+    padding: 10px 0;
   }
 
   .record-grid {
     gap: 10px;
   }
 
-  .education-controls {
-    padding: 8px 10px;
-    gap: 8px;
+  .record-controls {
+    padding-top: 10px;
+    gap: 6px;
   }
 
-  .education-control {
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
+  .record-ctl {
+    height: 36px;
+    font-size: 16px;
     border-radius: 10px;
   }
 

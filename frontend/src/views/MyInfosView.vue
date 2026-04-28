@@ -694,7 +694,7 @@
         <div class="card info-card">
           <div class="info-section-title">教育经历</div>
           <div class="info-hint">从小学开始填</div>
-          <div ref="educationTableWrap" class="education-table-wrap">
+          <div ref="educationTableWrap" class="record-list-wrap">
             <transition-group
               name="education-row"
               tag="div"
@@ -712,43 +712,41 @@
                 @current-change="handleEducationCurrentChange"
               />
             </transition-group>
-            <div class="education-controls-wrap">
-              <div class="education-controls">
-                <button
-                  class="education-control"
-                  type="button"
-                  :disabled="!isEditing"
-                  aria-label="增加一行"
-                  @click="addEducationRow"
-                >
-                  +
-                </button>
-                <button
-                  class="education-control"
-                  type="button"
-                  :disabled="!isEditing || educationItems.length <= 1"
-                  aria-label="减少一行"
-                  @click="removeEducationRow"
-                >
-                  −
-                </button>
-                <button
-                  class="education-control education-control-clear"
-                  type="button"
-                  :disabled="!isEditing"
-                  aria-label="清空教育经历"
-                  @click="handleClearEducation"
-                >
-                  清空
-                </button>
-              </div>
+            <div class="record-controls">
+              <button
+                class="record-ctl"
+                type="button"
+                :disabled="!isEditing"
+                aria-label="增加一行"
+                @click="addEducationRow"
+              >
+                +
+              </button>
+              <button
+                class="record-ctl"
+                type="button"
+                :disabled="!isEditing || educationItems.length <= 1"
+                aria-label="减少一行"
+                @click="removeEducationRow"
+              >
+                −
+              </button>
+              <button
+                class="record-ctl record-ctl-clear"
+                type="button"
+                :disabled="!isEditing"
+                aria-label="清空教育经历"
+                @click="handleClearEducation"
+              >
+                清空
+              </button>
             </div>
           </div>
         </div>
 
         <div class="card info-card">
           <div class="info-section-title">学生干部经历</div>
-          <div ref="cadreTableWrap" class="education-table-wrap">
+          <div ref="cadreTableWrap" class="record-list-wrap">
             <transition-group
               name="education-row"
               tag="div"
@@ -766,36 +764,34 @@
                 @current-change="handleCadreCurrentChange"
               />
             </transition-group>
-            <div class="education-controls-wrap">
-              <div class="education-controls">
-                <button
-                  class="education-control"
-                  type="button"
-                  :disabled="!isEditing"
-                  aria-label="增加一行"
-                  @click="addCadreRow"
-                >
-                  +
-                </button>
-                <button
-                  class="education-control"
-                  type="button"
-                  :disabled="!isEditing || cadreItems.length <= 1"
-                  aria-label="减少一行"
-                  @click="removeCadreRow"
-                >
-                  −
-                </button>
-                <button
-                  class="education-control education-control-clear"
-                  type="button"
-                  :disabled="!isEditing"
-                  aria-label="清空干部经历"
-                  @click="handleClearCadre"
-                >
-                  清空
-                </button>
-              </div>
+            <div class="record-controls">
+              <button
+                class="record-ctl"
+                type="button"
+                :disabled="!isEditing"
+                aria-label="增加一行"
+                @click="addCadreRow"
+              >
+                +
+              </button>
+              <button
+                class="record-ctl"
+                type="button"
+                :disabled="!isEditing || cadreItems.length <= 1"
+                aria-label="减少一行"
+                @click="removeCadreRow"
+              >
+                −
+              </button>
+              <button
+                class="record-ctl record-ctl-clear"
+                type="button"
+                :disabled="!isEditing"
+                aria-label="清空干部经历"
+                @click="handleClearCadre"
+              >
+                清空
+              </button>
             </div>
           </div>
         </div>
