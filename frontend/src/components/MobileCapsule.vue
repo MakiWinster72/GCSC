@@ -25,7 +25,6 @@
           </span>
         </div>
       </div>
-      <div v-if="$slots.right" class="capsule-divider" aria-hidden="true"></div>
       <div class="capsule-right">
         <slot name="right" />
       </div>
