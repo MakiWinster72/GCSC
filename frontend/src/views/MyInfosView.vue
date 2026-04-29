@@ -1886,6 +1886,14 @@ function cancelEdit() {
 }
 
 async function confirmEdit() {
+  if (info.classYear && !info.classMajor) {
+    toastError("请先选择专业");
+    return;
+  }
+  if (info.classYear && !info.classNo) {
+    toastError("请先选择班级");
+    return;
+  }
   const requiresReview =
     hasSavedProfileBefore.value &&
     reviewSettings.profileReviewEnabled &&
