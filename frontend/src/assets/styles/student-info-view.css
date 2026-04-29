@@ -1275,10 +1275,10 @@
     left: 0;
     right: 0;
     width: 100%;
-    max-height: 92vh;
+    max-height: 84vh;
     border-radius: 22px 22px 0 0;
     transform: translateY(100%);
-    padding: 0 0 max(16px, env(safe-area-inset-bottom));
+    padding: max(0px, env(safe-area-inset-top, 0px)) 0 max(16px, env(safe-area-inset-bottom));
   }
 
   .student-detail-view > :not(.student-detail-handle):not(.student-detail-header) {
@@ -1297,7 +1297,7 @@
   .student-detail-view.split {
     width: 100%;
     left: 0;
-    max-height: 92vh;
+    max-height: 84vh;
     transform: translateY(100%);
   }
 
@@ -1314,12 +1314,12 @@
     left: 0;
     right: 0;
     width: 100%;
-    height: 92vh;
-    max-height: 92vh;
+    height: auto;
+    max-height: 84vh;
     border-radius: 22px 22px 0 0;
     transform: translateY(100%);
     z-index: 70;
-    padding: 0 0 max(16px, env(safe-area-inset-bottom));
+    padding: max(0px, env(safe-area-inset-top, 0px)) 0 max(16px, env(safe-area-inset-bottom));
   }
 
   .student-achievements-view.open {
