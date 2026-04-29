@@ -383,7 +383,6 @@ function handleMenuClick(key) {
     panelDirection.value = "forward";
     currentPanel.value = "achievements";
     nextTick(updateBodyFadeState);
-    emit("menu-click", key);
     return;
   }
   if (key === "notifications") {
