@@ -103,13 +103,16 @@
               <div class="student-filter-panel-head">
                 <span class="info-label">班级</span>
               </div>
-              <StepperInput
-                v-model="filters.classNo"
-                :min="1"
-                :max="10"
-                wrap
-                placeholder="全部"
-              />
+              <select v-model="filters.classNo" class="info-input">
+                <option value="">全部</option>
+                <option
+                  v-for="n in 10"
+                  :key="n"
+                  :value="String(n)"
+                >
+                  {{ n }}
+                </option>
+              </select>
             </div>
           </div>
 
@@ -466,7 +469,6 @@ import MobileCapsule from "../components/MobileCapsule.vue";
 import StudentExportDialog from "../components/StudentExportDialog.vue";
 import StudentProfileEditor from "../components/StudentProfileEditor.vue";
 import PaginationBar from "../components/PaginationBar.vue";
-import StepperInput from "../components/StepperInput.vue";
 import OverlayPanel from "../components/OverlayPanel.vue";
 import { navigateWithViewTransition } from "../utils/viewTransition";
 import { useDashboardShell } from "../composables/useDashboardShell";

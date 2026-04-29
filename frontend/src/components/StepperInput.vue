@@ -191,8 +191,8 @@ function increment() {
   justify-content: center;
   height: 100%;
   color: var(--primary-dark, #2d1a3e);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   padding: 0 4px;
   box-sizing: border-box;
