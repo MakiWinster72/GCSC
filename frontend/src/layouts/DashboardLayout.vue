@@ -158,7 +158,7 @@ function handleAchievementEntry(key) {
 }
 
 function handleNotificationEntry({ category, entryId }) {
-  closeSidebar();
+  if (entryId) closeSidebar();
   navigateWithViewTransition(router, {
     path: "/notifications",
     query: { category, entry: entryId || "" },
@@ -174,7 +174,6 @@ function handleClassReviewsEntry({ entry }) {
 }
 
 function handleClassReviewsCategory(category) {
-  closeSidebar();
   navigateWithViewTransition(router, {
     path: "/notifications",
     query: { panel: "class-reviews", category },
