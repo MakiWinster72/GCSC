@@ -368,7 +368,7 @@ const roleLabel = computed(() => {
   /* top set by JS on scroll; CSS sets initial position before JS runs */
   top: calc(65px + env(safe-area-inset-top, 0px));
   right: calc(28px + env(safe-area-inset-right, 0px));
-  z-index: 50;
+  z-index: 35;
   display: flex;
   align-items: center;
   gap: 0;

@@ -19,7 +19,7 @@
   --card-padding: 0;
   gap: 16px;
   position: relative;
-  z-index: 40;
+  z-index: 28;
   padding-bottom: 18px;
   min-height: 0;
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.6);
