@@ -1625,11 +1625,15 @@
   }
   .users-card-header {
     padding: 14px 16px;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .users-card-meta {
+    flex: 1;
+    min-width: 0;
   }
   .users-count-badge {
-    align-self: flex-start;
+    flex-shrink: 0;
   }
   .users-toolbar {
     flex-direction: column;
