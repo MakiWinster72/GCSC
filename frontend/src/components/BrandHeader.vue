@@ -50,7 +50,10 @@
       </div>
 
       <!-- Divider + Actions (collapsed on mobile) -->
-      <div class="chip-tail" :class="{ 'chip-tail--visible': expanded || !isMobile }">
+      <div
+        class="chip-tail"
+        :class="{ 'chip-tail--visible': expanded || !isMobile }"
+      >
         <div class="chip-divider" aria-hidden="true" />
 
         <div class="chip-actions">
@@ -146,8 +149,8 @@ function onDocumentClick(e) {
 //   180 - 45 - 29 = 106px from viewport top
 const CHIP_BANNER_TOP = 106;
 const CHIP_FIXED_TOP = 20;
-const COLOR_START = 40;  // scrollY where chip color starts leaving banner
-const COLOR_END = 140;   // scrollY where chip is fully on light bg
+const COLOR_START = 40; // scrollY where chip color starts leaving banner
+const COLOR_END = 140; // scrollY where chip is fully on light bg
 
 // Scroll-out threshold: 20% of viewport height
 const SCROLL_THRESHOLD = 0.2;
@@ -166,13 +169,13 @@ function lerpHexColor(light, dark, t) {
   const r = lerpChannel(light.substring(0, 2), dark.substring(0, 2), t);
   const g = lerpChannel(light.substring(2, 4), dark.substring(2, 4), t);
   const b = lerpChannel(light.substring(4, 6), dark.substring(4, 6), t);
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
 function updateChip(scrollY) {
   if (!chipRef.value) return;
 
-  const safeTop = 'env(safe-area-inset-top, 0px)';
+  const safeTop = "env(safe-area-inset-top, 0px)";
   const bannerTop = isMobile.value ? CHIP_BANNER_TOP : 75;
   const fixedTop = CHIP_FIXED_TOP;
   const rawTop = Math.max(fixedTop, bannerTop - scrollY);
@@ -182,27 +185,28 @@ function updateChip(scrollY) {
   const cp = (scrollY - COLOR_START) / (COLOR_END - COLOR_START);
   const t = Math.min(1, Math.max(0, cp));
 
-  const nameColor = lerpHexColor('ffffff', '2d1a3e', t);
-  const subColor = lerpHexColor('ffffff', '5c5266', t);
-  const ghostColor = lerpHexColor('ffffff', '2d1a3e', t);
-  const borderColor = t > 0.5
-    ? `rgba(${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${lerp(0.18, 0.095, t).toFixed(3)})`
-    : `rgba(255, 255, 255, ${lerp(0.18, 0.095, t).toFixed(3)})`;
-  const bgAlpha = lerp(0.10, 0.68, t).toFixed(3);
-  const shadowAlpha = lerp(0.30, 0.08, t).toFixed(3);
+  const nameColor = lerpHexColor("ffffff", "2d1a3e", t);
+  const subColor = lerpHexColor("ffffff", "5c5266", t);
+  const ghostColor = lerpHexColor("ffffff", "2d1a3e", t);
+  const borderColor =
+    t > 0.5
+      ? `rgba(${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${Math.round(lerp(255, 0, t))}, ${lerp(0.18, 0.095, t).toFixed(3)})`
+      : `rgba(255, 255, 255, ${lerp(0.18, 0.095, t).toFixed(3)})`;
+  const bgAlpha = lerp(0.1, 0.68, t).toFixed(3);
+  const shadowAlpha = lerp(0.3, 0.08, t).toFixed(3);
   const dividerAlpha = lerp(0.12, 0.08, t).toFixed(3);
 
   const el = chipRef.value;
-  el.style.setProperty('--chip-name-color', nameColor);
-  el.style.setProperty('--chip-sub-color', subColor);
-  el.style.setProperty('--chip-ghost-color', ghostColor);
-  el.style.setProperty('--chip-border-color', borderColor);
-  el.style.setProperty('--chip-bg-alpha', bgAlpha);
-  el.style.setProperty('--chip-shadow-alpha', shadowAlpha);
-  el.style.setProperty('--chip-divider-alpha', dividerAlpha);
+  el.style.setProperty("--chip-name-color", nameColor);
+  el.style.setProperty("--chip-sub-color", subColor);
+  el.style.setProperty("--chip-ghost-color", ghostColor);
+  el.style.setProperty("--chip-border-color", borderColor);
+  el.style.setProperty("--chip-bg-alpha", bgAlpha);
+  el.style.setProperty("--chip-shadow-alpha", shadowAlpha);
+  el.style.setProperty("--chip-divider-alpha", dividerAlpha);
 
   // Settings icon: invert(1) = white on banner, invert(0) = dark on light bg
-  el.style.setProperty('--chip-icon-invert', (1 - t).toFixed(3));
+  el.style.setProperty("--chip-icon-invert", (1 - t).toFixed(3));
 }
 
 function onScroll() {
@@ -362,7 +366,7 @@ const roleLabel = computed(() => {
 .brand-profile-chip {
   position: fixed;
   /* top set by JS on scroll; CSS sets initial position before JS runs */
-  top: calc(75px + env(safe-area-inset-top, 0px));
+  top: calc(65px + env(safe-area-inset-top, 0px));
   right: calc(28px + env(safe-area-inset-right, 0px));
   z-index: 50;
   display: flex;
