@@ -116,15 +116,21 @@
 
 /* ── Edit Dock ──────────────────────────────────────────── */
 .edit-dock {
-  position: sticky;
+  position: fixed;
   bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 45;
   display: flex;
   justify-content: center;
-  margin-top: 24px;
-  padding: 0 12px 6px;
+  padding: 0 12px;
   padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-  overflow: hidden;
+  width: 100%;
+  max-width: min(calc(100vw - 320px - 40px), 552px);
+}
+
+.edit-dock > * {
+  pointer-events: auto;
 }
 
 .edit-dock-inner {
@@ -149,25 +155,19 @@
 .edit-dock-leave-active {
   transition:
     opacity 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    margin-top 300ms cubic-bezier(0.22, 1, 0.36, 1),
     padding-bottom 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .edit-dock-enter-from,
 .edit-dock-leave-to {
   opacity: 0;
-  max-height: 0;
-  margin-top: 0;
   padding-bottom: 0;
 }
 
 .edit-dock-enter-to,
 .edit-dock-leave-from {
   opacity: 1;
-  max-height: 120px;
-  margin-top: 24px;
-  padding-bottom: 6px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
 }
 
 .edit-dock-enter-active .edit-dock-inner,
@@ -310,8 +310,8 @@
 @media (max-width: 720px) {
   .edit-dock {
     bottom: 12px;
-    margin-top: 18px;
-    padding: 0 6px 4px;
+    max-width: min(calc(100vw - 40px), 552px);
+    padding: 0 6px;
     padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   }
 
@@ -324,7 +324,6 @@
 
   .edit-dock-enter-to,
   .edit-dock-leave-from {
-    margin-top: 18px;
-    padding-bottom: 4px;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   }
 }
