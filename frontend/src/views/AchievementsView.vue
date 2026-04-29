@@ -4,13 +4,6 @@
       <h1 class="feed-title">个人成果</h1>
     </header>
 
-    <section
-      v-if="activeCategory === 'all'"
-      class="info-card achievement-intro-card"
-    >
-      <div class="info-section-title">全部</div>
-    </section>
-
     <div v-if="!filteredAchievements.length" class="empty-tip">
       {{ emptyMessage }}
     </div>
