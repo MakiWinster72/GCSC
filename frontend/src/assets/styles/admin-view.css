@@ -1685,8 +1685,9 @@
   .backup-two-btns {
     flex-direction: column;
   }
-  .backup-btn {
-    min-width: 0;
+  .backup-two-btns .btn {
+    width: 100%;
+    flex: none;
   }
   .restore-item-row {
     flex-direction: column;
