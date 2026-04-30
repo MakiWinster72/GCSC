@@ -298,11 +298,8 @@
 /* --- Tables --- */
 .vp-doc table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 1px solid var(--vp-c-border);
-  border-radius: 10px;
-  overflow: hidden;
+  border-collapse: collapse;
+  border: none;
   font-size: 0.9rem;
   margin: 1.5em 0;
 }
@@ -319,24 +316,15 @@
   color: var(--vp-c-text-2);
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--vp-c-border);
 }
 
 .vp-doc td {
   padding: 10px 16px;
-  border-bottom: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
   vertical-align: top;
   line-height: 1.6;
 }
 
-.vp-doc tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.vp-doc tbody tr:hover {
-  background: var(--vp-c-bg-soft);
-}
 
 /* --- Code Blocks (Apple Style) --- */
 .vp-doc div[class*='language-'] {
