@@ -2,8 +2,6 @@
 
 ## 概述
 
-- **时长**: 23 分钟
-- **等级**: 进阶
 
 BDAI-SC 采用分层动画系统，涵盖从可复用的 CSS token 原语到 Vue `<Transition>` 类，再到组件级 composable 编排。
 
@@ -38,15 +36,15 @@ BDAI-SC 采用分层动画系统，涵盖从可复用的 CSS token 原语到 Vue
 
 ## 模式速查表
 
-| 模式 | 时长 | 缓动 |
-|------|------|------|
-| 登录卡片入场 | 720ms | --ease-out |
-| OverlayPanel 底部 | 300ms | --ease-page |
-| 抽屉模态框 | 420ms | --ease-page |
-| Toast 进入 | 280ms | --ease-page |
-| Toast 离开 | 220ms | ease |
-| 按钮悬停 | 160-180ms | ease |
-| 按钮按下 | 120ms | ease |
+| 模式 | 缓动 |
+|------|------|
+| 登录卡片入场 | --ease-out |
+| OverlayPanel 底部 | --ease-page |
+| 抽屉模态框 | --ease-page |
+| Toast 进入 | --ease-page |
+| Toast 离开 | ease |
+| 按钮悬停 | ease |
+| 按钮按下 | ease |
 
 ## 后续步骤
 

@@ -2,8 +2,6 @@
 
 ## 概述
 
-- **时长**: 11 分钟
-- **等级**: 入门
 
 BDAI-SC Student Center（BDAI-SC 学生中心）是一个面向高校学院场景的全栈 Web 应用，旨在为学生提供个人成就管理、个人信息维护和校园信息查看的综合平台。系统采用前后端分离架构，后端基于 Java 21 + Spring Boot 3.3.5 提供 RESTful API，前端基于 Vue 3 Composition API 构建响应式用户界面，两端通过 JWT（JSON Web Token）实现无状态身份认证。
 
