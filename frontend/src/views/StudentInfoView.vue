@@ -565,14 +565,39 @@
       <div v-if="viewLoading" class="empty-tip">加载中...</div>
       <StudentProfileEditor
         v-else-if="viewItem"
+        ref="profileEditorRef"
         :student="viewItem"
         :resolve-media-url="resolveMediaUrl"
         :save-profile="saveViewProfile"
         :can-edit="profile.role === 'ADMIN'"
         :show-achievements="true"
+        :editing="detailEditing"
         @saved="handleViewProfileSaved"
         @open-achievements="openAchievements"
+        @start-edit="detailEditing = true"
+        @cancel-edit="detailEditing = false"
       />
+      <div v-if="!viewLoading && viewItem" class="student-detail-capsule">
+        <template v-if="!detailEditing">
+          <button class="capsule-action" type="button" @click="openAchievements">
+            成果
+          </button>
+          <button class="capsule-action" type="button" @click="handleExportPdf">
+            PDF
+          </button>
+          <button class="capsule-action" type="button" @click="detailEditing = true">
+            编辑
+          </button>
+        </template>
+        <template v-else>
+          <button class="capsule-action" type="button" @click="handleCancelEdit">
+            取消
+          </button>
+          <button class="capsule-action capsule-action-primary" type="button" @click="handleSaveProfile">
+            保存
+          </button>
+        </template>
+      </div>
     </section>
 
     <section
@@ -1352,6 +1377,7 @@ function closeView() {
   }
   viewOpen.value = false;
   viewClosing.value = true;
+  detailEditing.value = false;
   setTimeout(() => {
     viewItem.value = null;
     viewLoading.value = false;
@@ -1398,6 +1424,7 @@ function handleViewProfileSaved(data) {
   if (!data) {
     return;
   }
+  detailEditing.value = false;
   viewItem.value = data;
   const nextClassName = buildClassName(data);
   students.value = students.value.map((item) => {
@@ -2309,8 +2336,29 @@ function goToSettings() {
   navigateWithViewTransition(router, "/settings");
 }
 
+function handleExportPdf() {
+  if (profileEditorRef.value?.triggerPdfExport) {
+    profileEditorRef.value.triggerPdfExport();
+  }
+}
+
+function handleSaveProfile() {
+  if (profileEditorRef.value?.triggerSave) {
+    profileEditorRef.value.triggerSave();
+  }
+}
+
+function handleCancelEdit() {
+  if (profileEditorRef.value?.cancelEdit) {
+    profileEditorRef.value.cancelEdit();
+  }
+  detailEditing.value = false;
+}
+
 const floatingRef = ref(null);
 const floatingBottom = ref("24px");
+const detailEditing = ref(false);
+const profileEditorRef = ref(null);
 
 function updateFloatingBottom() {
   const footer = document.querySelector(".dashboard-footer-wrap");
@@ -2680,6 +2728,61 @@ onUnmounted(() => {
     font-size: 13px;
     color: var(--text-sub);
     padding: 0 0 12px;
+  }
+}
+
+/* Student detail capsule */
+@media (max-width: 768px) {
+  .student-detail-capsule {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--card);
+    backdrop-filter: blur(15px) saturate(140%);
+    -webkit-backdrop-filter: blur(15px) saturate(140%);
+    border-radius: 50px;
+    border: 2px solid rgba(100, 12, 114, 0.15);
+    box-shadow: 0 4px 20px rgba(100, 12, 114, 0.15);
+    z-index: 56;
+  }
+
+  .student-detail-capsule .capsule-action {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .student-detail-capsule .capsule-action:active {
+    transform: scale(0.95);
+  }
+
+  .student-detail-capsule .capsule-action-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(100, 12, 114, 0.25);
+  }
+}
+
+/* Student profile editor bottom padding for capsule */
+@media (max-width: 768px) {
+  .info-shell.student-profile-editor {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 }
 </style>
