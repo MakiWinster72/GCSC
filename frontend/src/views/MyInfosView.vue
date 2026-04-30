@@ -202,7 +202,7 @@
           </label>
           <label class="field-card field-full">
             <span class="info-label">手机号码 / 备用联系方式</span>
-            <div class="class-inline">
+            <div class="class-inline contact-row">
               <input
                 v-model="info.phone"
                 class="info-input"
@@ -213,7 +213,6 @@
                 @input="handleDigitsInput('phone', 11, $event)"
                 :disabled="!isEditing"
               />
-              <span class="class-text">/</span>
               <input
                 v-model="info.backupContact"
                 class="info-input"
@@ -2895,5 +2894,22 @@ function loadUser() {
 .class-num {
   width: 76px !important;
   flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .contact-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .contact-row > .info-input:first-child {
+    width: 100%;
+    flex: unset;
+  }
+
+  .contact-row > .info-input:last-child {
+    width: 100%;
+    flex: unset;
+  }
 }
 </style>
