@@ -10,8 +10,8 @@ hero:
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
-      text: 详细设计
-      link: /design/
+      text: 使用手册
+      link: /manual/
 
 features:
   - icon:
