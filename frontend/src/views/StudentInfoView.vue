@@ -2731,7 +2731,11 @@ onUnmounted(() => {
   }
 }
 
-/* Student detail capsule */
+/* Student detail capsule - hidden on desktop */
+.student-detail-capsule {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .student-detail-capsule {
     position: fixed;
