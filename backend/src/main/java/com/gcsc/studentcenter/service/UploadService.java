@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public class UploadService {
         this.achievementUploadSettingsService = achievementUploadSettingsService;
     }
 
-    public UploadResponse upload(MultipartFile file, String context) {
+    public UploadResponse upload(MultipartFile file, String context, Long userId) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("文件不能为空");
         }
@@ -50,11 +49,10 @@ public class UploadService {
             }
         }
 
-        LocalDate now = LocalDate.now();
+        String subfolder = resolveSubfolder(context);
         String ext = extractExtension(file.getOriginalFilename());
         String filename = UUID.randomUUID() + ext;
-        Path targetDir = uploadRoot.resolve(Paths.get(String.valueOf(now.getYear()),
-            String.format("%02d", now.getMonthValue())));
+        Path targetDir = uploadRoot.resolve(Paths.get(String.valueOf(userId), subfolder));
         Path targetFile = targetDir.resolve(filename);
 
         try {
@@ -64,8 +62,21 @@ public class UploadService {
             throw new IllegalStateException("上传失败，请稍后再试");
         }
 
-        String url = "/uploads/" + now.getYear() + "/" + String.format("%02d", now.getMonthValue()) + "/" + filename;
+        String url = "/uploads/" + userId + "/" + subfolder + "/" + filename;
         return new UploadResponse(true, url, mediaType, file.getOriginalFilename());
+    }
+
+    private String resolveSubfolder(String context) {
+        if (context == null || context.isBlank()) {
+            return "avatar";
+        }
+        if (context.startsWith("achievement-")) {
+            return "achievements";
+        }
+        if (context.equals("review-supporting")) {
+            return "reviews";
+        }
+        return "avatar";
     }
 
     private String resolveMediaType(String contentType) {

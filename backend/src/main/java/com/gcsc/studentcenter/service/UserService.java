@@ -8,6 +8,7 @@ import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,8 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,11 +34,14 @@ public class UserService {
     private final AppUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
+    private final Path uploadRoot;
 
-    public UserService(AppUserRepository userRepository, PasswordEncoder passwordEncoder, EntityManager entityManager) {
+    public UserService(AppUserRepository userRepository, PasswordEncoder passwordEncoder, EntityManager entityManager,
+                       @Value("${app.upload-dir:./uploads}") String uploadDir) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.entityManager = entityManager;
+        this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
     }
 
     public AppUser createUser(CreateUserRequest request) {
@@ -233,6 +242,21 @@ public class UserService {
 
         entityManager.flush();
         userRepository.deleteById(userId);
+
+        // Delete user's upload folder from disk
+        Path userUploadDir = uploadRoot.resolve(String.valueOf(userId));
+        if (Files.exists(userUploadDir)) {
+            try (var files = Files.walk(userUploadDir)) {
+                files.sorted(Comparator.reverseOrder())
+                    .forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException ignored) {
+                        }
+                    });
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     public List<String> getDistinctStudentClasses() {
