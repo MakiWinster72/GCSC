@@ -172,15 +172,15 @@
           <div class="student-filter-meta">
             <div class="student-filter-flags">
               <label class="info-choice">
-                <input v-model="filters.isHk" type="checkbox" />
+                <input v-model="filters.isHk" type="radio" name="hkmo-filter" />
                 香港
               </label>
               <label class="info-choice">
-                <input v-model="filters.isMo" type="checkbox" />
+                <input v-model="filters.isMo" type="radio" name="hkmo-filter" />
                 澳门
               </label>
               <label class="info-choice">
-                <input v-model="filters.isTw" type="checkbox" />
+                <input v-model="filters.isTw" type="radio" name="hkmo-filter" />
                 台湾
               </label>
               <div class="student-special-filter">
@@ -491,15 +491,15 @@
               <label class="mobile-filter-label">港澳台学生</label>
               <div class="mobile-filter-chips">
                 <label class="mobile-filter-chip" :class="{ active: filters.isHk }">
-                  <input v-model="filters.isHk" type="checkbox" hidden />
+                  <input v-model="filters.isHk" type="radio" name="hkmo" value="true" hidden />
                   <span>香港</span>
                 </label>
                 <label class="mobile-filter-chip" :class="{ active: filters.isMo }">
-                  <input v-model="filters.isMo" type="checkbox" hidden />
+                  <input v-model="filters.isMo" type="radio" name="hkmo" value="true" hidden />
                   <span>澳门</span>
                 </label>
                 <label class="mobile-filter-chip" :class="{ active: filters.isTw }">
-                  <input v-model="filters.isTw" type="checkbox" hidden />
+                  <input v-model="filters.isTw" type="radio" name="hkmo" value="true" hidden />
                   <span>台湾</span>
                 </label>
               </div>
@@ -1092,6 +1092,28 @@ watch(
 // Clear major when student category changes (since major options depend on it)
 watch(() => filters.studentCategory, () => {
   filters.major = "";
+});
+
+// HMT is mutually exclusive - only one can be selected at a time
+watch(() => filters.isHk, (val) => {
+  if (val) {
+    filters.isMo = false;
+    filters.isTw = false;
+  }
+});
+
+watch(() => filters.isMo, (val) => {
+  if (val) {
+    filters.isHk = false;
+    filters.isTw = false;
+  }
+});
+
+watch(() => filters.isTw, (val) => {
+  if (val) {
+    filters.isHk = false;
+    filters.isMo = false;
+  }
 });
 
 watch(currentPage, () => {
