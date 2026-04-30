@@ -318,7 +318,7 @@
     </section>
 
     <!-- Floating action buttons -->
-    <div ref="floatingRef" class="floating-actions" :style="{ bottom: floatingBottom }">
+    <div ref="floatingRef" class="floating-actions">
       <Transition name="floating-action">
         <button
           v-if="hasSelection"
