@@ -218,6 +218,14 @@ function selectAllPage() {
   allFilteredSelected.value = false;
 }
 
+function toggleSelectAllPage() {
+  if (allPageSelected.value) {
+    selectedUserIds.value = new Set();
+  } else {
+    selectAllPage();
+  }
+}
+
 async function selectAllFiltered() {
   try {
     const res = await getAllUserIds({
@@ -1294,10 +1302,10 @@ watch([userSearch, userRoleFilter], () => {
                       <th scope="col" class="col-checkbox">
                         <input
                           type="checkbox"
-                          :checked="allFilteredSelected"
-                          :indeterminate="someSelected && !allFilteredSelected"
+                          :checked="allPageSelected"
+                          :indeterminate="someSelected && !allPageSelected"
                           aria-label="全选"
-                          @change="selectAllPage"
+                          @change="toggleSelectAllPage"
                         />
                       </th>
                       <th scope="col" style="width: 130px;">用户名</th>

@@ -318,7 +318,7 @@
     </section>
 
     <!-- Floating action buttons -->
-    <div class="floating-actions">
+    <div ref="floatingRef" class="floating-actions" :style="{ bottom: floatingBottom }">
       <Transition name="floating-action">
         <button
           v-if="hasSelection"
@@ -2284,8 +2284,31 @@ function goToSettings() {
   navigateWithViewTransition(router, "/settings");
 }
 
+const floatingRef = ref(null);
+const floatingBottom = ref("24px");
+
+function updateFloatingBottom() {
+  const footer = document.querySelector(".dashboard-footer-wrap");
+  if (!footer) return;
+  const footerRect = footer.getBoundingClientRect();
+  const viewH = window.innerHeight;
+  if (footerRect.top < viewH) {
+    floatingBottom.value = `${viewH - footerRect.top + 16}px`;
+  } else {
+    floatingBottom.value = "24px";
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("scroll", updateFloatingBottom, { passive: true });
+  window.addEventListener("resize", updateFloatingBottom);
+  updateFloatingBottom();
+});
+
 onUnmounted(() => {
   document.removeEventListener("click", onDocumentClick);
+  window.removeEventListener("scroll", updateFloatingBottom);
+  window.removeEventListener("resize", updateFloatingBottom);
 });
 </script>
 

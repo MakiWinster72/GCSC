@@ -1010,16 +1010,17 @@
 /* ── Floating Action Buttons ─────────────────── */
 
 .floating-actions {
-  position: sticky;
+  position: fixed;
   bottom: 24px;
+  right: 28px;
   z-index: 50;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
   width: fit-content;
   pointer-events: none;
+  transition: bottom 0.15s ease;
 }
 
 .floating-btn {
