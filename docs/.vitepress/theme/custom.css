@@ -2,25 +2,25 @@
    BDAI-SC Docs — Default VitePress Theme
    =================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
-/* VitePress default theme variables */
 :root {
-  --vp-font-family-base: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei',
-    'Helvetica Neue', Arial, sans-serif;
+  --vp-font-family-base:
+    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial,
+    sans-serif;
 }
 
 /* Override Shiki inline font-family so Chinese falls back to Noto Sans SC */
-.vp-doc div[class*='language-'] pre,
-.vp-doc div[class*='language-'] code {
-  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace,
-    'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei',
-    monospace !important;
+.vp-doc div[class*="language-"] pre,
+.vp-doc div[class*="language-"] code {
+  font-family:
+    "JetBrains Mono", "Fira Code", ui-monospace, "Noto Sans SC", "PingFang SC",
+    "Microsoft YaHei", monospace !important;
 }
 
 /* Inline code */
 .vp-doc :not(pre) > code {
-  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace,
-    'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei',
-    monospace !important;
+  font-family:
+    "JetBrains Mono", "Fira Code", ui-monospace, "Noto Sans SC", "PingFang SC",
+    "Microsoft YaHei", monospace !important;
 }

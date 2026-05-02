@@ -12,7 +12,7 @@ export default defineConfig({
   markdown: {
     theme: {
       light: "github-light",
-      dark: "tokyo-night",
+      dark: "catppuccin-mocha",
     },
     lineNumbers: false,
   },
