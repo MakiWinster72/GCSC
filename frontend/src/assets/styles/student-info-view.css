@@ -451,7 +451,7 @@
 .student-list {
   display: grid;
   gap: 14px;
-  padding: 2px 0;
+  padding: 2px 0 16px;
 }
 
 .student-results-loading {
@@ -599,7 +599,7 @@
   flex-wrap: wrap;
   padding-top: 8px;
   border-top: 1px solid var(--line);
-  margin-top: 8px;
+  margin-top: auto;
 }
 
 .student-pages {
