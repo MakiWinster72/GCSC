@@ -820,7 +820,7 @@ watch([userSearch, userRoleFilter], () => {
               </div>
               <div>
                 <div class="card-kicker">系统设置</div>
-                <h2 class="card-title">成就页面上传限制</h2>
+                <h2 class="card-title">成果页面限制</h2>
               </div>
             </div>
             <div class="card-body">
@@ -937,46 +937,6 @@ watch([userSearch, userRoleFilter], () => {
                 </div>
               </div>
 
-              <!-- Supporting Docs Block -->
-              <div class="setting-group">
-                <div class="setting-group-label">
-                  <span class="group-index">03</span>
-                  <span class="group-title">证明资料</span>
-                </div>
-                <div class="field-row">
-                  <div class="field-cell">
-                    <label class="field-label" for="sd-count">最多上传数量</label>
-                    <div class="input-wrap">
-                      <input
-                        id="sd-count"
-                        v-model.number="form.supportingDocMaxCount"
-                        class="text-input"
-                        type="number"
-                        min="1"
-                        max="20"
-                        aria-label="证明资料最多上传数量"
-                      />
-                      <span class="input-unit">个</span>
-                    </div>
-                  </div>
-                  <div class="field-cell">
-                    <label class="field-label" for="sd-size">单个文件最大大小</label>
-                    <div class="input-wrap">
-                      <input
-                        id="sd-size"
-                        v-model.number="form.supportingDocMaxSizeMb"
-                        class="text-input"
-                        type="number"
-                        min="1"
-                        max="200"
-                        aria-label="证明资料单个文件最大大小 MB"
-                      />
-                      <span class="input-unit">MB</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <!-- Feedback -->
               <Transition name="msg-fade">
                 <div v-if="activeErrorMessage" class="msg-banner error" role="alert">
@@ -1017,66 +977,66 @@ watch([userSearch, userRoleFilter], () => {
             </div>
           </div>
 
-          <!-- Preview Card -->
-          <div class="card admin-card preview-card">
+          <!-- 证明资料 Card -->
+          <div class="card admin-card">
             <div class="card-header">
-              <div class="card-header-icon preview-icon">
+              <div class="card-header-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <div>
-                <div class="card-kicker">实时预览</div>
-                <h2 class="card-title">用户侧展示效果</h2>
+                <div class="card-kicker">系统设置</div>
+                <h2 class="card-title">证明资料</h2>
               </div>
             </div>
-            <div class="card-body preview-shell">
-              <!-- Image Preview -->
-              <div class="preview-box" aria-hidden="true">
-                <div class="preview-box-header">
-                  <span class="preview-box-title">图片</span>
-                  <span class="preview-box-sub">{{ imageSubtitle }}</span>
-                </div>
-                <div class="preview-empty">
-                  <div class="preview-add-btn">+</div>
-                  <span class="preview-empty-text">点击添加图片</span>
+            <div class="card-body">
+              <div class="setting-group">
+                <div class="field-row">
+                  <div class="field-cell">
+                    <label class="field-label" for="sd-count">最多上传数量</label>
+                    <div class="input-wrap">
+                      <input
+                        id="sd-count"
+                        v-model.number="form.supportingDocMaxCount"
+                        class="text-input"
+                        type="number"
+                        min="1"
+                        max="20"
+                        aria-label="证明资料最多上传数量"
+                      />
+                      <span class="input-unit">个</span>
+                    </div>
+                  </div>
+                  <div class="field-cell">
+                    <label class="field-label" for="sd-size">单个文件最大大小</label>
+                    <div class="input-wrap">
+                      <input
+                        id="sd-size"
+                        v-model.number="form.supportingDocMaxSizeMb"
+                        class="text-input"
+                        type="number"
+                        min="1"
+                        max="200"
+                        aria-label="证明资料单个文件最大大小 MB"
+                      />
+                      <span class="input-unit">MB</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <!-- Attachment Preview -->
-              <div class="preview-box" aria-hidden="true">
-                <div class="preview-box-header">
-                  <span class="preview-box-title">附件</span>
-                  <span class="preview-box-sub">{{ attachmentSubtitle }}</span>
-                </div>
-                <div class="format-list">
-                  <div
-                    v-for="item in enabledPreviewTypes"
-                    :key="item.key"
-                    class="format-chip"
-                  >
-                    <img class="format-chip-icon" :src="item.icon" alt="" aria-hidden="true" />
-                    <span class="format-chip-label">{{ item.label }}</span>
-                    <span class="format-chip-exts">{{ item.exts.slice(0, 3).join("/") }}</span>
-                  </div>
-                  <div v-if="!enabledPreviewTypes.length" class="preview-empty-text">
-                    暂无可用附件类型
-                  </div>
-                </div>
-                <div class="preview-tip">
-                  {{ attachmentTypeSummary || "暂无可用附件类型" }} · 单个不超过 {{ form.attachmentMaxSizeMb }}MB
-                </div>
-              </div>
-              <!-- Supporting Docs Preview -->
-              <div class="preview-box" aria-hidden="true">
-                <div class="preview-box-header">
-                  <span class="preview-box-title">证明资料</span>
-                  <span class="preview-box-sub">{{ supportingDocSubtitle }}</span>
-                </div>
-                <div class="preview-empty">
-                  <div class="preview-add-btn">+</div>
-                  <span class="preview-empty-text">学生在审核通知中上传证明资料</span>
-                </div>
+              <div class="card-actions">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  :disabled="activeSaving"
+                  @click="handleSubmit"
+                >
+                  <svg v-if="activeSaving" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                  </svg>
+                  {{ activeSaving ? "保存中…" : "保存设置" }}
+                </button>
               </div>
             </div>
           </div>
@@ -1595,8 +1555,8 @@ watch([userSearch, userRoleFilter], () => {
                   :class="{ 'storage-bar-row--odd': idx % 2 === 1 }"
                 >
                   <div class="storage-bar-label">
-                    <span class="storage-bar-username">{{ item.username }}</span>
-                    <span v-if="item.displayName" class="storage-bar-displayname">{{ item.displayName }}</span>
+                    <span class="storage-bar-displayname">{{ item.displayName || item.username }}</span>
+                    <span v-if="item.displayName" class="storage-bar-username">{{ item.username }}</span>
                   </div>
                   <div class="storage-bar-track-wrap">
                     <div
