@@ -91,6 +91,29 @@ function persistStore() {
   );
 }
 
+function syncStoredIds() {
+  const allRequestIds = new Set([
+    ...store.achievementReviewRequests.map((r) => String(r.id)),
+    ...store.profileReviewRequests.map((r) => String(r.id)),
+  ]);
+  let changed = false;
+  for (const id of store.processedReadIds) {
+    if (!allRequestIds.has(id)) {
+      store.processedReadIds.delete(id);
+      changed = true;
+    }
+  }
+  for (const id of store.readIds) {
+    if (!allRequestIds.has(id)) {
+      store.readIds.delete(id);
+      changed = true;
+    }
+  }
+  if (changed) {
+    persistStore();
+  }
+}
+
 async function fetchDelayedThreshold() {
   if (typeof window === "undefined") return;
   try {
@@ -353,6 +376,7 @@ async function fetchAchievementReviewRequests(force = false) {
     const { data } = await listAchievementReviewRequests();
     store.achievementReviewRequests = Array.isArray(data) ? data : [];
     store.achievementReviewFetched = true;
+    syncStoredIds();
     return store.achievementReviewRequests;
   } finally {
     store.achievementReviewLoading = false;
@@ -380,6 +404,7 @@ async function fetchProfileReviewRequests(force = false) {
     const { data } = await listProfileReviewRequests();
     store.profileReviewRequests = Array.isArray(data) ? data : [];
     store.profileReviewFetched = true;
+    syncStoredIds();
     return store.profileReviewRequests;
   } finally {
     store.profileReviewLoading = false;
@@ -629,6 +654,15 @@ export function useNotifications(userSource) {
     ) || null;
   }
 
+  async function refreshNotifications() {
+    store.achievementReviewFetched = false;
+    store.profileReviewFetched = false;
+    await Promise.all([
+      fetchAchievementReviewRequests(true).catch(() => {}),
+      fetchProfileReviewRequests(true).catch(() => {}),
+    ]);
+  }
+
   return {
     inboxEntries,
     pendingCount,
@@ -644,6 +678,7 @@ export function useNotifications(userSource) {
     findPendingAchievementReview,
     fetchAchievementReviewRequests,
     fetchProfileReviewRequests,
+    refreshNotifications,
     submitAchievementReviewRequest,
     submitProfileReviewRequest,
     addNotification,
