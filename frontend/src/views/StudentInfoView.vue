@@ -2,44 +2,55 @@
   <main class="dashboard-right">
     <MobileCapsule @open-sidebar="openDashboardSidebar">
       <template #right>
-        <button class="capsule-action is-filter" type="button" @click="openMobileFilter">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
-          </svg>
-          筛选
+        <button class="capsule-action student-capsule-btn is-filter" type="button" @click="openMobileFilter">
+          <span class="capsule-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+            </svg>
+          </span>
+          <span class="student-capsule-label">筛选</span>
           <span v-if="hasActiveFilters" class="capsule-filter-dot"></span>
         </button>
-        <button class="capsule-action" type="button" @click="toggleGridView">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-          </svg>
-          {{ gridViewOpen ? "列表" : "表格" }}
+        <button class="capsule-action student-capsule-btn" type="button" @click="toggleGridView">
+          <span class="capsule-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+            </svg>
+          </span>
+          <span class="student-capsule-label">{{ gridViewOpen ? "列表" : "表格" }}</span>
         </button>
         <button
           v-if="gridViewOpen"
-          class="capsule-action"
+          class="capsule-action student-capsule-btn"
           :class="{ 'capsule-active': gridFullscreen }"
           type="button"
           @click="toggleGridFullscreen"
         >
-          {{ gridFullscreen ? "退出" : "全屏" }}
+          <span class="capsule-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+            </svg>
+          </span>
+          <span class="student-capsule-label">{{ gridFullscreen ? "退出" : "全屏" }}</span>
         </button>
         <button
           v-if="!gridViewOpen"
-          class="capsule-action"
+          class="capsule-action student-capsule-btn"
           :class="{ 'capsule-active': selectMenuOpen }"
           type="button"
           aria-label="选择学生"
           @click.stop="toggleSelectMenu"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="M9 12l2 2 4-4"/>
-          </svg>
-          选择
+          <span class="capsule-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </span>
+          <span class="student-capsule-label">选择</span>
         </button>
       </template>
     </MobileCapsule>
@@ -2423,15 +2434,34 @@ onUnmounted(() => {
 <style scoped>
 @import '../assets/styles/student-info-view.css';
 
-/* Mobile filter capsule button */
+/* Mobile capsule buttons — vertical icon+label layout matching AdminView */
 .capsule-action.is-filter {
   position: relative;
 }
 
+.student-capsule-btn {
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 1px;
+  color: var(--primary);
+  padding: 6px clamp(3px, 2.2vw, 10px);
+  border: 1px solid rgba(100, 12, 114, 0.12);
+}
+.student-capsule-btn .capsule-icon {
+  flex-shrink: 0;
+}
+
+.student-capsule-label {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
 .capsule-filter-dot {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 2px;
+  right: 2px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
