@@ -54,7 +54,21 @@ features:
 
 ## 更新日志
 
+```bash
+  14 commits  ███                                                               03-06 W1
+  73 commits  ████████████████████████████                                     03-09 W2
+ 124 commits  ████████████████████████████████████████████████████████████████ 03-16 W3
+  52 commits  ████████████████                                                 03-23 W4
+  56 commits  █████████████████                                                 04-01 W1
+ 111 commits  ████████████████████████████████████████████████████████████     04-09 W2
+  26 commits  ████████                                                         04-15 W3
+  83 commits  █████████████████████████████                                     04-25 W4
+  65 commits  █████████████████████████                                        04-29 W5
+  39 commits  ████████████                                                     05-01 W1
+```
+
 ### 2026-03-06
+
 - docs: 补充提交信息中文描述规范
 - docs: 补充项目启动与提交规范文档
 - feat: 合并JWT注册登录完善功能
@@ -68,15 +82,18 @@ features:
 - style: 优化认证页面视觉与动画效果
 
 ### 2026-03-07
+
 - docs: 补充前后端连接说明并忽略IDE文件
 - style: 登录按钮使用纯色主色调
 - style: 调整全局配色方案
 
 ### 2026-03-09
+
 - chore: 切换JDK到21
 - docs: 完善介绍，添加TODO以及页面设计预览
 
 ### 2026-03-10
+
 - feat: 上传支持附件类型
 - feat: 动态发布与媒体上传后端
 - feat: 发布编辑面板与Markdown预览
@@ -94,6 +111,7 @@ features:
 - style: 让卡片全宽
 
 ### 2026-03-11
+
 - docs: 数据库说明文档
 - feat: menu-card和profile-card改为sticky
 - feat: 为个人成就添加编辑删除功能
@@ -116,6 +134,7 @@ features:
 - style: 优化成就添加页的排版
 
 ### 2026-03-12
+
 - docs: 更新数据库描述，添加了足够的备注
 - feat: 创建教师/部门表
 - feat: 教师/部门联系方式添加搜索功能
@@ -124,6 +143,7 @@ features:
 - pages: open contacts 教师/部门联系方式
 
 ### 2026-03-13
+
 - docs: 添加港澳台字段以及特殊学生字段的描述
 - feat: 为移动端添加工具栏
 - feat: 修改学生数据库表，添加hk、mo、tw
@@ -151,6 +171,7 @@ features:
 - style: 优化下拉菜单展示效果，提高不透明度，添加出现消失动画
 
 ### 2026-03-14
+
 - feat: 根据正式资料增加更多信息字段
 - fix: 修复下拉菜单为原生模式
 - fix: 修复日期选择器在手机端无法显示的问题
@@ -158,6 +179,7 @@ features:
 - style: 统一下拉菜单样式
 
 ### 2026-03-16
+
 - docs: 添加注册登录的说明
 - docs: 补充新的数据库字段说明
 - feat: 在profile-card添加设置图标入口
@@ -180,6 +202,7 @@ features:
 - TODO: 注销账号
 
 ### 2026-03-18
+
 - docs: 更新数据库描述
 - feat: 为每一项成就添加专有的描述，分开每个成就添加的项
 - feat: 为表格增加添加减少行功能和
@@ -224,6 +247,7 @@ features:
 - TODO: 数据库备份与恢复
 
 ### 2026-03-19
+
 - feat: 团组织与入党信息单独一个工作表
 - feat: 在填写教育经历时如果勾选了"至今"，那么自动删除后续空行
 - feat: 在筛选结果中添加两个按钮，选择本页和选择全部
@@ -238,6 +262,7 @@ features:
 - Merge branch 'page/student-infos' into feat/export
 
 ### 2026-03-20
+
 - feat: 为导出提供预览功能
 - feat: 单独导出教育经历/团组织信息不分表
 - feat: 在myinfo也添加导出按钮
@@ -290,6 +315,7 @@ features:
 - TODO: 教育经历的高度设置为两行
 
 ### 2026-03-23
+
 - docs: 更新备用联系方式文档
 - docs: 更新学生干部经历的docs
 - feat: 个人信息页添加出生日期
@@ -300,6 +326,7 @@ features:
 - style: 详细地址提示到门牌号
 
 ### 2026-03-24
+
 - assets: 添加了一些图标
 - feat: 个人信息添加证件类型
 - feat: 个人成就支持附件
@@ -316,6 +343,7 @@ features:
 - style: 修正detail-badges的对齐
 
 ### 2026-03-25
+
 - feat: 为所有页面添加胶囊
 - feat: 美化移动端胶囊，添加动画效果
 - fix: 修复全部选项消失的bug
@@ -328,6 +356,7 @@ features:
 - style: 隐藏步进器内部的上下按钮
 
 ### 2026-03-26
+
 - fix: 修复桌面段achievement-fields的宽度显示
 - pages: open admin 开放后台管理页面
 - style: 优化教育/职业/联系人的外观
@@ -336,6 +365,7 @@ features:
 - style: 在未选择成就分类时不展示图片/附件添加入口
 
 ### 2026-03-27
+
 - feat: 现在导出会统计成就数量
 - fix: 修复username 的 placeholder 偏移问题
 - fix: 修正一些导出选项，未填写显示无
@@ -344,6 +374,7 @@ features:
 - style: 修复桌面段时间段的展示myinfos
 
 ### 2026-03-28
+
 - feat: admin添加编辑信息按钮
 - feat: 为admin添加组件
 - feat: 将menu-card和profile-card做成组件
@@ -354,9 +385,11 @@ features:
 - Merge branch 'page/myinfo' into dev
 
 ### 2026-04-01
+
 - feat: 管理员现在可编辑个人信息
 
 ### 2026-04-02
+
 - feat: 点击编辑时屏幕下方出现保存按钮
 - fix: card-menu 动画
 - fix: 修复card-menu的上间距
@@ -366,6 +399,7 @@ features:
 - style: 将profile-card设计成nav
 
 ### 2026-04-03
+
 - feat: 允许跨域访问资源
 - feat: 入党流程不必经过入团
 - feat: 后台管理可调节上传图片的数量以及附件大小
@@ -384,6 +418,7 @@ features:
 - style: 当宽度较小时，预览转移到屏幕下方
 
 ### 2026-04-06
+
 - feat: admin搜索/筛选用户
 - feat: admin用户管理
 - feat: settings修改密码
@@ -409,6 +444,7 @@ features:
 - style: 添加适当边距
 
 ### 2026-04-07
+
 - feat: 取消审核功能
 - feat: 审核开关
 - feat: 审核界面可查看当前学生信息
@@ -420,6 +456,7 @@ features:
 - style: 简化审核管理界面
 
 ### 2026-04-09
+
 - fix: 修复高亮导致光标无法看清
 - fix: 设置图标
 - refactor: 分开style.css
@@ -438,6 +475,7 @@ features:
 - style: 登录与注册页面
 
 ### 2026-04-10
+
 - feat: footer
 - feat: studentinfo添加学生类型筛选
 - feat: 测试数据功能
@@ -460,6 +498,7 @@ features:
 - style: 调整card-menu的顺序
 
 ### 2026-04-11
+
 - feat: 取消用户管理中的班级筛选
 - feat: 备份附件
 - feat: 实现数据库备份和恢复功能
@@ -468,10 +507,10 @@ features:
 - feat: 新增备份和恢复入口
 - feat: 新增通知功能
 - feat: 离开通知页面前本地缓存输入框
-- feat: 页脚跳转到https://beian.miit.gov.cn/
+- feat: 页脚跳转到<https://beian.miit.gov.cn/>
 - fix: 修复编译错误
 - fix: 修复预览成就页面依然出现页脚
-- fix: 允许 * 访问
+- fix: 允许 \* 访问
 - fix: 用户管理不再显示所有用户
 - fix: 解决恢复功能的跨域问题
 - merge: resolve conflict in AdminView.vue - combine user management with tab nav
@@ -488,6 +527,7 @@ features:
 - style: 调整学生信息预览按钮的排版
 
 ### 2026-04-12
+
 - feat: 为导出/修改密码/修改配置等添加toast提示
 - fix: 修复附件媒体预览
 - Merge branch 'admin' into style/google 合并备份与恢复
@@ -504,6 +544,7 @@ features:
 - style: 统一按钮样式
 
 ### 2026-04-13
+
 - feat: 登录提示
 - feat: 首次登录提示填写资料
 - fix: 修复成就描述
@@ -520,6 +561,7 @@ features:
 - 提取工具函数到 utils/constants，消除跨视图重复代码
 
 ### 2026-04-14
+
 - feat: 修复role参数缺失
 - feat: 提交成就时toast提示审核
 - feat: 正在审核时用户无法编辑个人信息
@@ -543,6 +585,7 @@ features:
 - style: 通知显示avatar媒体
 
 ### 2026-04-15
+
 - feat: 把通知tab栏移动到cardmenu
 - feat: 文件导入用户
 - feat: 未读小红点
@@ -554,6 +597,7 @@ features:
 - style: 通知计数
 
 ### 2026-04-16
+
 - feat: admin页面其他页
 - feat: 为双百/大创添加achievementVIEW
 - feat: 关闭注册功能
@@ -568,18 +612,22 @@ features:
 - Merge branch 'admin' into teachSep
 
 ### 2026-04-17
+
 - docs: API
 
 ### 2026-04-20
+
 - docs: from gcsc to BDAI-SC
 - docs: 调整quickstart顺序
 - fix: VPNav
 - style: style and 侧边栏 and index
 
 ### 2026-04-25
+
 - ignore cache dist
 
 ### 2026-04-26
+
 - chore: opti README
 - chore: opti README
 - chore: opti README
@@ -604,6 +652,7 @@ features:
 - style: 统一班级审核页面到通知页面
 
 ### 2026-04-27
+
 - chore: opti README
 - chore: opt README
 - chore: rm todo
@@ -634,6 +683,7 @@ features:
 - style: 优化users-content的样式
 
 ### 2026-04-28
+
 - feat: chip跟随滚动
 - feat: vite proxy, ready to opti 移动端
 - feat: 三秒不动chip自动收起
@@ -668,6 +718,7 @@ features:
 - style: 胶囊样式
 
 ### 2026-04-29
+
 - feat: 侧边栏退出动画
 - feat: 年选择器
 - feat: 移动端单独筛选
@@ -704,6 +755,7 @@ features:
 - style: 移动端不显示admin-tabs
 
 ### 2026-04-30
+
 - docs: manual
 - docs: 使用手册
 - docs: 删除时长和等级
@@ -737,12 +789,14 @@ features:
 - style: 重新配色
 
 ### 2026-05-01
+
 - docs: login1
 - feat: student-detail capsule
 - fix: 修复通知已读逻辑
 - fix: 隐藏student-detail-capsule桌面段
 
 ### 2026-05-02
+
 - docs: manual
 - docs: 删除在GitHub上编辑此页
 - feat: 为图片添加圆角和阴影
@@ -762,14 +816,17 @@ features:
 - style: 桌面端改成悬浮按钮
 
 ### 2026-05-03
+
 - chore: format
 - style: logo
 
 ### 2026-05-04
+
 - docs: getting-started
 - feat: image viewer
 
 ### 2026-05-05
+
 - docs: backup and restore
 - docs: init
 - docs: zread
@@ -783,6 +840,6 @@ features:
 - style: center feed-title, 好看多了
 
 ### 2026-05-06
+
 - docs: update myinfos
 - docs: 设计规范
-
