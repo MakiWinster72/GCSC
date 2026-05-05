@@ -136,6 +136,7 @@ export default defineConfig({
             { text: "快速开始", link: "/guide/getting-started" },
             { text: "测试清单", link: "/guide/test-checklist" },
             { text: "详细设计概述", link: "/design/" },
+            { text: "设计规范", link: "/design/design-spec" },
           ],
         },
         {

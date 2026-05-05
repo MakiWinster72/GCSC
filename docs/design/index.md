@@ -37,6 +37,7 @@ description: BDAI-SC Student Center 详细设计文档
 
 ## 设计与体验
 
+- [设计规范](./design-spec) — 色彩系统、字体排版、按钮卡片、动画、布局等完整设计规范
 - [CSS 架构与约定](./css-architecture) — 样式系统与命名规范
 - [动画与过渡模式](./animation) — 动画 token 与过渡类
 - [内嵌 Iframe 模式](./iframe-embed) — 成就页嵌入外部页面
