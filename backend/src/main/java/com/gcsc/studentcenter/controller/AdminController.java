@@ -348,11 +348,14 @@ public class AdminController {
           var userOpt = appUserRepository.findById(userId);
           String username = userOpt.map(AppUser::getUsername).orElse("(已删除)");
           String displayName = userOpt.map(AppUser::getDisplayName).orElse("");
+          boolean userExists = userOpt.isPresent();
 
           Map<String, Object> item = new LinkedHashMap<>();
           item.put("userId", userId);
+          item.put("folderName", name);
           item.put("username", username);
           item.put("displayName", displayName);
+          item.put("userExists", userExists);
           item.put("sizeBytes", size);
           item.put("sizeFormatted", formatSize(size));
           entries.add(item);
@@ -373,6 +376,40 @@ public class AdminController {
     }
   }
 
+  @DeleteMapping("/storage/{userId}")
+  public ResponseEntity<?> deleteStorage(
+      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+      @PathVariable Long userId,
+      HttpServletRequest httpRequest) {
+    String username = extractUsername(authHeader);
+    if (!isAdmin(authHeader)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    try {
+      Path uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+      Path userDir = uploadRoot.resolve(String.valueOf(userId)).normalize();
+      if (!userDir.startsWith(uploadRoot)) {
+        return ResponseEntity.badRequest()
+            .body(Map.of("success", false, "message", "非法路径"));
+      }
+      if (!Files.exists(userDir) || !Files.isDirectory(userDir)) {
+        return ResponseEntity.badRequest()
+            .body(Map.of("success", false, "message", "文件夹不存在"));
+      }
+      long size = folderSize(userDir);
+      deleteFolder(userDir);
+      auditLogService.log(username, "DELETE_STORAGE",
+          "删除用户 #" + userId + " 的附件文件夹 (" + formatSize(size) + ")",
+          auditLogService.resolveIpAddress(httpRequest));
+      return ResponseEntity.ok(Map.of(
+          "success", true,
+          "message", "已删除 " + formatSize(size) + " 的附件"));
+    } catch (IOException e) {
+      return ResponseEntity.internalServerError()
+          .body(Map.of("success", false, "message", "删除失败: " + e.getMessage()));
+    }
+  }
+
   private long folderSize(Path folder) throws IOException {
     try (var files = Files.walk(folder)) {
       return files
@@ -385,6 +422,20 @@ public class AdminController {
             }
           })
           .sum();
+    }
+  }
+
+  private void deleteFolder(Path folder) throws IOException {
+    if (!Files.exists(folder)) return;
+    try (var files = Files.walk(folder)) {
+      files
+          .sorted(java.util.Comparator.reverseOrder())
+          .forEach(p -> {
+            try {
+              Files.delete(p);
+            } catch (IOException ignored) {
+            }
+          });
     }
   }
 

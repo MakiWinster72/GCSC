@@ -4,7 +4,7 @@ import PaginationBar from "../components/PaginationBar.vue";
 import MobileCapsule from "../components/MobileCapsule.vue";
 import { useAchievementUploadSettings } from "../composables/useAchievementUploadSettings";
 import { useReviewSettings } from "../composables/useReviewSettings";
-import { getUserList, updateUser, deleteUser, createUser, getAllUserIds, getSystemSettings, updateSystemSettings, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments, updateTeacherAssignedClasses, getStorageAnalysis } from "../api/admin";
+import { getUserList, updateUser, deleteUser, createUser, getAllUserIds, getSystemSettings, updateSystemSettings, downloadBackupDb, restoreBackupDb, downloadBackupAttachments, restoreBackupAttachments, updateTeacherAssignedClasses, getStorageAnalysis, deleteUserStorage } from "../api/admin";
 import { useToast } from "../composables/useToast";
 import { useDashboardShell } from "../composables/useDashboardShell";
 import { loadUser } from "../utils/userStorage";
@@ -52,6 +52,34 @@ async function fetchStorageAnalysis() {
     storageError.value = "存储分析加载失败";
   } finally {
     storageLoading.value = false;
+  }
+}
+
+const storageDeleting = shallowRef(new Set());
+
+function storageLabel(item) {
+  if (item.userExists) {
+    return item.displayName || item.username;
+  }
+  return "(已删除) #" + item.folderName;
+}
+
+async function handleDeleteStorage(item) {
+  const label = storageLabel(item);
+  if (!confirm("确定要删除「" + label + "」的全部附件文件吗？\n\n此操作不可恢复，将删除磁盘上的 " + item.sizeFormatted + " 文件。")) {
+    return;
+  }
+  storageDeleting.value = new Set([...storageDeleting.value, item.userId]);
+  try {
+    await deleteUserStorage(item.userId);
+    success("已删除「" + label + "」的附件");
+    await fetchStorageAnalysis();
+  } catch (e) {
+    error("删除失败");
+  } finally {
+    const s = new Set(storageDeleting.value);
+    s.delete(item.userId);
+    storageDeleting.value = s;
   }
 }
 
@@ -1537,7 +1565,7 @@ watch([userSearch, userRoleFilter], () => {
                   :class="{ 'storage-bar-row--odd': idx % 2 === 1 }"
                 >
                   <div class="storage-bar-label">
-                    <span class="storage-bar-displayname">{{ item.displayName || item.username }}</span>
+                    <span class="storage-bar-displayname">{{ storageLabel(item) }}</span>
                     <span v-if="item.displayName" class="storage-bar-username">{{ item.username }}</span>
                   </div>
                   <div class="storage-bar-track-wrap">
@@ -1547,6 +1575,20 @@ watch([userSearch, userRoleFilter], () => {
                     ></div>
                   </div>
                   <span class="storage-bar-size">{{ item.sizeFormatted }}</span>
+                  <button
+                    class="storage-delete-btn"
+                    type="button"
+                    :disabled="storageDeleting.has(item.userId)"
+                    :aria-label="'删除' + storageLabel(item) + '的附件'"
+                    @click="handleDeleteStorage(item)"
+                  >
+                    <svg v-if="storageDeleting.has(item.userId)" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" />
+                    </svg>
+                    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

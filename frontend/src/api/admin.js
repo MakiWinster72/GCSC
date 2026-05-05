@@ -95,3 +95,8 @@ export function updateTeacherAssignedClasses(teacherId, assignedClasses) {
 export function getStorageAnalysis() {
   return request.get('/api/admin/storage-analysis')
 }
+
+// Delete a user's upload folder
+export function deleteUserStorage(userId) {
+  return request.delete(`/api/admin/storage/${userId}`)
+}

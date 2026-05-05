@@ -1803,6 +1803,38 @@
   font-variant-numeric: tabular-nums;
 }
 
+.storage-delete-btn {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.storage-delete-btn:hover {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.storage-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.storage-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
 @media (max-width: 640px) {
   .storage-bar-label {
     width: 100px;

@@ -12,6 +12,7 @@ const ACTION_LABELS = {
   RESTORE_DB: "恢复数据库",
   BACKUP_ATTACHMENTS: "导出附件",
   RESTORE_ATTACHMENTS: "恢复附件",
+  DELETE_STORAGE: "删除附件",
   EXPORT_STUDENTS: "导出学生信息",
   APPROVE_ACHIEVEMENT: "通过成就审核",
   REJECT_ACHIEVEMENT: "驳回成就审核",
