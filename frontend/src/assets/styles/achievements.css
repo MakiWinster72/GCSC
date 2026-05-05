@@ -17,11 +17,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 20px 0;
   margin-bottom: 12px;
   gap: 12px;
+  position: relative;
 }
 
 .feed-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
   font-size: 28px;
   font-weight: 800;
