@@ -647,7 +647,7 @@
       empty-message="没有获取到学生详情，请稍后再试。"
       :load-rows="loadExportRows"
       @close="closeExportDialog"
-      @export-success="toastSuccess('学生信息已导出')"
+      @export-success="handleStudentExportSuccess"
     />
 
     <div
@@ -694,6 +694,7 @@ import {
 import { listAchievements } from "../api/achievement";
 import MobileCapsule from "../components/MobileCapsule.vue";
 import StudentExportDialog from "../components/StudentExportDialog.vue";
+import { createAuditLog } from "../api/auditLog";
 import StudentProfileEditor from "../components/StudentProfileEditor.vue";
 import PaginationBar from "../components/PaginationBar.vue";
 import OverlayPanel from "../components/OverlayPanel.vue";
@@ -2055,6 +2056,15 @@ function openExportDialog() {
 
 function closeExportDialog() {
   exportDialogOpen.value = false;
+}
+
+async function handleStudentExportSuccess() {
+  toastSuccess('学生信息已导出');
+  try {
+    await createAuditLog({ action: 'EXPORT_STUDENTS', detail: '导出学生信息' });
+  } catch (e) {
+    // Silently ignore — export succeeded regardless
+  }
 }
 
 function isGroupSelected(group) {

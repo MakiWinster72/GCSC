@@ -6,11 +6,13 @@ import com.gcsc.studentcenter.dto.UserListItemResponse;
 import com.gcsc.studentcenter.entity.AppUser;
 import com.gcsc.studentcenter.entity.UserRole;
 import com.gcsc.studentcenter.repository.AppUserRepository;
+import com.gcsc.studentcenter.service.AuditLogService;
 import com.gcsc.studentcenter.service.BackupService;
 import com.gcsc.studentcenter.service.JwtService;
 import com.gcsc.studentcenter.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -35,16 +37,18 @@ public class AdminController {
   private final JwtService jwtService;
   private final BackupService backupService;
   private final AppUserRepository appUserRepository;
+  private final AuditLogService auditLogService;
 
   @Value("${app.upload-dir:./uploads}")
   private String uploadDir;
 
   public AdminController(UserService userService, JwtService jwtService, BackupService backupService,
-      AppUserRepository appUserRepository) {
+      AppUserRepository appUserRepository, AuditLogService auditLogService) {
     this.userService = userService;
     this.jwtService = jwtService;
     this.backupService = backupService;
     this.appUserRepository = appUserRepository;
+    this.auditLogService = auditLogService;
   }
 
   private boolean isAdmin(String authHeader) {
@@ -195,12 +199,16 @@ public class AdminController {
 
   @GetMapping("/backup/db")
   public ResponseEntity<?> backupDatabase(
-      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+      HttpServletRequest httpRequest) {
+    String username = extractUsername(authHeader);
     if (!isAdmin(authHeader)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     try {
       byte[] sqlContent = backupService.dumpDatabase();
+      auditLogService.log(username, "BACKUP_DB", "导出数据库备份",
+          auditLogService.resolveIpAddress(httpRequest));
       ByteArrayResource resource = new ByteArrayResource(sqlContent);
       return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -220,7 +228,9 @@ public class AdminController {
   @PostMapping("/restore/db")
   public ResponseEntity<?> restoreDatabase(
       @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
-      @RequestParam("file") MultipartFile file) {
+      @RequestParam("file") MultipartFile file,
+      HttpServletRequest httpRequest) {
+    String username = extractUsername(authHeader);
     if (!isAdmin(authHeader)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -236,6 +246,8 @@ public class AdminController {
     try {
       byte[] sqlContent = file.getBytes();
       backupService.restoreDatabase(sqlContent);
+      auditLogService.log(username, "RESTORE_DB", "恢复数据库备份",
+          auditLogService.resolveIpAddress(httpRequest));
       return ResponseEntity.ok(Map.of("success", true, "message", "数据库恢复成功"));
     } catch (RuntimeException e) {
       return ResponseEntity.internalServerError()
@@ -248,7 +260,9 @@ public class AdminController {
 
   @GetMapping("/backup/attachments")
   public ResponseEntity<?> backupAttachments(
-      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+      HttpServletRequest httpRequest) {
+    String username = extractUsername(authHeader);
     if (!isAdmin(authHeader)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -257,6 +271,8 @@ public class AdminController {
       if (zipContent.length == 0) {
         return ResponseEntity.ok(Map.of("success", false, "message", "附件目录为空，无需导出"));
       }
+      auditLogService.log(username, "BACKUP_ATTACHMENTS", "导出附件备份",
+          auditLogService.resolveIpAddress(httpRequest));
       ByteArrayResource resource = new ByteArrayResource(zipContent);
       return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -270,6 +286,39 @@ public class AdminController {
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
           .body(Map.of("success", false, "message", "导出失败: " + e.getMessage()));
+    }
+  }
+
+  @PostMapping("/restore/attachments")
+  public ResponseEntity<?> restoreAttachments(
+      @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+      @RequestParam("file") MultipartFile file,
+      HttpServletRequest httpRequest) {
+    String username = extractUsername(authHeader);
+    if (!isAdmin(authHeader)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    if (file.isEmpty()) {
+      return ResponseEntity.badRequest()
+          .body(Map.of("success", false, "message", "请上传附件压缩包"));
+    }
+    String originalFilename = file.getOriginalFilename();
+    if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".zip")) {
+      return ResponseEntity.badRequest()
+          .body(Map.of("success", false, "message", "请上传 .zip 格式的压缩文件"));
+    }
+    try {
+      byte[] zipContent = file.getBytes();
+      backupService.restoreAttachments(zipContent);
+      auditLogService.log(username, "RESTORE_ATTACHMENTS", "恢复附件备份",
+          auditLogService.resolveIpAddress(httpRequest));
+      return ResponseEntity.ok(Map.of("success", true, "message", "附件恢复成功"));
+    } catch (RuntimeException e) {
+      return ResponseEntity.internalServerError()
+          .body(Map.of("success", false, "message", "恢复失败: " + e.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError()
+          .body(Map.of("success", false, "message", "恢复失败: " + e.getMessage()));
     }
   }
 

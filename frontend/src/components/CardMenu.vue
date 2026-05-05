@@ -260,6 +260,7 @@ const menuMeta = computed(() => {
     "my-info": "编辑个人档案",
     "student-info": "检索学生资料",
     admin: "开关与系统设置",
+    logs: "审计追踪",
     "class-reviews": totalPending > 0
       ? `${totalPending} 条待审`
       : "无待审申请",

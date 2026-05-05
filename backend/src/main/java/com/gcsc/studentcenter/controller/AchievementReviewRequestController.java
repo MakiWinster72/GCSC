@@ -5,6 +5,8 @@ import com.gcsc.studentcenter.dto.AchievementReviewRequestResponse;
 import com.gcsc.studentcenter.dto.AchievementReviewSubmitRequest;
 import com.gcsc.studentcenter.dto.SupportingDocumentsRequest;
 import com.gcsc.studentcenter.service.AchievementReviewRequestService;
+import com.gcsc.studentcenter.service.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,12 @@ import java.util.Map;
 public class AchievementReviewRequestController {
 
   private final AchievementReviewRequestService achievementReviewRequestService;
+  private final AuditLogService auditLogService;
 
-  public AchievementReviewRequestController(AchievementReviewRequestService achievementReviewRequestService) {
+  public AchievementReviewRequestController(AchievementReviewRequestService achievementReviewRequestService,
+      AuditLogService auditLogService) {
     this.achievementReviewRequestService = achievementReviewRequestService;
+    this.auditLogService = auditLogService;
   }
 
   @GetMapping
@@ -39,18 +44,26 @@ public class AchievementReviewRequestController {
   @PostMapping("/{id}/approve")
   public ResponseEntity<AchievementReviewRequestResponse> approve(
       Authentication authentication,
-      @PathVariable("id") Long id) {
-    return ResponseEntity.ok(
-        achievementReviewRequestService.approve(id, authentication.getName()));
+      @PathVariable("id") Long id,
+      HttpServletRequest httpRequest) {
+    var response = achievementReviewRequestService.approve(id, authentication.getName());
+    auditLogService.log(authentication.getName(), "APPROVE_ACHIEVEMENT",
+        "通过了成就审核请求 #" + id,
+        auditLogService.resolveIpAddress(httpRequest));
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/{id}/reject")
   public ResponseEntity<AchievementReviewRequestResponse> reject(
       Authentication authentication,
       @PathVariable("id") Long id,
-      @RequestBody AchievementReviewDecisionRequest request) {
-    return ResponseEntity.ok(
-        achievementReviewRequestService.reject(id, authentication.getName(), request.getReason()));
+      @RequestBody AchievementReviewDecisionRequest request,
+      HttpServletRequest httpRequest) {
+    var response = achievementReviewRequestService.reject(id, authentication.getName(), request.getReason());
+    auditLogService.log(authentication.getName(), "REJECT_ACHIEVEMENT",
+        "驳回了成就审核请求 #" + id + "，理由：" + request.getReason(),
+        auditLogService.resolveIpAddress(httpRequest));
+    return ResponseEntity.ok(response);
   }
 
   @DeleteMapping("/{id}")
