@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import taskLists from "markdown-it-task-lists";
 
 export default defineConfig({
   title: "BSAI-SC wiki",
@@ -15,6 +16,9 @@ export default defineConfig({
       dark: "catppuccin-mocha",
     },
     lineNumbers: false,
+    config: (md) => {
+      md.use(taskLists);
+    },
   },
 
   // Head tags — fonts + favicon
@@ -37,6 +41,11 @@ export default defineConfig({
         href: "https://fonts.gstatic.com",
       },
     ],
+    [
+      "style",
+      {},
+      ".vp-doc .task-list-item { list-style: none !important; } .vp-doc .task-list-item::before { display: none !important; }",
+    ],
   ],
 
   themeConfig: {
@@ -47,7 +56,10 @@ export default defineConfig({
       { text: "首页", link: "/" },
       {
         text: "指南",
-        items: [{ text: "快速开始", link: "/guide/getting-started" }],
+        items: [
+          { text: "快速开始", link: "/guide/getting-started" },
+          { text: "测试清单", link: "/guide/test-checklist" },
+        ],
       },
       {
         text: "使用手册",
@@ -122,6 +134,7 @@ export default defineConfig({
           text: "指南",
           items: [
             { text: "快速开始", link: "/guide/getting-started" },
+            { text: "测试清单", link: "/guide/test-checklist" },
             { text: "详细设计概述", link: "/design/" },
           ],
         },
