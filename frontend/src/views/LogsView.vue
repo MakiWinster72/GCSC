@@ -126,7 +126,7 @@ watch(auditLogSearch, () => {
             </svg>
             <span>暂无操作记录</span>
           </div>
-          <div v-else class="table-wrap">
+          <div v-else class="table-wrap logs-table-wrap">
             <table class="users-table" aria-label="操作日志列表">
               <thead>
                 <tr>
@@ -168,4 +168,12 @@ watch(auditLogSearch, () => {
 
 <style scoped>
 @import '../assets/styles/admin-view.css';
+
+/* Keep user column visible on small screens */
+@media (max-width: 700px) {
+  .logs-table-wrap .users-table th:nth-child(2),
+  .logs-table-wrap .user-row td:nth-child(2) {
+    display: table-cell;
+  }
+}
 </style>
