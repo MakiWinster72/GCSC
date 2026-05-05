@@ -62,7 +62,7 @@ public class AuthService {
     }
 
     AppUser user = new AppUser();
-    UserRole role = parseRole(request.getRole());
+    UserRole role = UserRole.STUDENT;
     user.setDisplayName(displayName);
     user.setUsername(username);
     user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
@@ -169,18 +169,7 @@ public class AuthService {
     return user.getAvatarUrl();
   }
 
-  private UserRole parseRole(String rawRole) {
-    if (rawRole == null || rawRole.trim().isEmpty()) {
-      return UserRole.STUDENT;
-    }
-    try {
-      return UserRole.valueOf(rawRole.trim().toUpperCase());
-    } catch (IllegalArgumentException ex) {
-      throw new IllegalArgumentException("角色只支持 STUDENT/TEACHER/ADMIN");
-    }
-  }
-
-  private String normalizeOptional(String value) {
+private String normalizeOptional(String value) {
     if (value == null) {
       return null;
     }
