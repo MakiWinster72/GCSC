@@ -16,11 +16,13 @@ MySQL 8.0+
 cp .env.example .env
 ```
 
-按需修改 `.env` 中的以下关键配置：
+按需修改 `.env` 中的关键配置：
 
 ```bash
 # 数据库连接
-BDAI_SC_DB_URL=jdbc:mysql://127.0.0.1:3306/bdai_sc?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+BDAI_SC_DB_HOST=127.0.0.1
+BDAI_SC_DB_PORT=3306
+BDAI_SC_DB_NAME=bdai_sc
 BDAI_SC_DB_USER=bdai_sc
 BDAI_SC_DB_PASSWORD=bdai_sc
 
@@ -34,6 +36,12 @@ BDAI_SC_INIT_ADMIN_DISPLAY_NAME=管理员
 ```
 
 > ⚠️ 首次启动后系统会自动创建一个默认管理员账号（用户名 `bdai`，密码 `bdai2026`）。**请务必在部署后修改该账号的密码**，或登录后新建一个管理员账号并删除此默认账号，以确保安全。
+
+加载环境变量：
+
+```bash
+source .env
+```
 
 ## 2. 初始化数据库
 
