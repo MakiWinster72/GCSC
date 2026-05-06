@@ -67,15 +67,6 @@ npm run dev
 
 访问 `http://localhost:5173`
 
-### 下一步
-
-1. 阅读 [快速开始指南](https://makiwinster.github.io/bdai-sc/guide/getting-started)
-2. 了解 [项目架构](https://makiwinster.github.io/bdai-sc/design/architecture)
-3. 查看 [使用手册](https://makiwinster.github.io/bdai-sc/manual/)
-4. 参考 [API 文档](https://makiwinster.github.io/bdai-sc/api/)
-
----
-
 ## 角色权限
 
 | 功能         | STUDENT        | CADRE | TEACHER | ADMIN |
